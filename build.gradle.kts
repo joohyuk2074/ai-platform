@@ -1,29 +1,38 @@
 plugins {
   java
-  id("org.springframework.boot") version "4.0.2"
-  id("io.spring.dependency-management") version "1.1.7"
+  id("org.springframework.boot") version "4.0.2" apply false
+  id("io.spring.dependency-management") version "1.1.7" apply false
 }
 
 group = "me.joohyuk"
 version = "0.0.1-SNAPSHOT"
 description = "ai-platform"
 
-java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(25)
+subprojects {
+  apply(plugin = "java")
+  apply(plugin = "org.springframework.boot")
+  apply(plugin = "io.spring.dependency-management")
+
+  group = "me.joohyuk"
+  version = "0.0.1-SNAPSHOT"
+
+  java {
+    toolchain {
+      languageVersion = JavaLanguageVersion.of(25)
+    }
   }
-}
 
-repositories {
-  mavenCentral()
-}
+  repositories {
+    mavenCentral()
+  }
 
-dependencies {
-  implementation("org.springframework.boot:spring-boot-starter")
-  testImplementation("org.springframework.boot:spring-boot-starter-test")
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
+  dependencies {
+    implementation("org.springframework.boot:spring-boot-starter")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+  }
 
-tasks.withType<Test> {
-  useJUnitPlatform()
+  tasks.withType<Test> {
+    useJUnitPlatform()
+  }
 }

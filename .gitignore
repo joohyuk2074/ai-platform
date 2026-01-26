@@ -36,6 +36,37 @@ out/
 ### VS Code ###
 .vscode/
 
+### macOS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+### Logs ###
+*.log
+logs/
+spring.log
+
+### Temporary files ###
+*.tmp
+*.swp
+*~
+*.bak
+
+### Database ###
+*.db
+*.sqlite
+*.h2.db
+
+### Spring Boot DevTools ###
+.springBeans.tmp
+
+### Local Configuration ###
+application-local.yml
+application-dev.yml
+
+### Docker ###
+docker-compose.override.yml
+
 CLAUDE.md
 **/src/main/resources/static/**
 .env
