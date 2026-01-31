@@ -1,5 +1,9 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
+plugins {
+  `java-library`
+}
+
 description = "common-core"
 
 configurations {
@@ -9,6 +13,8 @@ configurations {
 }
 
 dependencies {
+  // Jackson for JSON serialization/deserialization (Passport)
+  api("com.fasterxml.jackson.core:jackson-annotations")
 }
 
 tasks.named<BootJar>("bootJar") {

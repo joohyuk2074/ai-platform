@@ -7,7 +7,7 @@ public abstract class BaseEntity<ID> {
 
   private ID id;
 
-  protected ID getId() {
+  public ID getId() {
     return id;
   }
 
