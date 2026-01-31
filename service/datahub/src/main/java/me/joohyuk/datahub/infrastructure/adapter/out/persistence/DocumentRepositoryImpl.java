@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
+import me.joohyuk.datahub.domain.vo.ContentHash;
 import me.joohyuk.datahub.infrastructure.adapter.out.persistence.entity.DocumentJpaEntity;
 import org.springframework.stereotype.Repository;
 
@@ -65,5 +66,10 @@ public class DocumentRepositoryImpl implements DocumentRepository {
   @Override
   public boolean existsByFileKey(String fileKey) {
     return jpaRepository.existsByFileKey(fileKey);
+  }
+
+  @Override
+  public boolean existsByContentHash(ContentHash contentHash) {
+    return jpaRepository.existsByContentHash(contentHash.getValue());
   }
 }

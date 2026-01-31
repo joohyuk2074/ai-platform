@@ -4,6 +4,7 @@ import com.spartaecommerce.domain.vo.DocumentId;
 import java.util.List;
 import java.util.Optional;
 import me.joohyuk.datahub.domain.entity.Document;
+import me.joohyuk.datahub.domain.vo.ContentHash;
 
 public interface DocumentRepository {
 
@@ -22,4 +23,6 @@ public interface DocumentRepository {
   boolean existsById(DocumentId id);
 
   boolean existsByFileKey(String fileKey);
+
+  boolean existsByContentHash(ContentHash contentHash);
 }

@@ -1,6 +1,7 @@
 package me.joohyuk.datahub.application;
 
 import com.spartaecommerce.domain.vo.DocumentId;
+import com.spartaecommerce.domain.vo.UserId;
 import java.io.InputStream;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DocumentCommandServiceImpl implements DocumentCommandService {
 
-  private final DocumentCreateCommandHandler documentCreateCommandHandler;
+  private final DocumentUploadCommandHandler documentUploadCommandHandler;
   private final ChunkUploadStore chunkUploadStore;
 
   /** 청크 크기 (바이트). 기본값 5 MB. application.yml에서 datahub.chunked-upload.chunk-size로 조정 가능 */
@@ -40,7 +41,7 @@ public class DocumentCommandServiceImpl implements DocumentCommandService {
       InputStream fileInputStream
   ) {
     DocumentUploadedEvent uploadedDocumentEvent =
-        documentCreateCommandHandler.uploadDocument(command, fileInputStream);
+        documentUploadCommandHandler.uploadDocument(command, fileInputStream);
 
     return UploadDocumentResult.from(uploadedDocumentEvent.getDocument());
   }
@@ -126,12 +127,12 @@ public class DocumentCommandServiceImpl implements DocumentCommandService {
         session.getFileName(),
         session.getTotalSize(),
         session.getContentType(),
-        session.getUploadedBy()
+        new UserId(session.getUploadedBy())
     );
 
     try {
       DocumentUploadedEvent event =
-          documentCreateCommandHandler.uploadDocument(command, assembledInputStream);
+          documentUploadCommandHandler.uploadDocument(command, assembledInputStream);
 
       log.info("Chunked upload completed successfully: uploadId={}, documentId={}",
           uploadId, event.getDocument().getId().getValue());

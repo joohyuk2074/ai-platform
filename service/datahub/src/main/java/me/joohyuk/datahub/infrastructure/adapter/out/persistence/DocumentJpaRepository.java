@@ -24,4 +24,12 @@ public interface DocumentJpaRepository extends JpaRepository<DocumentJpaEntity, 
    * @return 존재 여부
    */
   boolean existsByFileKey(String fileKey);
+
+  /**
+   * 콘텐츠 해시로 존재 여부 확인 (중복 파일 검증용)
+   *
+   * @param contentHash SHA-256 콘텐츠 해시값
+   * @return 존재 여부
+   */
+  boolean existsByContentHash(String contentHash);
 }

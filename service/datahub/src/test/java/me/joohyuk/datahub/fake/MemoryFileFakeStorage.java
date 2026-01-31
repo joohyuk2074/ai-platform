@@ -18,8 +18,8 @@ public class MemoryFileFakeStorage implements FileStorage {
   private RuntimeException deleteException;
 
   @Override
-  public String store(InputStream inputStream, Metadata metadata) {
-    String fileKey = "documents/test-file-" + keyCounter.getAndIncrement();
+  public String store(InputStream inputStream, Metadata metadata, String scope) {
+    String fileKey = scope + "/test-file-" + keyCounter.getAndIncrement();
     try {
       byte[] data = inputStream.readAllBytes();
       store.put(fileKey, data);

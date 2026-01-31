@@ -9,16 +9,20 @@ import me.joohyuk.datahub.application.dto.request.UploadDocumentCommand;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
+import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.domain.port.out.storage.FileStorage;
+import me.joohyuk.datahub.domain.vo.ContentHash;
+import me.joohyuk.datahub.infrastructure.util.ContentHasher;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DocumentCreateCommandHandler {
+public class DocumentUploadCommandHandler {
 
   private final FileStorage fileStorage;
   private final DocumentPersistenceHelper persistenceHelper;
+  private final DocumentRepository documentRepository;
 
   public DocumentUploadedEvent uploadDocument(
       UploadDocumentCommand uploadDocumentCommand,
@@ -30,15 +34,29 @@ public class DocumentCreateCommandHandler {
         uploadDocumentCommand.fileName(),
         uploadDocumentCommand.fileSize(),
         uploadDocumentCommand.contentType(),
-        uploadDocumentCommand.uploadedBy()
+        uploadDocumentCommand.uploadedBy().getValue()
     );
 
-    String fileKey = fileStorage.store(fileInputStream, metadata);
-    log.info("File stored successfully with key: {}", fileKey);
+    // Phase 1: 스트림을 감싸서 저장소에 전달 (저장 중 SHA-256 해시를 동시에 계산)
+    var hashingStream = ContentHasher.wrap(fileInputStream);
 
-    Document document = Document.create(fileKey, metadata);
+    String scope = "collections/" + uploadDocumentCommand.collectionId().getValue();
+    String fileKey = fileStorage.store(hashingStream, metadata, scope);
 
-    // 4. DB 저장 (트랜잭션 안에서 수행) - Helper에 위임
+    // Phase 2: 스트림 소비 후 해시 추출
+    ContentHash contentHash = hashingStream.getContentHash();
+    log.info("File stored successfully with key: {}, contentHash: {}", fileKey, contentHash);
+
+    if (documentRepository.existsByContentHash(contentHash)) {
+      log.warn("Duplicate file detected. contentHash={}, fileKey={}", contentHash, fileKey);
+      compensateFileUpload(fileKey);
+      throw new IngestionDomainException("Duplicate file detected. contentHash: " + contentHash);
+    }
+
+    Document document = Document.create(
+        uploadDocumentCommand.collectionId(), fileKey, contentHash, metadata);
+
+    // DB 저장 (트랜잭션 안에서 수행) - Helper에 위임
     try {
       return persistenceHelper.persistDocument(document);
     } catch (Exception e) {

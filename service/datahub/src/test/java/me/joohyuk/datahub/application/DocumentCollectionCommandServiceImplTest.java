@@ -52,7 +52,7 @@ class DocumentCollectionCommandServiceImplTest {
       );
 
       // When: 컬렉션 생성 요청
-      CreateDocumentCollectionResult result = service.createCollection(command);
+      CreateDocumentCollectionResult result = service.createCollection(new UserId(1L), command);
 
       // Then: 출력 기반 검증 - 반환된 결과가 올바른가?
       assertThat(result).isNotNull();
@@ -83,7 +83,7 @@ class DocumentCollectionCommandServiceImplTest {
       );
 
       // When: 컬렉션 생성 요청
-      CreateDocumentCollectionResult result = service.createCollection(command);
+      CreateDocumentCollectionResult result = service.createCollection(new UserId(1L), command);
 
       // Then: 출력 기반 검증 - 설명이 null로 저장되는가?
       assertThat(result).isNotNull();
@@ -120,7 +120,7 @@ class DocumentCollectionCommandServiceImplTest {
       );
 
       // When & Then: 중복된 이름으로 생성 시도하면 예외 발생
-      assertThatThrownBy(() -> service.createCollection(command))
+      assertThatThrownBy(() -> service.createCollection(new UserId(2L), command))
           .isInstanceOf(IngestionDomainException.class)
           .hasMessageContaining("Collection with name '" + duplicateName + "' already exists");
 
@@ -146,8 +146,8 @@ class DocumentCollectionCommandServiceImplTest {
       );
 
       // When: 여러 컬렉션 생성
-      CreateDocumentCollectionResult result1 = service.createCollection(command1);
-      CreateDocumentCollectionResult result2 = service.createCollection(command2);
+      CreateDocumentCollectionResult result1 = service.createCollection(new UserId(1L), command1);
+      CreateDocumentCollectionResult result2 = service.createCollection(new UserId(1L), command2);
 
       // Then: 출력 기반 검증 - 각 컬렉션이 고유한 ID를 가지는가?
       assertThat(result1.collectionId()).isNotEqualTo(result2.collectionId());
@@ -168,7 +168,7 @@ class DocumentCollectionCommandServiceImplTest {
       );
 
       // When: 컬렉션 생성
-      CreateDocumentCollectionResult result = service.createCollection(command);
+      CreateDocumentCollectionResult result = service.createCollection(new UserId(1L), command);
       Instant afterCreation = Instant.now();
 
       // Then: 출력 기반 검증 - 생성 시간이 올바른 범위에 있는가?
@@ -199,15 +199,8 @@ class DocumentCollectionCommandServiceImplTest {
   private CreateDocumentCollectionCommand createCollectionCommand(
       String name,
       String description,
-      Long userId
+      Long userId  // createCollection(UserId, command) 호출 시 사용되지만 command 자체에는 포함되지 않음
   ) {
-    return new CreateDocumentCollectionCommand(
-        name,
-        description,
-        null,  // source
-        null,  // author
-        null,  // tags
-        new UserId(userId)
-    );
+    return new CreateDocumentCollectionCommand(name, description);
   }
 }

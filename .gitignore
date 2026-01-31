@@ -70,3 +70,6 @@ docker-compose.override.yml
 CLAUDE.md
 **/src/main/resources/static/**
 .env
+
+### file ###
+/storage/

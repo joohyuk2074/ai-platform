@@ -3,14 +3,18 @@ package me.joohyuk.datahub.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.spartaecommerce.domain.vo.UserId;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.Instant;
 import me.joohyuk.datahub.application.dto.request.UploadDocumentCommand;
+import me.joohyuk.datahub.domain.entity.DocumentCollection;
 import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
 import me.joohyuk.datahub.domain.service.DocumentDomainService;
 import me.joohyuk.datahub.domain.vo.CollectionId;
 import me.joohyuk.datahub.fake.FakeDateTimeHolder;
+import me.joohyuk.datahub.fake.InMemoryDocumentCollectionRepository;
 import me.joohyuk.datahub.fake.InMemoryDocumentRepository;
 import me.joohyuk.datahub.fake.InMemoryIdGenerator;
 import me.joohyuk.datahub.fake.MemoryFileFakeStorage;
@@ -36,9 +40,12 @@ import org.junit.jupiter.api.Test;
  * </ul>
  */
 @DisplayName("DocumentCreateCommandHandler 테스트")
-class DocumentCreateCommandHandlerTest {
+class DocumentUploadCommandHandlerTest {
 
-  private DocumentCreateCommandHandler handler;
+  /** 테스트 전체에서 공유하는 고정 CollectionId. PersistenceHelper의 Collection 존재 체크를 통과시킴 */
+  private static final CollectionId COLLECTION_ID = new CollectionId(1L);
+
+  private DocumentUploadCommandHandler handler;
   private MemoryFileFakeStorage fileStorage;
   private InMemoryDocumentRepository documentRepository;
 
@@ -50,12 +57,18 @@ class DocumentCreateCommandHandlerTest {
     fileStorage = new MemoryFileFakeStorage();
     documentRepository = new InMemoryDocumentRepository();
 
+    // Collection 존재 체크를 위해 사전 시드
+    var collectionRepository = new InMemoryDocumentCollectionRepository();
+    collectionRepository.save(
+        DocumentCollection.of(COLLECTION_ID.getValue(), "test-collection", "desc",
+            Instant.now(), Instant.now()));
+
     DocumentDomainService domainService =
         new DocumentDomainService(idGenerator, dateTimeHolder);
     DocumentPersistenceHelper persistenceHelper =
-        new DocumentPersistenceHelper(domainService, documentRepository);
+        new DocumentPersistenceHelper(domainService, documentRepository, collectionRepository);
 
-    handler = new DocumentCreateCommandHandler(fileStorage, persistenceHelper);
+    handler = new DocumentUploadCommandHandler(fileStorage, persistenceHelper, documentRepository);
   }
 
   @Nested
@@ -149,6 +162,31 @@ class DocumentCreateCommandHandlerTest {
     }
 
     @Test
+    @DisplayName("동일한 콘텐츠의 파일을 재업로드하면 중복 검증에 의해 거부되고 파일이 보상 삭제된다")
+    void should_reject_duplicate_file_and_compensate_storage() {
+      // Given: 첫 번째 업로드 완료
+      UploadDocumentCommand command =
+          createUploadCommand("report.pdf", 1024L, "application/pdf", 1L);
+      String fileContent = "duplicate content";
+      handler.uploadDocument(command, new ByteArrayInputStream(fileContent.getBytes()));
+
+      assertThat(fileStorage.size()).isEqualTo(1);
+      assertThat(documentRepository.size()).isEqualTo(1);
+
+      // When & Then: 동일한 콘텐츠로 재업로드 시 IngestionDomainException 발생
+      UploadDocumentCommand duplicateCommand =
+          createUploadCommand("report-copy.pdf", 1024L, "application/pdf", 1L);
+      assertThatThrownBy(() ->
+          handler.uploadDocument(duplicateCommand, new ByteArrayInputStream(fileContent.getBytes()))
+      ).isInstanceOf(IngestionDomainException.class)
+       .hasMessageContaining("Duplicate file detected");
+
+      // And: 상태 기반 검증 - 중복 파일은 보상 삭제되어 저장소 크기가 변하지 않음
+      assertThat(fileStorage.size()).isEqualTo(1);
+      assertThat(documentRepository.size()).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("여러 문서를 연속 업로드하면 각각 고유한 ID와 파일 키를 가진다")
     void should_assign_unique_ids_and_keys_when_uploading_multiple_documents() {
       // Given
@@ -179,11 +217,11 @@ class DocumentCreateCommandHandlerTest {
       String fileName, Long fileSize, String contentType, Long uploadedBy
   ) {
     return new UploadDocumentCommand(
-        CollectionId.generate(),
+        COLLECTION_ID,
         fileName,
         fileSize,
         contentType,
-        uploadedBy
+        new UserId(uploadedBy)
     );
   }
 }

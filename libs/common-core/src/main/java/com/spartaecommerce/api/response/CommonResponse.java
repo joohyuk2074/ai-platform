@@ -4,11 +4,11 @@ import com.spartaecommerce.exception.ErrorCode;
 
 public class CommonResponse<T> {
 
-  private String code;
+  private final String code;
 
-  private String message;
+  private final String message;
 
-  private T data;
+  private final T data;
 
   private CommonResponse(String code, String message, T data) {
     this.code = code;
@@ -36,4 +36,15 @@ public class CommonResponse<T> {
     return new CommonResponse<>(errorCode.getCode(), message, null);
   }
 
+  public String getCode() {
+    return code;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public T getData() {
+    return data;
+  }
 }

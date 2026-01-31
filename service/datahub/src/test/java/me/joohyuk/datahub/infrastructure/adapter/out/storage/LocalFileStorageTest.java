@@ -41,23 +41,23 @@ class LocalFileStorageTest {
         new ByteArrayInputStream("테스트 내용".getBytes(StandardCharsets.UTF_8));
     Metadata metadata = Metadata.of("test.md", 12L, "text/markdown", 1L);
 
-    String fileKey = storage.store(inputStream, metadata);
+    String fileKey = storage.store(inputStream, metadata, "collections/1");
 
     assertNotNull(fileKey);
     assertFalse(fileKey.isBlank());
   }
 
   @Test
-  @DisplayName("반환된 파일 키의 형식이 documents/{timestamp}_{fileName}이다")
+  @DisplayName("반환된 파일 키의 형식이 {scope}/{timestamp}_{fileName}이다")
   void store_파일키_형식이_올바름() {
     InputStream inputStream = new ByteArrayInputStream("내용".getBytes(StandardCharsets.UTF_8));
     Metadata metadata = Metadata.of("report.pdf", 2L, "application/pdf", 1L);
 
-    String fileKey = storage.store(inputStream, metadata);
+    String fileKey = storage.store(inputStream, metadata, "collections/1");
 
     assertTrue(
-        fileKey.matches("documents/\\d+_report\\.pdf"),
-        "파일 키 형식이 'documents/{timestamp}_{fileName}'이어야 한다. 실제값: " + fileKey);
+        fileKey.matches("collections/1/\\d+_report\\.pdf"),
+        "파일 키 형식이 '{scope}/{timestamp}_{fileName}'이어야 한다. 실제값: " + fileKey);
   }
 
   @Test
@@ -68,7 +68,7 @@ class LocalFileStorageTest {
     InputStream inputStream = new ByteArrayInputStream(contentBytes);
     Metadata metadata = Metadata.of("content.txt", (long) contentBytes.length, "text/plain", 1L);
 
-    String fileKey = storage.store(inputStream, metadata);
+    String fileKey = storage.store(inputStream, metadata, "collections/1");
 
     Path storedFilePath = tempDir.resolve(fileKey);
     assertTrue(Files.exists(storedFilePath), "파일이 디스크에 존재해야 한다");
@@ -77,15 +77,15 @@ class LocalFileStorageTest {
   }
 
   @Test
-  @DisplayName("baseDirectory 아래에 documents 하위 디렉토리를 생성한다")
-  void store_documents_하위_디렉토리_생성() {
+  @DisplayName("baseDirectory 아래에 scope 하위 디렉토리를 생성한다")
+  void store_scope_하위_디렉토리_생성() {
     InputStream inputStream = new ByteArrayInputStream("내용".getBytes(StandardCharsets.UTF_8));
     Metadata metadata = Metadata.of("dir-test.md", 2L, "text/markdown", 1L);
 
-    storage.store(inputStream, metadata);
+    storage.store(inputStream, metadata, "collections/1");
 
-    Path documentsDir = tempDir.resolve("documents");
-    assertTrue(Files.isDirectory(documentsDir), "documents 디렉토리가 생성되어야 한다");
+    Path collectionsDir = tempDir.resolve("collections/1");
+    assertTrue(Files.isDirectory(collectionsDir), "collections/1 디렉토리가 생성되어야 한다");
   }
 
   @Test
@@ -94,7 +94,7 @@ class LocalFileStorageTest {
     InputStream emptyStream = new ByteArrayInputStream(new byte[0]);
     Metadata metadata = Metadata.of("empty.txt", 0L, "text/plain", 1L);
 
-    String fileKey = storage.store(emptyStream, metadata);
+    String fileKey = storage.store(emptyStream, metadata, "collections/1");
 
     Path storedFilePath = tempDir.resolve(fileKey);
     assertTrue(Files.exists(storedFilePath), "빈 파일도 디스크에 존재해야 한다");
@@ -121,7 +121,7 @@ class LocalFileStorageTest {
     FileStorage.FileStorageException exception =
         assertThrows(
             FileStorage.FileStorageException.class,
-            () -> storage.store(brokenStream, metadata));
+            () -> storage.store(brokenStream, metadata, "collections/1"));
 
     assertTrue(
         exception.getMessage().contains("Failed to store file: broken.md"),

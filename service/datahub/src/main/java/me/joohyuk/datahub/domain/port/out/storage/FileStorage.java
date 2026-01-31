@@ -16,10 +16,11 @@ public interface FileStorage {
    *
    * @param inputStream 저장할 파일의 입력 스트림
    * @param metadata 파일 메타데이터 (파일명, 크기, 타입 등)
-   * @return 저장된 파일의 키 (예: "documents/user123/doc-uuid.md")
+   * @param scope 논리적 저장 경로 접두사 (예: "collections/1")
+   * @return 저장된 파일의 키 (예: "collections/1/1738000000_doc.md")
    * @throws FileStorageException 저장 중 오류 발생시
    */
-  String store(InputStream inputStream, Metadata metadata);
+  String store(InputStream inputStream, Metadata metadata, String scope);
 
   /**
    * 파일 키로 파일을 조회하여 입력 스트림을 반환합니다.

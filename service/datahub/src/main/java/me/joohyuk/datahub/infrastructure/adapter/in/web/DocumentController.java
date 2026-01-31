@@ -2,6 +2,7 @@ package me.joohyuk.datahub.infrastructure.adapter.in.web;
 
 import com.spartaecommerce.api.response.CommonResponse;
 import com.spartaecommerce.domain.entity.Passport;
+import com.spartaecommerce.domain.vo.UserId;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,20 +39,18 @@ public class DocumentController {
   /**
    * 문서 파일을 한 번에 업로드합니다.
    *
-   * @param passport 인증된 사용자 정보
-   * @param file 업로드할 파일
+   * @param file         업로드할 파일
    * @param collectionId 문서를 저장할 컬렉션 ID
    * @return 업로드된 문서 정보
    */
   @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse<UploadDocumentResult>> uploadDocument(
-      @AuthenticatedUser Passport passport,
+      @RequestHeader("X-Request-UserId") Long userId,
       @RequestParam("file") MultipartFile file,
       @RequestParam("collectionId") String collectionId
   ) throws IOException {
-    log.info("User {} (username: {}) uploading file: {} (size: {} bytes) to collection: {}",
-        passport.userId().getValue(),
-        passport.username(),
+    log.info("User {} uploading file: {} (size: {} bytes) to collection: {}",
+        userId,
         file.getOriginalFilename(),
         file.getSize(),
         collectionId);
@@ -64,7 +64,8 @@ public class DocumentController {
         file.getOriginalFilename(),
         file.getSize(),
         file.getContentType(),
-        passport.userId().getValue()
+        new UserId(userId)
+//        passport.userId().getValue()
     );
 
     UploadDocumentResult result = documentCommandService.uploadDocument(
@@ -87,11 +88,11 @@ public class DocumentController {
    * <p>클라이언트는 반환된 {@code uploadId}와 {@code chunkSize}를 기반으로 파일을 분할하여 Step 2를
    * 반복 호출해야 합니다.
    *
-   * @param passport 인증된 사용자 정보
+   * @param passport     인증된 사용자 정보
    * @param collectionId 문서를 저장할 컬렉션 ID
-   * @param fileName 원본 파일명
-   * @param totalSize 파일 전체 크기 (바이트)
-   * @param contentType MIME 타입
+   * @param fileName     원본 파일명
+   * @param totalSize    파일 전체 크기 (바이트)
+   * @param contentType  MIME 타입
    * @return 업로드 세션 정보 (uploadId, chunkSize, totalChunks)
    */
   @PostMapping("/upload/chunked/initiate")
@@ -127,13 +128,12 @@ public class DocumentController {
    * Step 2. 개별 청크를 업로드합니다.
    *
    * <p>클라이언트는 이 엔드포인트를 {@code totalChunks}만큼 반복 호출합니다. 응답의 {@code
-   * allChunksReceived}가 {@code true}이면 Step 3을 호출해야 합니다. 중복 청크 재전송은 멱등적으로
-   * 처리됩니다.
+   * allChunksReceived}가 {@code true}이면 Step 3을 호출해야 합니다. 중복 청크 재전송은 멱등적으로 처리됩니다.
    *
-   * @param passport 인증된 사용자 정보
-   * @param uploadId initiateChunkedUpload에서 반환된 세션 ID
+   * @param passport   인증된 사용자 정보
+   * @param uploadId   initiateChunkedUpload에서 반환된 세션 ID
    * @param chunkIndex 현재 청크의 인덱스 (0-based)
-   * @param chunk 청크 파일 데이터
+   * @param chunk      청크 파일 데이터
    * @return 청크 업로드 결과 및 전체 진행 상태
    */
   @PostMapping(value = "/upload/chunked/{uploadId}/chunk",

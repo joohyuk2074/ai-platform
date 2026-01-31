@@ -1,6 +1,7 @@
 package me.joohyuk.datahub.application;
 
 import com.spartaecommerce.domain.port.IdGenerator;
+import com.spartaecommerce.domain.vo.UserId;
 import com.spartaecommerce.util.DateTimeHolder;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,10 @@ public class DocumentCollectionCommandServiceImpl implements DocumentCollectionC
   private final DocumentCollectionRepository documentCollectionRepository;
 
   @Override
-  public CreateDocumentCollectionResult createCollection(CreateDocumentCollectionCommand command) {
+  public CreateDocumentCollectionResult createCollection(
+      UserId userId,
+      CreateDocumentCollectionCommand command
+  ) {
     log.info("Processing collection creation request: {}", command.name());
 
     if (documentCollectionRepository.existsByName(command.name())) {

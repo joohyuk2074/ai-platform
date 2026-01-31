@@ -2,6 +2,7 @@ package me.joohyuk.datahub.infrastructure.adapter.web;
 
 import com.spartaecommerce.api.response.CommonResponse;
 import com.spartaecommerce.domain.entity.Passport;
+import com.spartaecommerce.domain.vo.UserId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.dto.request.CreateDocumentCollectionCommand;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,14 +32,14 @@ public class DocumentCollectionController {
 
   @PostMapping
   public ResponseEntity<CommonResponse<CreateDocumentCollectionResult>> createCollection(
-      @AuthenticatedUser Passport passport,
+//      @AuthenticatedUser Passport passport,
+      @RequestHeader("X-Request-UserId") Long userId,
       @RequestBody CreateDocumentCollectionCommand command
   ) {
-    log.info("User {} (username: {}) creating collection: {}",
-        passport.userId().getValue(), passport.username(), command.name());
+    log.info("User {} creating collection: {}", userId, command.name());
 
     CreateDocumentCollectionResult result =
-        documentCollectionCommandService.createCollection(command);
+        documentCollectionCommandService.createCollection(new UserId(userId), command);
 
     CommonResponse<CreateDocumentCollectionResult> response = CommonResponse.success(result);
 

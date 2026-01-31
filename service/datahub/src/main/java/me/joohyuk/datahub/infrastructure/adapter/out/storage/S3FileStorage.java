@@ -18,7 +18,7 @@ public class S3FileStorage implements FileStorage {
   // private final String bucketName;
 
   @Override
-  public String store(InputStream inputStream, Metadata metadata) {
+  public String store(InputStream inputStream, Metadata metadata, String scope) {
     // TODO: S3 업로드 구현
     // 1. S3Client를 사용하여 파일 업로드
     // 2. PutObjectRequest 생성

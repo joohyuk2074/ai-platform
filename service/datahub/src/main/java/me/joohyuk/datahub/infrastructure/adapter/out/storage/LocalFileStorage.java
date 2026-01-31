@@ -28,10 +28,10 @@ public class LocalFileStorage implements FileStorage {
   }
 
   @Override
-  public String store(InputStream inputStream, Metadata metadata) {
+  public String store(InputStream inputStream, Metadata metadata, String scope) {
     try {
-      // 파일 키 생성: documents/{fileName}
-      String fileKey = generateFileKey(metadata);
+      // 파일 키 생성: {scope}/{timestamp}_{fileName}
+      String fileKey = generateFileKey(metadata, scope);
       Path targetPath = baseDirectory.resolve(fileKey);
 
       // 디렉토리가 없으면 생성
@@ -76,11 +76,11 @@ public class LocalFileStorage implements FileStorage {
   }
 
   /**
-   * 메타데이터로부터 파일 키를 생성합니다. 형식: documents/{timestamp}_{fileName}
+   * 메타데이터와 scope로부터 파일 키를 생성합니다. 형식: {scope}/{timestamp}_{fileName}
    */
-  private String generateFileKey(Metadata metadata) {
+  private String generateFileKey(Metadata metadata, String scope) {
     String timestamp = String.valueOf(System.currentTimeMillis());
     String fileName = metadata.fileName();
-    return String.format("documents/%s_%s", timestamp, fileName);
+    return String.format("%s/%s_%s", scope, timestamp, fileName);
   }
 }

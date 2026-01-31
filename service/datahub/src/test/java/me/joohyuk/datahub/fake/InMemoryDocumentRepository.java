@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
+import me.joohyuk.datahub.domain.vo.ContentHash;
 
 /**
  * In-Memory DocumentRepository 구현
@@ -80,6 +81,11 @@ public class InMemoryDocumentRepository implements DocumentRepository {
   @Override
   public boolean existsByFileKey(String fileKey) {
     return store.values().stream().anyMatch(d -> d.getFileKey().equals(fileKey));
+  }
+
+  @Override
+  public boolean existsByContentHash(ContentHash contentHash) {
+    return store.values().stream().anyMatch(d -> d.getContentHash().equals(contentHash));
   }
 
   // ─── 테스트 헬퍼 ──────────────────────────────────────────────
