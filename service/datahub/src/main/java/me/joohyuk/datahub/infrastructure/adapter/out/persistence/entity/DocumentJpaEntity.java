@@ -5,17 +5,24 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.joohyuk.datahub.domain.entity.Document;
+import me.joohyuk.datahub.domain.vo.CollectionId;
 import me.joohyuk.datahub.infrastructure.adapter.out.persistence.converter.MetadataConverter;
 
 @Getter
 @Entity
-@Table(name = "documents")
+@Table(
+    name = "documents",
+    indexes = {
+        @Index(name = "idx_documents_collection_id", columnList = "collection_id")
+    }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DocumentJpaEntity {
 
@@ -25,6 +32,9 @@ public class DocumentJpaEntity {
 
   @Column(name = "file_key", nullable = false)
   private String fileKey;
+
+  @Column(name = "collection_id", nullable = false)
+  private Long collectionId;
 
   @Column(name = "metadata", columnDefinition = "TEXT", nullable = false)
   @Convert(converter = MetadataConverter.class)
@@ -38,12 +48,14 @@ public class DocumentJpaEntity {
 
   public DocumentJpaEntity(
       Long id,
+      Long collectionId,
       String fileKey,
       Metadata metadata,
       Instant createdAt,
       Instant updatedAt
   ) {
     this.id = id;
+    this.collectionId = collectionId;
     this.fileKey = fileKey;
     this.metadata = metadata;
     this.createdAt = createdAt;
@@ -53,6 +65,7 @@ public class DocumentJpaEntity {
   public static DocumentJpaEntity from(Document domain) {
     return new DocumentJpaEntity(
         domain.getId().getValue(),
+        domain.getCollectionId().getValue(),
         domain.getFileKey(),
         domain.getMetadata(),
         domain.getCreatedAt(),
@@ -61,9 +74,13 @@ public class DocumentJpaEntity {
   }
 
   public Document toDomain() {
-    Document document = Document.create(fileKey, metadata);
-    document.initialize(id, createdAt);
-    // updatedAt이 createdAt과 다르면 별도로 설정하는 로직이 필요할 수 있음
-    return document;
+    return Document.restore(
+        this.id,
+        new CollectionId(this.collectionId),
+        this.fileKey,
+        this.metadata,
+        this.createdAt,
+        this.updatedAt
+    );
   }
 }
