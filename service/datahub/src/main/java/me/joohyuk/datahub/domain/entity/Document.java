@@ -5,8 +5,10 @@ import com.spartaecommerce.domain.vo.DocumentId;
 import com.spartaecommerce.domain.vo.Metadata;
 import java.time.Instant;
 import lombok.Getter;
+import me.joohyuk.datahub.domain.exception.IngestionDomainException;
 import me.joohyuk.datahub.domain.vo.CollectionId;
 import me.joohyuk.datahub.domain.vo.ContentHash;
+import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
 @Getter
 public class Document extends AggregateRoot<DocumentId> {
@@ -25,22 +27,41 @@ public class Document extends AggregateRoot<DocumentId> {
 
   private final Metadata metadata;
 
+  private DocumentStatus status;
+  private int attempt;
+  private String lastErrorCode;
+  private String lastErrorMessage;
+  private int passageCount;
+  private String lastResultEventId;
+
   private Instant createdAt;
   private Instant updatedAt;
 
-  private Document(CollectionId collectionId, String fileKey, ContentHash contentHash, Metadata metadata) {
-    validate(collectionId, fileKey, contentHash, metadata);
+  private Document(
+      CollectionId collectionId,
+      String fileKey,
+      ContentHash contentHash,
+      Metadata metadata,
+      DocumentStatus status
+  ) {
+    validate(collectionId, fileKey, contentHash, metadata, status);
 
     this.collectionId = collectionId;
     this.fileKey = fileKey;
     this.contentHash = contentHash;
     this.metadata = metadata;
+    this.status = status;
+    this.attempt = 0;
+    this.passageCount = 0;
   }
 
   public static Document create(
-      CollectionId collectionId, String fileKey, ContentHash contentHash, Metadata metadata
+      CollectionId collectionId,
+      String fileKey,
+      ContentHash contentHash,
+      Metadata metadata
   ) {
-    return new Document(collectionId, fileKey, contentHash, metadata);
+    return new Document(collectionId, fileKey, contentHash, metadata, DocumentStatus.UPLOADED);
   }
 
   public static Document restore(
@@ -49,13 +70,24 @@ public class Document extends AggregateRoot<DocumentId> {
       String fileKey,
       ContentHash contentHash,
       Metadata metadata,
+      DocumentStatus status,
+      int attempt,
+      String lastErrorCode,
+      String lastErrorMessage,
+      int passageCount,
+      String lastResultEventId,
       Instant createdAt,
       Instant updatedAt
   ) {
-    validate(collectionId, fileKey, contentHash, metadata);
+    validate(collectionId, fileKey, contentHash, metadata, status);
 
-    Document doc = new Document(collectionId, fileKey, contentHash, metadata);
-    doc.setId(id);          // AggregateRoot 보호 메서드/접근 가능해야 함
+    Document doc = new Document(collectionId, fileKey, contentHash, metadata, status);
+    doc.setId(id);
+    doc.attempt = attempt;
+    doc.lastErrorCode = lastErrorCode;
+    doc.lastErrorMessage = lastErrorMessage;
+    doc.passageCount = passageCount;
+    doc.lastResultEventId = lastResultEventId;
     doc.createdAt = createdAt;
     doc.updatedAt = updatedAt;
 
@@ -72,8 +104,89 @@ public class Document extends AggregateRoot<DocumentId> {
     return super.getId();
   }
 
+  // ─── 상태 전이 메서드 ────────────────────────────────────────────
+
+  /**
+   * {@code UPLOADED → PASSAGE_REQUESTED} 로 전이합니다. Kafka 이벤트 publish 직전에 호출합니다.
+   *
+   * @throws IngestionDomainException 현재 상태가 UPLOADED가 아닌 경우
+   */
+  public void requestPassageCreation(Instant now) {
+    if (status != DocumentStatus.UPLOADED) {
+      throw new IngestionDomainException(
+          "Cannot request passage creation. current=" + status + ", expected=UPLOADED"
+              + " [documentId=" + getId() + "]");
+    }
+    this.status = DocumentStatus.PASSAGE_REQUESTED;
+    this.updatedAt = now;
+  }
+
+  /**
+   * {@code PASSAGE_REQUESTED → PASSAGE_CREATED} 로 전이합니다. datarex에서 Passage 생성 완료 이벤트를 수신하면 호출합니다.
+   *
+   * @param passageCount 생성된 Passage 수
+   * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
+   * @throws IngestionDomainException 현재 상태가 PASSAGE_REQUESTED가 아닌 경우
+   */
+  public void markPassageCreated(int passageCount, String eventId, Instant now) {
+    if (status != DocumentStatus.PASSAGE_REQUESTED) {
+      throw new IngestionDomainException(
+          "Cannot mark passage created. current=" + status + ", expected=PASSAGE_REQUESTED"
+              + " [documentId=" + getId() + "]");
+    }
+    this.status = DocumentStatus.PASSAGE_CREATED;
+    this.passageCount = passageCount;
+    this.lastResultEventId = eventId;
+    this.updatedAt = now;
+  }
+
+  /**
+   * {@code PASSAGE_REQUESTED → PASSAGE_FAILED} 로 전이합니다. datarex에서 Passage 생성 실패 이벤트를 수신하면 호출합니다.
+   * {@code attempt}를 1 증가시키고 에러 정보를 저장합니다.
+   *
+   * @param errorCode    실패 이벤트의 에러 코드
+   * @param errorMessage 실패 이벤트의 에러 메시지 (500자 초과 시 절단)
+   * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
+   * @throws IngestionDomainException 현재 상태가 PASSAGE_REQUESTED가 아닌 경우
+   */
+  public void markPassageFailed(
+      String errorCode,
+      String errorMessage,
+      String eventId,
+      Instant now
+  ) {
+    if (status != DocumentStatus.PASSAGE_REQUESTED) {
+      throw new IngestionDomainException(
+          "Cannot mark passage failed. current=" + status + ", expected=PASSAGE_REQUESTED"
+              + " [documentId=" + getId() + "]");
+    }
+    this.status = DocumentStatus.PASSAGE_FAILED;
+    this.attempt++;
+    this.lastErrorCode = errorCode;
+    this.lastErrorMessage = truncateErrorMessage(errorMessage);
+    this.lastResultEventId = eventId;
+    this.updatedAt = now;
+  }
+
+  // ─── private helpers ────────────────────────────────────────────
+
+  private static final int MAX_ERROR_MESSAGE_LENGTH = 500;
+
+  private static String truncateErrorMessage(String message) {
+    if (message == null) {
+      return null;
+    }
+    return message.length() > MAX_ERROR_MESSAGE_LENGTH
+        ? message.substring(0, MAX_ERROR_MESSAGE_LENGTH)
+        : message;
+  }
+
   private static void validate(
-      CollectionId collectionId, String fileKey, ContentHash contentHash, Metadata metadata
+      CollectionId collectionId,
+      String fileKey,
+      ContentHash contentHash,
+      Metadata metadata,
+      DocumentStatus status
   ) {
     if (collectionId == null) {
       throw new IllegalArgumentException("collectionId cannot be null");
@@ -89,6 +202,10 @@ public class Document extends AggregateRoot<DocumentId> {
 
     if (metadata == null) {
       throw new IllegalArgumentException("Metadata cannot be null");
+    }
+
+    if (status == null) {
+      throw new IllegalArgumentException("DocumentStatus cannot be null");
     }
   }
 }
