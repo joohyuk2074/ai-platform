@@ -32,4 +32,12 @@ public interface DocumentJpaRepository extends JpaRepository<DocumentJpaEntity, 
    * @return 존재 여부
    */
   boolean existsByContentHash(String contentHash);
+
+  /**
+   * 컬렉션 ID로 해당 컬렉션의 문서 목록 조회
+   *
+   * @param collectionId 컬렉션 ID
+   * @return 문서 엔티티 리스트
+   */
+  List<DocumentJpaEntity> findByCollectionId(Long collectionId);
 }

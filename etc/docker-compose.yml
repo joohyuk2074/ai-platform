@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
@@ -21,17 +19,75 @@ services:
       - --collation-server=utf8mb4_unicode_ci
       - --default-time-zone=+09:00
     networks:
-      - datahub-network
+      - ai-platform-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # Kafka (KRaft mode - without Zookeeper)
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: sparta-ecommerce-kafka
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+      - "9093:9093"
+    environment:
+      # KRaft 설정
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      # 리스너 설정 (내부: kafka:9092, 외부: localhost:9094)
+      KAFKA_LISTENERS: PLAINTEXT_INTERNAL://0.0.0.0:9092,PLAINTEXT_EXTERNAL://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://kafka:9092,PLAINTEXT_EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+
+      # 클러스터 설정
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+      # 로그 설정
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - ai-platform-network
+    healthcheck:
+      test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  kafka-ui:
+    image: redpandadata/console:latest
+    container_name: sparta-ecommerce-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8088:8080"
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+    networks:
+      - ai-platform-network
+    restart: unless-stopped
+
 volumes:
   mysql_data:
     driver: local
+  kafka_data:
+    driver: local
 
 networks:
-  datahub-network:
+  ai-platform-network:
     driver: bridge

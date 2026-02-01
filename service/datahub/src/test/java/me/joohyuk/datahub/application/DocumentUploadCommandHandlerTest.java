@@ -18,6 +18,7 @@ import me.joohyuk.datahub.fake.InMemoryDocumentCollectionRepository;
 import me.joohyuk.datahub.fake.InMemoryDocumentRepository;
 import me.joohyuk.datahub.fake.InMemoryIdGenerator;
 import me.joohyuk.datahub.fake.MemoryFileFakeStorage;
+import me.joohyuk.datahub.fake.NoOpPassageCreationRequestPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -65,8 +66,10 @@ class DocumentUploadCommandHandlerTest {
 
     DocumentDomainService domainService =
         new DocumentDomainService(idGenerator, dateTimeHolder);
+    var passagePublisher = new NoOpPassageCreationRequestPublisher();
     DocumentPersistenceHelper persistenceHelper =
-        new DocumentPersistenceHelper(domainService, documentRepository, collectionRepository);
+        new DocumentPersistenceHelper(domainService, documentRepository, collectionRepository,
+            passagePublisher, dateTimeHolder);
 
     handler = new DocumentUploadCommandHandler(fileStorage, persistenceHelper, documentRepository);
   }

@@ -11,10 +11,14 @@ configurations {
 dependencies {
   implementation(project(":libs:common-core"))
   implementation(project(":libs:common-infrastructure"))
+  implementation(project(":libs:common-outbox"))
 
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-validation")
+
+  implementation("org.springframework.kafka:spring-kafka")
+  testImplementation("org.springframework.kafka:spring-kafka-test")
 
   implementation("com.fasterxml.jackson.core:jackson-databind")
 

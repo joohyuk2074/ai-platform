@@ -16,7 +16,7 @@ public class DocumentDomainService {
   private final IdGenerator idGenerator;
   private final DateTimeHolder dateTimeHolder;
 
-  public DocumentUploadedEvent createDocument(Document document) {
+  public DocumentUploadedEvent initializeDocument(Document document) {
     document.initialize(idGenerator.generateId(), dateTimeHolder.now());
 
     log.info("Document created with id: {} and fileKey: {}", document.getId().getValue(),

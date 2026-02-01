@@ -3,12 +3,14 @@ package me.joohyuk.datahub.infrastructure.adapter.web;
 import com.spartaecommerce.api.response.CommonResponse;
 import com.spartaecommerce.domain.entity.Passport;
 import com.spartaecommerce.domain.vo.UserId;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.dto.request.CreateDocumentCollectionCommand;
 import me.joohyuk.datahub.application.dto.request.UpdateDocumentCollectionCommand;
 import me.joohyuk.datahub.application.dto.response.CreateDocumentCollectionResult;
 import me.joohyuk.datahub.domain.port.in.service.DocumentCollectionCommandService;
+import me.joohyuk.datahub.domain.port.in.service.DocumentCommandService;
 import me.joohyuk.datahub.domain.vo.CollectionId;
 import me.joohyuk.datahub.infrastructure.adapter.web.auth.AuthenticatedUser;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DocumentCollectionController {
 
   private final DocumentCollectionCommandService documentCollectionCommandService;
+  private final DocumentCommandService documentCommandService;
 
   @PostMapping
   public ResponseEntity<CommonResponse<CreateDocumentCollectionResult>> createCollection(
@@ -77,5 +80,26 @@ public class DocumentCollectionController {
     return ResponseEntity
         .noContent()
         .build();
+  }
+
+  @PostMapping("/{collectionId}/passages/request")
+  public ResponseEntity<CommonResponse<Map<String, Object>>> requestPassageCreation(
+      @RequestHeader("X-Request-UserId") Long userId,
+      @PathVariable String collectionId
+  ) {
+    log.info("User {} requesting passage creation for collectionId={}", userId, collectionId);
+
+    int publishedCount =
+        documentCommandService.requestPassageCreationByCollection(CollectionId.of(collectionId));
+
+    log.info("Passage creation request completed: collectionId={}, publishedCount={}",
+        collectionId, publishedCount);
+
+    Map<String, Object> body = Map.of(
+        "collectionId", collectionId,
+        "publishedCount", publishedCount
+    );
+
+    return ResponseEntity.ok(CommonResponse.success(body));
   }
 }

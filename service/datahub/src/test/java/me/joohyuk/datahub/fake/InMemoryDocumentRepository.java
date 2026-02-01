@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
+import me.joohyuk.datahub.domain.vo.CollectionId;
 import me.joohyuk.datahub.domain.vo.ContentHash;
 
 /**
@@ -65,6 +66,13 @@ public class InMemoryDocumentRepository implements DocumentRepository {
   public List<Document> findByFileKey(String fileKey) {
     return store.values().stream()
         .filter(d -> d.getFileKey().equals(fileKey))
+        .toList();
+  }
+
+  @Override
+  public List<Document> findByCollectionId(CollectionId collectionId) {
+    return store.values().stream()
+        .filter(d -> d.getCollectionId().equals(collectionId))
         .toList();
   }
 

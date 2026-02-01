@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
+import me.joohyuk.datahub.domain.vo.CollectionId;
 import me.joohyuk.datahub.domain.vo.ContentHash;
 import me.joohyuk.datahub.infrastructure.adapter.out.persistence.entity.DocumentJpaEntity;
 import org.springframework.stereotype.Repository;
@@ -49,6 +50,13 @@ public class DocumentRepositoryImpl implements DocumentRepository {
   @Override
   public List<Document> findByFileKey(String fileKey) {
     return jpaRepository.findByFileKey(fileKey).stream()
+        .map(DocumentJpaEntity::toDomain)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Document> findByCollectionId(CollectionId collectionId) {
+    return jpaRepository.findByCollectionId(collectionId.getValue()).stream()
         .map(DocumentJpaEntity::toDomain)
         .collect(Collectors.toList());
   }

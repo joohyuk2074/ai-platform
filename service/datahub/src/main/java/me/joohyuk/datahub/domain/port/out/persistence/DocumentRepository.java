@@ -4,6 +4,7 @@ import com.spartaecommerce.domain.vo.DocumentId;
 import java.util.List;
 import java.util.Optional;
 import me.joohyuk.datahub.domain.entity.Document;
+import me.joohyuk.datahub.domain.vo.CollectionId;
 import me.joohyuk.datahub.domain.vo.ContentHash;
 
 public interface DocumentRepository {
@@ -17,6 +18,14 @@ public interface DocumentRepository {
   List<Document> findAll();
 
   List<Document> findByFileKey(String fileKey);
+
+  /**
+   * 특정 컬렉션에 속하는 문서 목록을 조회합니다.
+   *
+   * @param collectionId 조회할 컬렉션 ID
+   * @return 해당 컬렉션의 문서 목록 (빈 리스트 가능)
+   */
+  List<Document> findByCollectionId(CollectionId collectionId);
 
   void delete(DocumentId id);
 
