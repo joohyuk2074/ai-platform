@@ -1,6 +1,7 @@
 package me.joohyuk.datahub.infrastructure.adapter.out.persistence;
 
 import java.util.List;
+import me.joohyuk.datahub.domain.vo.DocumentStatus;
 import me.joohyuk.datahub.infrastructure.adapter.out.persistence.entity.DocumentJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -40,4 +41,9 @@ public interface DocumentJpaRepository extends JpaRepository<DocumentJpaEntity, 
    * @return 문서 엔티티 리스트
    */
   List<DocumentJpaEntity> findByCollectionId(Long collectionId);
+
+  List<DocumentJpaEntity> findByCollectionIdAndDocumentStatus(
+      Long collectionId,
+      DocumentStatus documentStatus
+  );
 }

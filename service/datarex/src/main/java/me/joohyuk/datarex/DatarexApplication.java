@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ChunkingApplication {
+public class DatarexApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(ChunkingApplication.class, args);
+  static void main(String[] args) {
+    SpringApplication.run(DatarexApplication.class, args);
   }
 
 }

@@ -1,7 +1,6 @@
 package me.joohyuk.datahub.application.dto.response;
 
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
-import me.joohyuk.datahub.domain.vo.CollectionId;
 
 import java.time.Instant;
 

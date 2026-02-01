@@ -8,4 +8,9 @@ public class DocumentUploadedEvent extends DocumentEvent {
   public DocumentUploadedEvent(Document document, LocalDateTime createdAt) {
     super(document, createdAt);
   }
+
+  @Override
+  public void fire() {
+    
+  }
 }

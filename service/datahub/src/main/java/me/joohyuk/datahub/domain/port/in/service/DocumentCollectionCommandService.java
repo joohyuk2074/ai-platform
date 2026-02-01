@@ -4,7 +4,7 @@ import com.spartaecommerce.domain.vo.UserId;
 import me.joohyuk.datahub.application.dto.request.CreateDocumentCollectionCommand;
 import me.joohyuk.datahub.application.dto.request.UpdateDocumentCollectionCommand;
 import me.joohyuk.datahub.application.dto.response.CreateDocumentCollectionResult;
-import me.joohyuk.datahub.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.CollectionId;
 
 public interface DocumentCollectionCommandService {
 

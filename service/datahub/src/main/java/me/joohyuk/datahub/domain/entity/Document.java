@@ -3,10 +3,11 @@ package me.joohyuk.datahub.domain.entity;
 import com.spartaecommerce.domain.entity.AggregateRoot;
 import com.spartaecommerce.domain.vo.DocumentId;
 import com.spartaecommerce.domain.vo.Metadata;
+import com.spartaecommerce.domain.vo.UserId;
 import java.time.Instant;
 import lombok.Getter;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
-import me.joohyuk.datahub.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.CollectionId;
 import me.joohyuk.datahub.domain.vo.ContentHash;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
@@ -166,6 +167,10 @@ public class Document extends AggregateRoot<DocumentId> {
     this.lastErrorMessage = truncateErrorMessage(errorMessage);
     this.lastResultEventId = eventId;
     this.updatedAt = now;
+  }
+
+  public UserId getUploader() {
+    return this.metadata.uploadedBy();
   }
 
   // ─── private helpers ────────────────────────────────────────────

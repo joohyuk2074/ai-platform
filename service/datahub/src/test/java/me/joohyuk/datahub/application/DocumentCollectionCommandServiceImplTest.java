@@ -11,7 +11,7 @@ import me.joohyuk.datahub.application.dto.request.CreateDocumentCollectionComman
 import me.joohyuk.datahub.application.dto.response.CreateDocumentCollectionResult;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
-import me.joohyuk.datahub.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.CollectionId;
 import me.joohyuk.datahub.fake.FakeDateTimeHolder;
 import me.joohyuk.datahub.fake.InMemoryDocumentCollectionRepository;
 import me.joohyuk.datahub.fake.InMemoryIdGenerator;

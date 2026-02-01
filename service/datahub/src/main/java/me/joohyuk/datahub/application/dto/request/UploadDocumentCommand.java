@@ -1,7 +1,7 @@
 package me.joohyuk.datahub.application.dto.request;
 
 import com.spartaecommerce.domain.vo.UserId;
-import me.joohyuk.datahub.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.CollectionId;
 
 /**
  * 문서 업로드 커맨드

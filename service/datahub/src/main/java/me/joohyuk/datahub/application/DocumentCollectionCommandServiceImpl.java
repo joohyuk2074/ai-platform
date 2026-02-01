@@ -13,7 +13,7 @@ import me.joohyuk.datahub.domain.entity.DocumentCollection;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
 import me.joohyuk.datahub.domain.port.in.service.DocumentCollectionCommandService;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentCollectionRepository;
-import me.joohyuk.datahub.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.CollectionId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

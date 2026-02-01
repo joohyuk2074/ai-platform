@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
-import me.joohyuk.datahub.domain.event.PassageCreationRequestedEvent;
+import me.joohyuk.datahub.domain.event.PassageCreationRequestEvent;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
 import me.joohyuk.datahub.domain.port.out.message.publisher.PassageCreationRequestPublisher;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentCollectionRepository;
@@ -46,8 +46,8 @@ public class DocumentPersistenceHelper {
         savedDocument.getId().getValue(), savedDocument.getStatus());
 
     // 4. Passage 생성 요청 이벤트를 Kafka로 발행
-    PassageCreationRequestedEvent passageEvent =
-        new PassageCreationRequestedEvent(document, dateTimeHolder.getCurrentDateTime());
+    PassageCreationRequestEvent passageEvent =
+        new PassageCreationRequestEvent(document, dateTimeHolder.getCurrentDateTime());
     passageCreationRequestPublisher.publish(passageEvent);
 
     return uploadEvent;

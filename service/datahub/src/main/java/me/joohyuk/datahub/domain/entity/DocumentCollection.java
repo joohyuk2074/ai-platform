@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.Objects;
 import lombok.Getter;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
-import me.joohyuk.datahub.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.CollectionId;
 
 @Getter
 public class DocumentCollection extends AggregateRoot<CollectionId> {

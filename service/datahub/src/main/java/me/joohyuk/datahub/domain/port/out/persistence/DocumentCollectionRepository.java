@@ -3,7 +3,7 @@ package me.joohyuk.datahub.domain.port.out.persistence;
 import java.util.List;
 import java.util.Optional;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
-import me.joohyuk.datahub.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.CollectionId;
 
 public interface DocumentCollectionRepository {
 

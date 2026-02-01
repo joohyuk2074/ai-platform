@@ -1,6 +1,6 @@
 package me.joohyuk.datahub.fake;
 
-import me.joohyuk.datahub.domain.event.PassageCreationRequestedEvent;
+import me.joohyuk.datahub.domain.event.PassageCreationRequestEvent;
 import me.joohyuk.datahub.domain.port.out.message.publisher.PassageCreationRequestPublisher;
 
 /**
@@ -11,7 +11,7 @@ import me.joohyuk.datahub.domain.port.out.message.publisher.PassageCreationReque
 public class NoOpPassageCreationRequestPublisher implements PassageCreationRequestPublisher {
 
   @Override
-  public void publish(PassageCreationRequestedEvent event) {
+  public void publish(PassageCreationRequestEvent event) {
     // no-op: 테스트에서 아웃박스 저장 불필요
   }
 }

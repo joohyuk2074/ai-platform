@@ -1,6 +1,4 @@
-package me.joohyuk.datahub.domain.vo;
-
-import com.spartaecommerce.domain.vo.BaseId;
+package com.spartaecommerce.domain.vo;
 
 import java.util.UUID;
 

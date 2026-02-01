@@ -4,8 +4,9 @@ import com.spartaecommerce.domain.vo.DocumentId;
 import java.util.List;
 import java.util.Optional;
 import me.joohyuk.datahub.domain.entity.Document;
-import me.joohyuk.datahub.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.CollectionId;
 import me.joohyuk.datahub.domain.vo.ContentHash;
+import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
 public interface DocumentRepository {
 
@@ -26,6 +27,8 @@ public interface DocumentRepository {
    * @return 해당 컬렉션의 문서 목록 (빈 리스트 가능)
    */
   List<Document> findByCollectionId(CollectionId collectionId);
+
+  List<Document> findByCollectionId(CollectionId collectionId, DocumentStatus documentStatus);
 
   void delete(DocumentId id);
 

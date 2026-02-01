@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.dto.request.UploadDocumentCommand;
 import me.joohyuk.datahub.application.dto.response.UploadDocumentResult;
 import me.joohyuk.datahub.domain.port.in.service.DocumentCommandService;
-import me.joohyuk.datahub.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.CollectionId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

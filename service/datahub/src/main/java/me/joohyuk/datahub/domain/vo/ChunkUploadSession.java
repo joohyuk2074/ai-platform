@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChunkUploadSession {
 
   private final String uploadId;
-  private final CollectionId collectionId;
+  private final com.spartaecommerce.domain.vo.CollectionId collectionId;
   private final String fileName;
   private final long totalSize;
   private final String contentType;
@@ -26,7 +26,7 @@ public class ChunkUploadSession {
 
   public ChunkUploadSession(
       String uploadId,
-      CollectionId collectionId,
+      com.spartaecommerce.domain.vo.CollectionId collectionId,
       String fileName,
       long totalSize,
       String contentType,
@@ -65,7 +65,7 @@ public class ChunkUploadSession {
     return uploadId;
   }
 
-  public CollectionId getCollectionId() {
+  public com.spartaecommerce.domain.vo.CollectionId getCollectionId() {
     return collectionId;
   }
 

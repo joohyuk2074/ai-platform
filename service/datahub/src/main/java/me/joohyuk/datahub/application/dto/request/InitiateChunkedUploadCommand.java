@@ -1,6 +1,6 @@
 package me.joohyuk.datahub.application.dto.request;
 
-import me.joohyuk.datahub.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.CollectionId;
 
 /**
  * 청크 업로드 시작 커맨드

@@ -11,8 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
-import me.joohyuk.datahub.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.CollectionId;
 import me.joohyuk.datahub.domain.vo.ContentHash;
+import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
 /**
  * In-Memory DocumentRepository 구현
@@ -77,6 +78,17 @@ public class InMemoryDocumentRepository implements DocumentRepository {
   }
 
   @Override
+  public List<Document> findByCollectionId(
+      CollectionId collectionId,
+      DocumentStatus documentStatus
+  ) {
+    return store.values().stream()
+        .filter(d -> d.getCollectionId().equals(collectionId))
+        .filter(document -> document.getStatus() == documentStatus)
+        .toList();
+  }
+
+  @Override
   public void delete(DocumentId id) {
     store.remove(id);
   }
@@ -98,17 +110,23 @@ public class InMemoryDocumentRepository implements DocumentRepository {
 
   // ─── 테스트 헬퍼 ──────────────────────────────────────────────
 
-  /** 현재 저장된 문서 수 */
+  /**
+   * 현재 저장된 문서 수
+   */
   public int size() {
     return store.size();
   }
 
-  /** save() 호출 시 예외를 발생시키도록 설정 (DB 저장 실패 테스트용) */
+  /**
+   * save() 호출 시 예외를 발생시키도록 설정 (DB 저장 실패 테스트용)
+   */
   public void configureToFailOnSave() {
     this.throwOnSave = true;
   }
 
-  /** save() 호출 시 특정 예외를 발생시키도록 설정 */
+  /**
+   * save() 호출 시 특정 예외를 발생시키도록 설정
+   */
   public void configureToFailOnSave(RuntimeException exception) {
     this.throwOnSave = true;
     this.saveException = exception;
