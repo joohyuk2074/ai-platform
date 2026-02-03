@@ -1,4 +1,4 @@
-package me.joohyuk.datarex.domain.port.out;
+package me.joohyuk.datarex.domain.port.out.message;
 
 import me.joohyuk.datarex.domain.entity.PassageCreationCompletedMessage;
 import me.joohyuk.datarex.domain.entity.PassageCreationFailedMessage;

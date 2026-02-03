@@ -1,7 +1,7 @@
 package me.joohyuk.datarex.infrastructure.adapter.out.chunking;
 
 import java.util.List;
-import me.joohyuk.datarex.domain.port.out.PassageChunker;
+import me.joohyuk.datarex.domain.port.out.chunking.PassageChunker;
 import org.springframework.stereotype.Component;
 
 @Component

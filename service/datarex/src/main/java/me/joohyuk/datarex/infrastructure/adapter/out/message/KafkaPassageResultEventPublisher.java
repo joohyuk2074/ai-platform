@@ -3,7 +3,7 @@ package me.joohyuk.datarex.infrastructure.adapter.out.message;
 import lombok.RequiredArgsConstructor;
 import me.joohyuk.datarex.domain.entity.PassageCreationCompletedMessage;
 import me.joohyuk.datarex.domain.entity.PassageCreationFailedMessage;
-import me.joohyuk.datarex.domain.port.out.PassageResultEventPublisher;
+import me.joohyuk.datarex.domain.port.out.message.PassageResultEventPublisher;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 

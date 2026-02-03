@@ -1,4 +1,4 @@
-package me.joohyuk.datarex.domain.port.out;
+package me.joohyuk.datarex.domain.port.out.chunking;
 
 import java.util.List;
 

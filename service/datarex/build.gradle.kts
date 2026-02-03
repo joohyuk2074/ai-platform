@@ -16,6 +16,7 @@ dependencies {
 
   implementation(platform("org.springframework.ai:spring-ai-bom:1.0.0"))
   implementation("org.springframework.ai:spring-ai-openai")
+  implementation("org.springframework.ai:spring-ai-markdown-document-reader")
 
   implementation("org.springframework.kafka:spring-kafka")
   testImplementation("org.springframework.kafka:spring-kafka-test")

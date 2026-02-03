@@ -1,4 +1,4 @@
-package me.joohyuk.datarex.domain.port.out;
+package me.joohyuk.datarex.domain.port.out.storage;
 
 import java.util.List;
 import me.joohyuk.datarex.domain.entity.Passage;
