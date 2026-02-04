@@ -4,7 +4,11 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import me.joohyuk.datarex.domain.entity.PassageCreationRequestedMessage.DocumentData;
+import java.util.stream.Collectors;
+import me.joohyuk.datarex.domain.entity.DocumentTransformRequestedMessage.DocumentData;
+import me.joohyuk.datarex.domain.exception.DatarexDomainException;
+import me.joohyuk.datarex.domain.model.DocumentContent;
+import me.joohyuk.datarex.domain.port.out.storage.DocumentReader;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.markdown.MarkdownDocumentReader;
 import org.springframework.ai.reader.markdown.config.MarkdownDocumentReaderConfig;
@@ -12,29 +16,34 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MarkdownReader {
+public class MarkdownReader implements DocumentReader {
 
-  public List<Document> loadMarkdown(DocumentData documentData) {
+  private static final String STORAGE_BASE_PATH = "storage/documents/";
+
+  @Override
+  public List<DocumentContent> read(DocumentData documentData) {
+    List<Document> springAiDocuments = loadMarkdown(documentData);
+    return toDocumentContents(springAiDocuments);
+  }
+
+  private List<Document> loadMarkdown(DocumentData documentData) {
     String filePath = documentData.fileKey();
     if (filePath == null || filePath.isBlank()) {
-      throw new IllegalArgumentException("fileKey는 필수입니다");
+      throw new DatarexDomainException("fileKey는 필수입니다");
     }
 
     Map<String, Object> metadata = buildMetadata(documentData);
 
-    // MarkdownDocumentReaderConfig 생성
-    MarkdownDocumentReaderConfig.Builder configBuilder = MarkdownDocumentReaderConfig.builder()
+    MarkdownDocumentReaderConfig.Builder builder = MarkdownDocumentReaderConfig.builder()
         .withHorizontalRuleCreateDocument(true)
         .withIncludeCodeBlock(false)
         .withIncludeBlockquote(false);
 
-    // 메타정보를 config에 추가
-    metadata.forEach(configBuilder::withAdditionalMetadata);
+    metadata.forEach(builder::withAdditionalMetadata);
 
-    MarkdownDocumentReaderConfig config = configBuilder.build();
+    MarkdownDocumentReaderConfig config = builder.build();
 
-    // 파일 시스템 리소스로 문서 읽기
-    FileSystemResource resource = new FileSystemResource(Path.of("storage/documents/" + filePath));
+    FileSystemResource resource = new FileSystemResource(Path.of(STORAGE_BASE_PATH + filePath));
     if (!resource.exists()) {
       throw new IllegalStateException("파일이 존재하지 않습니다: " + filePath);
     }
@@ -43,9 +52,12 @@ public class MarkdownReader {
     return reader.get();
   }
 
-  /**
-   * DocumentData로부터 메타정보를 추출하여 Map으로 변환합니다.
-   */
+  private List<DocumentContent> toDocumentContents(List<Document> documents) {
+    return documents.stream()
+        .map(doc -> new DocumentContent(doc.getText(), doc.getMetadata()))
+        .collect(Collectors.toList());
+  }
+
   private Map<String, Object> buildMetadata(DocumentData documentData) {
     Map<String, Object> metadata = new HashMap<>();
 

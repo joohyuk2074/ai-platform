@@ -61,7 +61,7 @@ public class KafkaConsumerConfig {
 
     // Type Mapping: datahub의 이벤트 클래스를 datarex의 메시지 클래스로 매핑
     configProps.put("spring.json.type.mapping",
-        "me.joohyuk.datahub.domain.event.PassageCreationRequestEvent:me.joohyuk.datarex.domain.entity.PassageCreationRequestedMessage");
+        "me.joohyuk.datahub.domain.event.DocumentTransformRequestEvent:me.joohyuk.datarex.domain.entity.DocumentTransformRequestedMessage");
 
     return new DefaultKafkaConsumerFactory<>(configProps);
   }

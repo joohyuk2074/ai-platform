@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Passage 생성 요청 메시지.
+ * Document Transform 요청 메시지.
  *
- * <p>datahub 서비스의 PassageCreationRequestEvent를 Kafka를 통해 받습니다.
- * datarex 서비스는 이 메시지를 소비하여 실제 passage chunking 작업을 수행합니다.
+ * <p>datahub 서비스의 DocumentTransformRequestEvent를 Kafka를 통해 받습니다.
+ * datarex 서비스는 이 메시지를 소비하여 실제 문서 청킹(chunking) 작업을 수행합니다.
  */
-public record PassageCreationRequestedMessage(
+public record DocumentTransformRequestedMessage(
     DocumentData document,
     LocalDateTime createdAt
 ) {
@@ -34,7 +34,7 @@ public record PassageCreationRequestedMessage(
         Instant updatedAt
     ) {
 
-        // Passage 생성에 필요한 주요 정보 편의 메서드
+        // Document Transform에 필요한 주요 정보 편의 메서드
         public Long getDocumentId() {
             return id != null ? id.value() : null;
         }
