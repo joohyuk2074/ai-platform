@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datarex.domain.entity.PassageCreationRequestedMessage;
 import me.joohyuk.datarex.domain.entity.PassageCreationRequestedMessage.DocumentData;
+import me.joohyuk.datarex.domain.exception.DatarexDomainException;
 import me.joohyuk.datarex.domain.port.in.service.PassageCreationService;
 import me.joohyuk.datarex.infrastructure.adapter.out.storage.MarkdownReader;
 import org.springframework.ai.document.Document;
@@ -73,7 +74,7 @@ public class PassageCreationServiceImpl implements PassageCreationService {
       }
     } catch (IOException e) {
       log.error("디렉토리 생성 실패: {}", outputPath, e);
-      throw new RuntimeException("디렉토리 생성 실패", e);
+      throw new DatarexDomainException("디렉토리 생성 실패", e);
     }
 
     FileDocumentWriter writer = new FileDocumentWriter(
