@@ -42,7 +42,7 @@ public class DocumentPersistenceHelper {
 
     // 3. Document 저장 (PASSAGE_REQUESTED 상태)
     Document savedDocument = documentRepository.save(document);
-    log.info("Document saved: id={}, status={}",
+    log.info("Document saved: documentId={}, status={}",
         savedDocument.getId().getValue(), savedDocument.getStatus());
 
     // 4. Passage 생성 요청 이벤트를 Kafka로 발행

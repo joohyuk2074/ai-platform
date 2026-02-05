@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import me.joohyuk.datarex.domain.entity.DocumentTransformRequestedMessage.DocumentData;
 import me.joohyuk.datarex.domain.exception.DatarexDomainException;
-import me.joohyuk.datarex.domain.model.DocumentContent;
 import me.joohyuk.datarex.domain.port.out.storage.DocumentReader;
+import me.joohyuk.datarex.domain.vo.DocumentContent;
+import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.DocumentTransformRequest;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.markdown.MarkdownDocumentReader;
 import org.springframework.ai.reader.markdown.config.MarkdownDocumentReaderConfig;
@@ -21,18 +21,18 @@ public class MarkdownReader implements DocumentReader {
   private static final String STORAGE_BASE_PATH = "storage/documents/";
 
   @Override
-  public List<DocumentContent> read(DocumentData documentData) {
-    List<Document> springAiDocuments = loadMarkdown(documentData);
+  public List<DocumentContent> read(DocumentTransformRequest documentTransformRequest) {
+    List<Document> springAiDocuments = loadMarkdown(documentTransformRequest);
     return toDocumentContents(springAiDocuments);
   }
 
-  private List<Document> loadMarkdown(DocumentData documentData) {
-    String filePath = documentData.fileKey();
+  private List<Document> loadMarkdown(DocumentTransformRequest documentTransformRequest) {
+    String filePath = documentTransformRequest.fileKey();
     if (filePath == null || filePath.isBlank()) {
       throw new DatarexDomainException("fileKey는 필수입니다");
     }
 
-    Map<String, Object> metadata = buildMetadata(documentData);
+    Map<String, Object> metadata = buildMetadata(documentTransformRequest);
 
     MarkdownDocumentReaderConfig.Builder builder = MarkdownDocumentReaderConfig.builder()
         .withHorizontalRuleCreateDocument(true)
@@ -58,48 +58,48 @@ public class MarkdownReader implements DocumentReader {
         .collect(Collectors.toList());
   }
 
-  private Map<String, Object> buildMetadata(DocumentData documentData) {
+  private Map<String, Object> buildMetadata(DocumentTransformRequest documentTransformRequest) {
     Map<String, Object> metadata = new HashMap<>();
 
     // 문서 기본 정보
-    if (documentData.getDocumentId() != null) {
-      metadata.put("documentId", documentData.getDocumentId());
+    if (documentTransformRequest.documentId() != null) {
+      metadata.put("documentId", documentTransformRequest.documentId());
     }
-    if (documentData.getCollectionId() != null) {
-      metadata.put("collectionId", documentData.getCollectionId());
+    if (documentTransformRequest.collectionId() != null) {
+      metadata.put("collectionId", documentTransformRequest.collectionId());
     }
 
     // 파일 정보
-    if (documentData.fileKey() != null) {
-      metadata.put("fileKey", documentData.fileKey());
+    if (documentTransformRequest.fileKey() != null) {
+      metadata.put("fileKey", documentTransformRequest.fileKey());
     }
-    if (documentData.getFileName() != null) {
-      metadata.put("fileName", documentData.getFileName());
+    if (documentTransformRequest.metadata().fileName() != null) {
+      metadata.put("fileName", documentTransformRequest.metadata().fileName());
     }
-    if (documentData.getContentType() != null) {
-      metadata.put("contentType", documentData.getContentType());
+    if (documentTransformRequest.metadata().contentType() != null) {
+      metadata.put("contentType", documentTransformRequest.metadata().contentType());
     }
-    if (documentData.getFileSize() != null) {
-      metadata.put("fileSize", documentData.getFileSize());
+    if (documentTransformRequest.metadata().fileSize() != null) {
+      metadata.put("fileSize", documentTransformRequest.metadata().fileSize());
     }
 
     // 콘텐츠 해시
-    if (documentData.getContentHashValue() != null) {
-      metadata.put("contentHash", documentData.getContentHashValue());
+    if (documentTransformRequest.contentHash() != null) {
+      metadata.put("contentHash", documentTransformRequest.contentHash());
     }
 
     // 문서 상태 정보
-    if (documentData.status() != null) {
-      metadata.put("status", documentData.status());
+    if (documentTransformRequest.status() != null) {
+      metadata.put("status", documentTransformRequest.status());
     }
-    metadata.put("attempt", documentData.attempt());
+    metadata.put("attempt", documentTransformRequest.attempt());
 
     // 타임스탬프
-    if (documentData.createdAt() != null) {
-      metadata.put("createdAt", documentData.createdAt().toString());
+    if (documentTransformRequest.createdAt() != null) {
+      metadata.put("createdAt", documentTransformRequest.createdAt().toString());
     }
-    if (documentData.updatedAt() != null) {
-      metadata.put("updatedAt", documentData.updatedAt().toString());
+    if (documentTransformRequest.updatedAt() != null) {
+      metadata.put("updatedAt", documentTransformRequest.updatedAt().toString());
     }
 
     return metadata;

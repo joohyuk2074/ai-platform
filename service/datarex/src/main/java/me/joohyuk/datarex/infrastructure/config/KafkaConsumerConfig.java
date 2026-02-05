@@ -59,9 +59,8 @@ public class KafkaConsumerConfig {
     // JsonDeserializer를 위한 trusted packages 설정
     configProps.put("spring.json.trusted.packages", trustedPackages);
 
-    // Type Mapping: datahub의 이벤트 클래스를 datarex의 메시지 클래스로 매핑
-    configProps.put("spring.json.type.mapping",
-        "me.joohyuk.datahub.domain.event.DocumentTransformRequestEvent:me.joohyuk.datarex.domain.entity.DocumentTransformRequestedMessage");
+    // Type Mapping: 공통 메시징 DTO를 사용하므로 불필요 (동일한 클래스 사용)
+    // datahub와 datarex 모두 me.joohyuk.messaging.events.DocumentTransformRequestedMessage 사용
 
     return new DefaultKafkaConsumerFactory<>(configProps);
   }

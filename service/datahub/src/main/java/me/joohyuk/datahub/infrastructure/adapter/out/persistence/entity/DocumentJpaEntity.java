@@ -17,7 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.joohyuk.datahub.domain.entity.Document;
 import com.spartaecommerce.domain.vo.CollectionId;
-import me.joohyuk.datahub.domain.vo.ContentHash;
+import com.spartaecommerce.domain.vo.ContentHash;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 import me.joohyuk.datahub.infrastructure.adapter.out.persistence.converter.MetadataConverter;
 

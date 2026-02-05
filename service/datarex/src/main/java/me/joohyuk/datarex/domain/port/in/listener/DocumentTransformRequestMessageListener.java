@@ -1,6 +1,6 @@
 package me.joohyuk.datarex.domain.port.in.listener;
 
-import me.joohyuk.datarex.domain.entity.DocumentTransformRequestedMessage;
+import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
 
 public interface DocumentTransformRequestMessageListener {
 

@@ -11,7 +11,7 @@ import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.domain.port.out.storage.FileStorage;
-import me.joohyuk.datahub.domain.vo.ContentHash;
+import com.spartaecommerce.domain.vo.ContentHash;
 import me.joohyuk.datahub.infrastructure.util.ContentHasher;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ public class DocumentUploadCommandHandler {
       UploadDocumentCommand uploadDocumentCommand,
       InputStream fileInputStream
   ) {
-    log.info("Starting document upload: {}", uploadDocumentCommand.fileName());
+    log.info("Starting message upload: {}", uploadDocumentCommand.fileName());
 
     Metadata metadata = Metadata.of(
         uploadDocumentCommand.fileName(),

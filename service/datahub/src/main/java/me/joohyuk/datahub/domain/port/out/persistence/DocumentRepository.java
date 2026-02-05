@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import me.joohyuk.datahub.domain.entity.Document;
 import com.spartaecommerce.domain.vo.CollectionId;
-import me.joohyuk.datahub.domain.vo.ContentHash;
+import com.spartaecommerce.domain.vo.ContentHash;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
 public interface DocumentRepository {

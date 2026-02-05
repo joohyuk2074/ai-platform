@@ -1,7 +1,6 @@
-package me.joohyuk.datahub.domain.vo;
+package com.spartaecommerce.domain.vo;
 
 import java.util.Objects;
-import lombok.Getter;
 
 /**
  * 파일 콘텐츠의 SHA-256 해시값을 나타내는 값 타입입니다.
@@ -10,7 +9,6 @@ import lombok.Getter;
  * 검증합니다. 해시 계산의 구현 세부사항(알고리즘 선택, DigestInputStream 패턴 등)은
  * {@code infrastructure.util.ContentHasher}에 위임됩니다.
  */
-@Getter
 public final class ContentHash {
 
   private static final int SHA256_HEX_LENGTH = 64;
@@ -35,6 +33,10 @@ public final class ContentHash {
           "ContentHash must be a valid SHA-256 hex string ("
               + SHA256_HEX_LENGTH + " characters), but was: " + value.length());
     }
+  }
+
+  public String getValue() {
+    return value;
   }
 
   @Override

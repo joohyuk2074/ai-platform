@@ -26,7 +26,7 @@ spring:
       acks: all
       linger-ms: 5
 #    consumer:
-#      group-id: ${KAFKA_CONSUMER_GROUP_ID:datahub-consumer}
+#      group-documentId: ${KAFKA_CONSUMER_GROUP_ID:datahub-consumer}
 #      auto-offset-reset: earliest
 #      enable-auto-commit: false
 #      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer

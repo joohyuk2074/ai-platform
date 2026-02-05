@@ -13,6 +13,7 @@ dependencies {
   implementation(project(":libs:common-infrastructure"))
   implementation(project(":libs:common-outbox"))
   implementation(project(":libs:common-saga"))
+  implementation(project(":libs:messaging-common"))
 
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")

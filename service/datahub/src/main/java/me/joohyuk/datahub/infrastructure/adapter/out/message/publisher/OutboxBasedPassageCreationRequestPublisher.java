@@ -2,10 +2,11 @@ package me.joohyuk.datahub.infrastructure.adapter.out.message.publisher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.PassageCreationRequestEvent;
 import me.joohyuk.datahub.domain.port.out.message.publisher.PassageCreationRequestPublisher;
 import me.joohyuk.datahub.infrastructure.adapter.PassageMessagingDataMapper;
+import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
+import me.joohyuk.messaging.topics.KafkaTopics;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -14,19 +15,23 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OutboxBasedPassageCreationRequestPublisher implements PassageCreationRequestPublisher {
 
-  // TODO: 환경변수로 관리
-  private static final String TOPIC = "passage.creation.requested";
-
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private final PassageMessagingDataMapper passageMessagingDataMapper;
 
   @Override
   public void publish(PassageCreationRequestEvent event) {
-    // TODO: avro 직렬화 적용
-    Document document = event.getDocument();
 
-    kafkaTemplate.send(TOPIC, String.valueOf(document.getId().getValue()), event);
-    log.info("Passage creation request event published: documentId={}, collectionId={}",
-        document.getId().getValue(), document.getCollectionId().getValue());
+    // TODO: avro 직렬화 적용
+    DocumentTransformRequestedMessage message =
+        passageMessagingDataMapper.eventToMessage(event);
+
+    kafkaTemplate.send(
+        KafkaTopics.DOCUMENT_TRANSFORM_REQUESTED,
+        String.valueOf(message.message().documentId()),
+        message
+    );
+
+    log.info("Document transform requested message published: documentId={}, collectionId={}",
+        message.message().documentId(), message.message().collectionId());
   }
 }

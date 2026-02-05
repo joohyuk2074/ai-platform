@@ -1,4 +1,4 @@
-package me.joohyuk.datarex.domain.model;
+package me.joohyuk.datarex.domain.vo;
 
 import java.util.HashMap;
 import java.util.Map;

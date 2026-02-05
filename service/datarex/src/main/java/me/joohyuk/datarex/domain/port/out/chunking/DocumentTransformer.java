@@ -1,21 +1,10 @@
 package me.joohyuk.datarex.domain.port.out.chunking;
 
 import java.util.List;
-import me.joohyuk.datarex.domain.model.DocumentContent;
+import me.joohyuk.datarex.domain.vo.DocumentContent;
 
-/**
- * Spring AI의 DocumentTransformer 패턴을 따르는 문서 변환 인터페이스
- * 문서를 청킹(chunking)하여 더 작은 단위로 분할합니다.
- */
 public interface DocumentTransformer {
 
-  /**
-   * 문서 리스트를 청킹하여 변환합니다.
-   *
-   * @param documents 변환할 문서 리스트
-   * @param config 청킹 설정
-   * @return 청킹된 문서 리스트
-   */
   List<DocumentContent> transform(
       List<DocumentContent> documents,
       ChunkingConfig config
@@ -38,9 +27,6 @@ public interface DocumentTransformer {
       boolean keepSeparator
   ) {
 
-    /**
-     * 기본 청킹 설정을 생성
-     */
     public static ChunkingConfig defaultConfig() {
       return new ChunkingConfig(
           1000,  // defaultChunkSize

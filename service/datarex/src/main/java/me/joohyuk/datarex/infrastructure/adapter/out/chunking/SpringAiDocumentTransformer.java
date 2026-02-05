@@ -3,7 +3,7 @@ package me.joohyuk.datarex.infrastructure.adapter.out.chunking;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.datarex.domain.model.DocumentContent;
+import me.joohyuk.datarex.domain.vo.DocumentContent;
 import me.joohyuk.datarex.domain.port.out.chunking.DocumentTransformer;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;

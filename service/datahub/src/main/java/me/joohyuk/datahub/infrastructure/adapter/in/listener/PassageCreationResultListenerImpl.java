@@ -20,7 +20,7 @@ public class PassageCreationResultListenerImpl implements PassageCreationResultL
   @Override
   public void onCompleted(PassageResponse passageResponse) {
     PassageCreationRequestEvent domainEvent = passageCreationSaga.process(passageResponse);
-    log.info("Publishing PassageCreationEvent for document id: {}",
+    log.info("Publishing PassageCreationEvent for message documentId: {}",
         passageResponse.getDocumentId());
     domainEvent.fire();
   }
@@ -28,7 +28,7 @@ public class PassageCreationResultListenerImpl implements PassageCreationResultL
   @Override
   public void onFailed(PassageResponse passageResponse) {
     passageCreationSaga.rollback(passageResponse);
-    log.info("Passage creation is roll backed for id: {} with failure messages: {}",
+    log.info("Passage creation is roll backed for documentId: {} with failure messages: {}",
         passageResponse.getDocumentId(),
         String.join(",", passageResponse.getFailureMessages()));
   }

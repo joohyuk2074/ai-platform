@@ -29,13 +29,13 @@ public class PassageCreationSaga implements
   @Override
   @Transactional
   public PassageCreationRequestEvent process(PassageResponse passageResponse) {
-    log.info("Completing passaging for document with id: {}", passageResponse.getDocumentId());
+    log.info("Completing passaging for message with documentId: {}", passageResponse.getDocumentId());
     Document document = documentRepository.getById(new DocumentId(passageResponse.getDocumentId()));
     PassageCreationRequestEvent domainEvent = documentDomainService.createPassage(document);
 
     documentRepository.save(document);
 
-    log.info("Document with id: {} is created to passages", document.getId().getValue());
+    log.info("Document with documentId: {} is created to passages", document.getId().getValue());
 
     return domainEvent;
   }
@@ -43,13 +43,13 @@ public class PassageCreationSaga implements
   @Override
   @Transactional
   public EmptyEvent rollback(PassageResponse passageResponse) {
-    log.info("Cancelling with id: {}", passageResponse.getDocumentId());
+    log.info("Cancelling with documentId: {}", passageResponse.getDocumentId());
     Document document = documentRepository.getById(new DocumentId(passageResponse.getDocumentId()));
     documentDomainService.cancelCreatePassage(document, passageResponse.getFailureMessages());
 
     documentRepository.save(document);
 
-    log.info("Document with id: {} is cancelled", document.getId().getValue());
+    log.info("Document with documentId: {} is cancelled", document.getId().getValue());
 
     return EmptyEvent.INSTANCE;
   }

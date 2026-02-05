@@ -1,11 +1,14 @@
 package me.joohyuk.datahub.infrastructure.adapter;
 
+import com.spartaecommerce.domain.vo.Metadata;
 import java.time.ZoneOffset;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.PassageCreationRequestEvent;
 import me.joohyuk.datahub.infrastructure.adapter.out.persistence.converter.MetadataConverter;
+import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
+import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.DocumentTransformRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,6 +16,36 @@ import org.springframework.stereotype.Component;
 public class PassageMessagingDataMapper {
 
   private final MetadataConverter metadataConverter;
+
+  public DocumentTransformRequestedMessage eventToMessage(PassageCreationRequestEvent event) {
+    Document document = event.getDocument();
+
+    DocumentTransformRequest transformRequest = new DocumentTransformRequest(
+        document.getId().getValue(),
+        document.getCollectionId().getValue(),
+        document.getFileKey(),
+        document.getContentHash().getValue(),
+        new Metadata(
+            document.getMetadata().fileName(),
+            document.getMetadata().fileSize(),
+            document.getMetadata().contentType(),
+            document.getMetadata().uploadedBy(),
+            document.getMetadata().source(),
+            document.getMetadata().author(),
+            document.getMetadata().tags()
+        ),
+        document.getStatus().name(),
+        document.getAttempt(),
+        document.getLastErrorCode(),
+        document.getLastErrorMessage(),
+        document.getPassageCount(),
+        document.getLastResultEventId(),
+        document.getCreatedAt(),
+        document.getUpdatedAt()
+    );
+
+    return new DocumentTransformRequestedMessage(transformRequest, event.getCreatedAt());
+  }
 
   public PassageCreationRequestAvroModel passageCreationRequestEventToPassageCreationRequestAvroModel(
       PassageCreationRequestEvent event

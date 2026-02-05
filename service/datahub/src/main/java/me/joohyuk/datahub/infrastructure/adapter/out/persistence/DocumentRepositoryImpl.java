@@ -1,5 +1,7 @@
 package me.joohyuk.datahub.infrastructure.adapter.out.persistence;
 
+import com.spartaecommerce.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.ContentHash;
 import com.spartaecommerce.domain.vo.DocumentId;
 import java.util.List;
 import java.util.Optional;
@@ -8,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.exception.IngestionDomainException;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
-import com.spartaecommerce.domain.vo.CollectionId;
-import me.joohyuk.datahub.domain.vo.ContentHash;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 import me.joohyuk.datahub.infrastructure.adapter.out.persistence.entity.DocumentJpaEntity;
 import org.springframework.stereotype.Repository;
@@ -67,8 +67,9 @@ public class DocumentRepositoryImpl implements DocumentRepository {
       CollectionId collectionId,
       DocumentStatus documentStatus
   ) {
-    return jpaRepository.findByCollectionIdAndDocumentStatus(collectionId.getValue(),
-            documentStatus).stream()
+    return jpaRepository
+        .findByCollectionIdAndDocumentStatus(collectionId.getValue(), documentStatus)
+        .stream()
         .map(DocumentJpaEntity::toDomain)
         .collect(Collectors.toList());
   }

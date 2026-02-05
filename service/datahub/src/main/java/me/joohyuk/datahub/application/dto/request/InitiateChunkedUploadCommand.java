@@ -10,7 +10,7 @@ import com.spartaecommerce.domain.vo.CollectionId;
  */
 public record InitiateChunkedUploadCommand(
     CollectionId collectionId,
-    String fileName,      // 원본 파일명 (예: "document.md")
+    String fileName,      // 원본 파일명 (예: "message.md")
     long totalSize,       // 파일 전체 크기 (바이트)
     String contentType,   // MIME 타입 (예: "text/markdown")
     Long uploadedBy       // 업로드한 사용자 ID

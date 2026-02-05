@@ -6,7 +6,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
-import me.joohyuk.datahub.domain.vo.ContentHash;
+import com.spartaecommerce.domain.vo.ContentHash;
 
 /**
  * SHA-256 콘텐츠 해시 계산을 책임지는 유틸리티입니다.

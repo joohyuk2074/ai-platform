@@ -1,10 +1,10 @@
 package me.joohyuk.datarex.domain.port.out.storage;
 
 import java.util.List;
-import me.joohyuk.datarex.domain.entity.DocumentTransformRequestedMessage.DocumentData;
-import me.joohyuk.datarex.domain.model.DocumentContent;
+import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.DocumentTransformRequest;
+import me.joohyuk.datarex.domain.vo.DocumentContent;
 
 public interface DocumentReader {
 
-    List<DocumentContent> read(DocumentData documentData);
+    List<DocumentContent> read(DocumentTransformRequest documentTransformRequest);
 }
