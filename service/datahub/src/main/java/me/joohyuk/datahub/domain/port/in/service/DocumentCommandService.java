@@ -22,12 +22,12 @@ public interface DocumentCommandService {
     // ─── Passage 생성 요청 ───────────────────────────────────────────
 
     /**
-     * 특정 컬렉션에 속하는 {@code UPLOADED} 상태의 모든 Document에 대해 Passage 생성 요청 이벤트를
+     * 특정 컬렉션에 속하는 {@code UPLOADED} 상태의 모든 Document에 대해 Transform 요청 이벤트를
      * Kafka로 발행합니다.
      *
-     * <p>각 Document의 상태를 {@code UPLOADED → PASSAGE_REQUESTED}로 전이시키고,
+     * <p>각 Document의 상태를 {@code UPLOADED → TRANSFORM_REQUESTED}로 전이시키고,
      * {@code PassageCreationRequestedEvent}를 Kafka 토픽 {@code passage.creation.requested}로
-     * produce합니다. 이미 {@code PASSAGE_REQUESTED} 이상의 상태인 Document는 건너뜁니다.
+     * produce합니다. 이미 {@code TRANSFORM_REQUESTED} 이상의 상태인 Document는 건너뜁니다.
      *
      * @param collectionId Passage 생성을 요청할 컬렉션 ID
      * @return Passage 생성 요청 처리 결과 (처리된 문서 수, 성공/실패 정보)

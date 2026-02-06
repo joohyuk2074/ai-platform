@@ -36,16 +36,16 @@ public class DocumentPersistenceHelper {
     // 1. Document ID 초기화 및 DocumentUploadedEvent 생성
     DocumentUploadedEvent uploadEvent = documentDomainService.initializeDocument(document);
 
-    // 2. UPLOADED → PASSAGE_REQUESTED 상태 전이
+    // 2. UPLOADED → TRANSFORM_REQUESTED 상태 전이
     Instant now = dateTimeHolder.now();
-    document.requestPassageCreation(now);
+    document.transform(now);
 
-    // 3. Document 저장 (PASSAGE_REQUESTED 상태)
+    // 3. Document 저장 (TRANSFORM_REQUESTED 상태)
     Document savedDocument = documentRepository.save(document);
     log.info("Document saved: documentId={}, status={}",
         savedDocument.getId().getValue(), savedDocument.getStatus());
 
-    // 4. Passage 생성 요청 이벤트를 Kafka로 발행
+    // 4. Transform 요청 이벤트를 Kafka로 발행
     PassageCreationRequestEvent passageEvent =
         new PassageCreationRequestEvent(document, dateTimeHolder.getCurrentDateTime());
     passageCreationRequestPublisher.publish(passageEvent);

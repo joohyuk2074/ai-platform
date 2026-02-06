@@ -17,18 +17,17 @@ import me.joohyuk.datahub.domain.port.out.persistence.DocumentCollectionReposito
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Passage 생성 요청 이벤트 발행을 처리하는 Command Handler
  *
  * <p>이 핸들러는:
  * <ul>
- *   <li>Document 상태를 UPLOADED → PASSAGE_REQUESTED로 변경</li>
+ *   <li>Document 상태를 UPLOADED → TRANSFORM_REQUESTED로 변경</li>
  *   <li>Kafka로 PassageCreationRequestEvent 발행</li>
  * </ul>
  *
- * <p><b>중요:</b> 실제 Passage 생성은 datarex 서비스에서 비동기로 처리되며,
+ * <p><b>중요:</b> 실제 Transform 처리는 datarex 서비스에서 비동기로 처리되며,
  * 이 핸들러는 "요청 발행"까지만 담당합니다.
  */
 @Slf4j
@@ -46,7 +45,7 @@ public class PassageCreationRequestCommandHandler {
      *
      * <p>각 Document에 대해:
      * <ol>
-     *   <li>상태를 PASSAGE_REQUESTED로 변경</li>
+     *   <li>상태를 TRANSFORM_REQUESTED로 변경</li>
      *   <li>PassageCreationRequestEvent를 Kafka로 발행</li>
      * </ol>
      *
@@ -72,7 +71,7 @@ public class PassageCreationRequestCommandHandler {
 
         for (Document document : documents) {
             try {
-                document.requestPassageCreation(now);
+                document.transform(now);
                 documentRepository.save(document);
 
                 // TODO: outbox 패턴 적용

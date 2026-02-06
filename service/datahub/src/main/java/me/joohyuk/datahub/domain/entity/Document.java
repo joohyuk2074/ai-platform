@@ -108,47 +108,47 @@ public class Document extends AggregateRoot<DocumentId> {
   // ─── 상태 전이 메서드 ────────────────────────────────────────────
 
   /**
-   * {@code UPLOADED → PASSAGE_REQUESTED} 로 전이합니다. Kafka 이벤트 publish 직전에 호출합니다.
+   * {@code UPLOADED → TRANSFORM_REQUESTED} 로 전이합니다. Kafka 이벤트 publish 직전에 호출합니다.
    *
    * @throws IngestionDomainException 현재 상태가 UPLOADED가 아닌 경우
    */
-  public void requestPassageCreation(Instant now) {
+  public void transform(Instant now) {
     if (status != DocumentStatus.UPLOADED) {
       throw new IngestionDomainException(
-          "Cannot request passage creation. current=" + status + ", expected=UPLOADED"
+          "Cannot request transform. current=" + status + ", expected=UPLOADED"
               + " [documentId=" + getId() + "]");
     }
-    this.status = DocumentStatus.PASSAGE_REQUESTED;
+    this.status = DocumentStatus.TRANSFORM_REQUESTED;
     this.updatedAt = now;
   }
 
   /**
-   * {@code PASSAGE_REQUESTED → PASSAGE_CREATED} 로 전이합니다. datarex에서 Passage 생성 완료 이벤트를 수신하면 호출합니다.
+   * {@code TRANSFORM_REQUESTED → TRANSFORMED} 로 전이합니다. datarex에서 Transform 완료 이벤트를 수신하면 호출합니다.
    *
-   * @param passageCount 생성된 Passage 수
+   * @param passageCount 생성된 청크 수
    * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
-   * @throws IngestionDomainException 현재 상태가 PASSAGE_REQUESTED가 아닌 경우
+   * @throws IngestionDomainException 현재 상태가 TRANSFORM_REQUESTED가 아닌 경우
    */
   public void markPassageCreated(int passageCount, String eventId, Instant now) {
-    if (status != DocumentStatus.PASSAGE_REQUESTED) {
+    if (status != DocumentStatus.TRANSFORM_REQUESTED) {
       throw new IngestionDomainException(
-          "Cannot mark passage created. current=" + status + ", expected=PASSAGE_REQUESTED"
+          "Cannot mark transformed. current=" + status + ", expected=TRANSFORM_REQUESTED"
               + " [documentId=" + getId() + "]");
     }
-    this.status = DocumentStatus.PASSAGE_CREATED;
+    this.status = DocumentStatus.TRANSFORMED;
     this.passageCount = passageCount;
     this.lastResultEventId = eventId;
     this.updatedAt = now;
   }
 
   /**
-   * {@code PASSAGE_REQUESTED → PASSAGE_FAILED} 로 전이합니다. datarex에서 Passage 생성 실패 이벤트를 수신하면 호출합니다.
+   * {@code TRANSFORM_REQUESTED → TRANSFORM_FAILED} 로 전이합니다. datarex에서 Transform 실패 이벤트를 수신하면 호출합니다.
    * {@code attempt}를 1 증가시키고 에러 정보를 저장합니다.
    *
    * @param errorCode    실패 이벤트의 에러 코드
    * @param errorMessage 실패 이벤트의 에러 메시지 (500자 초과 시 절단)
    * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
-   * @throws IngestionDomainException 현재 상태가 PASSAGE_REQUESTED가 아닌 경우
+   * @throws IngestionDomainException 현재 상태가 TRANSFORM_REQUESTED가 아닌 경우
    */
   public void markPassageFailed(
       String errorCode,
@@ -156,12 +156,12 @@ public class Document extends AggregateRoot<DocumentId> {
       String eventId,
       Instant now
   ) {
-    if (status != DocumentStatus.PASSAGE_REQUESTED) {
+    if (status != DocumentStatus.TRANSFORM_REQUESTED) {
       throw new IngestionDomainException(
-          "Cannot mark passage failed. current=" + status + ", expected=PASSAGE_REQUESTED"
+          "Cannot mark transform failed. current=" + status + ", expected=TRANSFORM_REQUESTED"
               + " [documentId=" + getId() + "]");
     }
-    this.status = DocumentStatus.PASSAGE_FAILED;
+    this.status = DocumentStatus.TRANSFORM_FAILED;
     this.attempt++;
     this.lastErrorCode = errorCode;
     this.lastErrorMessage = truncateErrorMessage(errorMessage);
