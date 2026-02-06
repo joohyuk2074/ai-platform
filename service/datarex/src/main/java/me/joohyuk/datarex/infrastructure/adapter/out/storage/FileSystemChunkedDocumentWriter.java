@@ -51,7 +51,7 @@ public class FileSystemChunkedDocumentWriter implements ChunkedDocumentWriter {
   private String buildOutputPath(StorageConfig config) {
     // 파일 확장자를 .jsonl로 변경
     String fileNameWithoutExt = removeExtension(config.fileName());
-    return String.format("%s/%d/%d/%s.json",
+    return String.format("%s/%d/%d/%s.jsonl",
         BASE_STORAGE_PATH,
         config.collectionId().getValue(),
         config.documentId().getValue(),
