@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import me.joohyuk.datahub.application.port.out.storage.FileStorage;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.infrastructure.adapter.storage.LocalFileStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,29 +36,32 @@ class LocalFileStorageTest {
   }
 
   @Test
-  @DisplayName("정상 저장 시 파일 키를 반환한다")
-  void store_정상저장_시_파일키를_반환한다() {
+  @DisplayName("정상 저장 시 파일 키와 콘텐츠 해시를 반환한다")
+  void store_정상저장_시_파일키와_해시를_반환한다() {
     InputStream inputStream =
         new ByteArrayInputStream("테스트 내용".getBytes(StandardCharsets.UTF_8));
-    Metadata metadata = Metadata.of("test.md", 12L, "text/markdown", 1L);
+    Metadata metadata = Metadata.forUpload("test.md", 12L, "text/markdown", 1L);
 
-    String fileKey = storage.store(inputStream, metadata, "collections/1");
+    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, "collections/1");
 
-    assertNotNull(fileKey);
-    assertFalse(fileKey.isBlank());
+    assertNotNull(result);
+    assertNotNull(result.fileKey());
+    assertFalse(result.fileKey().isBlank());
+    assertNotNull(result.contentHash());
+    assertNotNull(result.contentHash().getValue());
   }
 
   @Test
   @DisplayName("반환된 파일 키의 형식이 {scope}/{timestamp}_{fileName}이다")
   void store_파일키_형식이_올바름() {
     InputStream inputStream = new ByteArrayInputStream("내용".getBytes(StandardCharsets.UTF_8));
-    Metadata metadata = Metadata.of("report.pdf", 2L, "application/pdf", 1L);
+    Metadata metadata = Metadata.forUpload("report.pdf", 2L, "application/pdf", 1L);
 
-    String fileKey = storage.store(inputStream, metadata, "collections/1");
+    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, "collections/1");
 
     assertTrue(
-        fileKey.matches("collections/1/\\d+_report\\.pdf"),
-        "파일 키 형식이 '{scope}/{timestamp}_{fileName}'이어야 한다. 실제값: " + fileKey);
+        result.fileKey().matches("collections/1/\\d+_report\\.pdf"),
+        "파일 키 형식이 '{scope}/{timestamp}_{fileName}'이어야 한다. 실제값: " + result.fileKey());
   }
 
   @Test
@@ -66,11 +70,12 @@ class LocalFileStorageTest {
     String content = "저장될 파일 내용입니다.";
     byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
     InputStream inputStream = new ByteArrayInputStream(contentBytes);
-    Metadata metadata = Metadata.of("content.txt", (long) contentBytes.length, "text/plain", 1L);
+    Metadata metadata = Metadata.forUpload("content.txt", (long) contentBytes.length, "text/plain",
+        1L);
 
-    String fileKey = storage.store(inputStream, metadata, "collections/1");
+    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, "collections/1");
 
-    Path storedFilePath = tempDir.resolve(fileKey);
+    Path storedFilePath = tempDir.resolve(result.fileKey());
     assertTrue(Files.exists(storedFilePath), "파일이 디스크에 존재해야 한다");
     String storedContent = new String(Files.readAllBytes(storedFilePath), StandardCharsets.UTF_8);
     assertEquals(content, storedContent);
@@ -80,9 +85,9 @@ class LocalFileStorageTest {
   @DisplayName("baseDirectory 아래에 scope 하위 디렉토리를 생성한다")
   void store_scope_하위_디렉토리_생성() {
     InputStream inputStream = new ByteArrayInputStream("내용".getBytes(StandardCharsets.UTF_8));
-    Metadata metadata = Metadata.of("dir-test.md", 2L, "text/markdown", 1L);
+    Metadata metadata = Metadata.forUpload("dir-test.md", 2L, "text/markdown", 1L);
 
-    storage.store(inputStream, metadata, "collections/1");
+    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, "collections/1");
 
     Path collectionsDir = tempDir.resolve("collections/1");
     assertTrue(Files.isDirectory(collectionsDir), "collections/1 디렉토리가 생성되어야 한다");
@@ -92,11 +97,11 @@ class LocalFileStorageTest {
   @DisplayName("빈 파일도 성공적으로 저장된다")
   void store_빈_파일_저장_가능() throws IOException {
     InputStream emptyStream = new ByteArrayInputStream(new byte[0]);
-    Metadata metadata = Metadata.of("empty.txt", 0L, "text/plain", 1L);
+    Metadata metadata = Metadata.forUpload("empty.txt", 0L, "text/plain", 1L);
 
-    String fileKey = storage.store(emptyStream, metadata, "collections/1");
+    FileStorage.FileStorageResult result = storage.store(emptyStream, metadata, "collections/1");
 
-    Path storedFilePath = tempDir.resolve(fileKey);
+    Path storedFilePath = tempDir.resolve(result.fileKey());
     assertTrue(Files.exists(storedFilePath), "빈 파일도 디스크에 존재해야 한다");
     assertEquals(0L, Files.size(storedFilePath), "저장된 파일의 크기가 0이어야 한다");
   }
@@ -116,11 +121,11 @@ class LocalFileStorageTest {
             throw new IOException("스트림 읽기 오류");
           }
         };
-    Metadata metadata = Metadata.of("broken.md", 10L, "text/markdown", 1L);
+    Metadata metadata = Metadata.forUpload("broken.md", 10L, "text/markdown", 1L);
 
-    FileStorage.FileStorageException exception =
+    DatahubDomainException exception =
         assertThrows(
-            FileStorage.FileStorageException.class,
+            DatahubDomainException.class,
             () -> storage.store(brokenStream, metadata, "collections/1"));
 
     assertTrue(

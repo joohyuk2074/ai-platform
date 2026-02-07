@@ -1,18 +1,18 @@
 package me.joohyuk.datahub.fake;
 
+import com.spartaecommerce.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.ContentHash;
 import com.spartaecommerce.domain.vo.DocumentId;
-import com.spartaecommerce.exception.ErrorCode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
-import com.spartaecommerce.domain.vo.CollectionId;
-import com.spartaecommerce.domain.vo.ContentHash;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
 /**
@@ -53,7 +53,7 @@ public class InMemoryDocumentRepository implements DocumentRepository {
   public Document getById(DocumentId documentId) {
     Document doc = store.get(documentId);
     if (doc == null) {
-      throw new DatahubDomainException(ErrorCode.ENTITY_NOT_FOUND.getMessage());
+      throw new DatahubDomainException("", DatahubErrorCode.DOCUMENT_NOT_FOUND);
     }
     return doc;
   }

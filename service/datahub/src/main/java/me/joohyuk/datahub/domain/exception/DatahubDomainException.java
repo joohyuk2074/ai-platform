@@ -6,14 +6,14 @@ public class DatahubDomainException extends DomainException {
 
   public DatahubDomainException(
       String message,
-      DatahubDomainErrorCode errorCode
+      DatahubErrorCode errorCode
   ) {
     super(message, errorCode);
   }
 
   public DatahubDomainException(
       String message,
-      DatahubDomainErrorCode errorCode,
+      DatahubErrorCode errorCode,
       Throwable cause
   ) {
     super(message, errorCode, cause);

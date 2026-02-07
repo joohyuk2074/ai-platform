@@ -1,6 +1,9 @@
 package me.joohyuk.datahub.application.dto.command;
 
+import com.spartaecommerce.domain.vo.UserId;
+
 public record CreateDocumentCollectionCommand(
+    UserId userId,
     String name,
     String description
 //    String source,        // 문서 출처

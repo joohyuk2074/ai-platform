@@ -1,21 +1,19 @@
 package me.joohyuk.datahub.infrastructure.adapter.in.web;
 
 import com.spartaecommerce.api.response.CommonResponse;
-import com.spartaecommerce.domain.entity.Passport;
 import com.spartaecommerce.domain.vo.CollectionId;
-import com.spartaecommerce.domain.vo.UserId;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.datahub.application.dto.result.TransformDocumentResult;
-import me.joohyuk.datahub.application.dto.command.CreateDocumentCollectionCommand;
-import me.joohyuk.datahub.application.dto.command.UpdateDocumentCollectionCommand;
 import me.joohyuk.datahub.application.dto.result.CreateDocumentCollectionResult;
+import me.joohyuk.datahub.application.dto.result.TransformDocumentResult;
 import me.joohyuk.datahub.application.port.in.service.CreateDocumentCollectionUseCase;
 import me.joohyuk.datahub.application.port.in.service.DeleteDocumentCollectionUseCase;
 import me.joohyuk.datahub.application.port.in.service.TransformDocumentUseCase;
 import me.joohyuk.datahub.application.port.in.service.UpdateDocumentCollectionUseCase;
+import me.joohyuk.datahub.infrastructure.adapter.in.web.dto.CreateDocumentCollectionRequest;
 import me.joohyuk.datahub.infrastructure.adapter.in.web.dto.DocumentTransformRequestResponse;
-import me.joohyuk.datahub.infrastructure.adapter.web.auth.AuthenticatedUser;
+import me.joohyuk.datahub.infrastructure.adapter.in.web.dto.UpdateDocumentCollectionRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,101 +31,93 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class DocumentCollectionController {
 
-    private final CreateDocumentCollectionUseCase createDocumentCollectionUseCase;
-    private final UpdateDocumentCollectionUseCase updateDocumentCollectionUseCase;
-    private final DeleteDocumentCollectionUseCase deleteDocumentCollectionUseCase;
-    private final TransformDocumentUseCase transformDocumentUseCase;
+  private final CreateDocumentCollectionUseCase createDocumentCollectionUseCase;
+  private final UpdateDocumentCollectionUseCase updateDocumentCollectionUseCase;
+  private final DeleteDocumentCollectionUseCase deleteDocumentCollectionUseCase;
+  private final TransformDocumentUseCase transformDocumentUseCase;
 
-    @PostMapping
-    public ResponseEntity<CommonResponse<CreateDocumentCollectionResult>> createCollection(
-//      @AuthenticatedUser Passport passport,
-        @RequestHeader("X-Request-UserId") Long userId,
-        @RequestBody CreateDocumentCollectionCommand command
-    ) {
-        log.info("User {} creating collection: {}", userId, command.name());
+  @PostMapping
+  public ResponseEntity<CommonResponse<CreateDocumentCollectionResult>> createCollection(
+      @RequestHeader("X-Request-UserId") Long userId,
+      @Valid @RequestBody CreateDocumentCollectionRequest request
+  ) {
+    log.info("User {} creating collection: {}", userId, request.name());
 
-        CreateDocumentCollectionResult result =
-            createDocumentCollectionUseCase.createCollection(new UserId(userId), command);
+    CreateDocumentCollectionResult result =
+        createDocumentCollectionUseCase.createCollection(request.toCommand(userId));
 
-        CommonResponse<CreateDocumentCollectionResult> response = CommonResponse.success(result);
+    CommonResponse<CreateDocumentCollectionResult> response = CommonResponse.success(result);
 
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(response);
-    }
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(response);
+  }
 
-    @PutMapping("/{collectionId}")
-    public ResponseEntity<CommonResponse<CreateDocumentCollectionResult>> updateCollection(
-        @AuthenticatedUser Passport passport,
-        @PathVariable String collectionId,
-        @RequestBody UpdateDocumentCollectionCommand command
-    ) {
-        log.info("User {} (username: {}) updating collection: {}",
-            passport.userId().getValue(), passport.username(), collectionId);
+  @PutMapping("/{collectionId}")
+  public ResponseEntity<CommonResponse<CreateDocumentCollectionResult>> updateCollection(
+      @PathVariable Long collectionId,
+      @Valid @RequestBody UpdateDocumentCollectionRequest request
+  ) {
+    CreateDocumentCollectionResult result = updateDocumentCollectionUseCase.updateCollection(
+        request.toCommand(collectionId)
+    );
 
-        CreateDocumentCollectionResult result =
-            updateDocumentCollectionUseCase.updateCollection(CollectionId.of(collectionId), command);
+    CommonResponse<CreateDocumentCollectionResult> response = CommonResponse.success(result);
 
-        CommonResponse<CreateDocumentCollectionResult> response = CommonResponse.success(result);
+    return ResponseEntity.ok(response);
+  }
 
-        return ResponseEntity.ok(response);
-    }
+  @DeleteMapping("/{collectionId}")
+  public ResponseEntity<Void> deleteCollection(
+      @PathVariable String collectionId
+  ) {
+    deleteDocumentCollectionUseCase.deleteCollection(CollectionId.of(collectionId));
 
-    @DeleteMapping("/{collectionId}")
-    public ResponseEntity<Void> deleteCollection(
-        @AuthenticatedUser Passport passport,
-        @PathVariable String collectionId
-    ) {
-        log.info("User {} deleting collection: {}", passport.userId().getValue(), collectionId);
+    return ResponseEntity
+        .noContent()
+        .build();
+  }
 
-        deleteDocumentCollectionUseCase.deleteCollection(CollectionId.of(collectionId));
+  @PostMapping("/{collectionId}/transform")
+  public ResponseEntity<CommonResponse<DocumentTransformRequestResponse>> transformDocuments(
+      @RequestHeader("X-Request-UserId") Long userId,
+      @PathVariable String collectionId
+  ) {
+    log.info("User {} requesting document transformation for collectionId={}", userId,
+        collectionId);
 
-        return ResponseEntity
-            .noContent()
-            .build();
-    }
+    TransformDocumentResult result =
+        transformDocumentUseCase.transform(CollectionId.of(collectionId));
 
-    @PostMapping("/{collectionId}/transform")
-    public ResponseEntity<CommonResponse<DocumentTransformRequestResponse>> transformDocuments(
-        @RequestHeader("X-Request-UserId") Long userId,
-        @PathVariable String collectionId
-    ) {
-        log.info("User {} requesting document transformation for collectionId={}", userId, collectionId);
+    log.info(
+        "Document transformation request completed: collectionId={}, total={}, successful={}, failed={}",
+        collectionId, result.totalDocumentsFound(), result.successfullyRequested(),
+        result.totalDocumentsFound() - result.successfullyRequested());
 
-        TransformDocumentResult result =
-            transformDocumentUseCase.transform(CollectionId.of(collectionId));
+    DocumentTransformRequestResponse response = DocumentTransformRequestResponse.from(result);
 
-        log.info("Document transformation request completed: collectionId={}, total={}, successful={}, failed={}",
-            collectionId, result.totalDocumentsFound(), result.successfullyRequested(),
-            result.totalDocumentsFound() - result.successfullyRequested());
+    return ResponseEntity.ok(CommonResponse.success(response));
+  }
 
-        DocumentTransformRequestResponse response = DocumentTransformRequestResponse.from(result);
-
-        return ResponseEntity.ok(CommonResponse.success(response));
-    }
-
-    /**
-     * 전체 ETL 파이프라인 실행
-     * 1. Transform (문서 청킹)
-     * 2. 청킹 완료 이벤트 리스닝
-     * 3. 청킹된 파일에서 Passage 생성 및 저장
-     * 4. VecDash 서비스로 임베딩 요청
-     */
-    @PostMapping("/{collectionId}/etl-pipeline")
-    public ResponseEntity<CommonResponse<TransformDocumentResult>> executeEtlPipeline(
-        @RequestHeader("X-Request-UserId") Long userId,
-        @PathVariable String collectionId
-    ) {
-        log.info("User {} requesting full ETL pipeline for collectionId={}", userId, collectionId);
+  /**
+   * 전체 ETL 파이프라인 실행 1. Transform (문서 청킹) 2. 청킹 완료 이벤트 리스닝 3. 청킹된 파일에서 Passage 생성 및 저장 4. VecDash
+   * 서비스로 임베딩 요청
+   */
+  @PostMapping("/{collectionId}/etl-pipeline")
+  public ResponseEntity<CommonResponse<TransformDocumentResult>> executeEtlPipeline(
+      @RequestHeader("X-Request-UserId") Long userId,
+      @PathVariable String collectionId
+  ) {
+    log.info("User {} requesting full ETL pipeline for collectionId={}", userId, collectionId);
 
 //        TransformDocumentResult transformDocumentResult =
 //            documentCommandService.autoIndexing(CollectionId.of(collectionId));
 
-        // TODO: 전체 ETL 파이프라인 실행 로직 구현
-        // - Transform 요청
-        // - 이벤트 리스닝 및 Passage 생성
-        // - VecDash 임베딩 요청
+    // TODO: 전체 ETL 파이프라인 실행 로직 구현
+    // - Transform 요청
+    // - 이벤트 리스닝 및 Passage 생성
+    // - VecDash 임베딩 요청
 
-        return ResponseEntity.ok(CommonResponse.success(null));
-    }
+    return ResponseEntity.ok(CommonResponse.success(null));
+  }
 }

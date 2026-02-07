@@ -18,11 +18,12 @@ public class S3FileStorage implements FileStorage {
   // private final String bucketName;
 
   @Override
-  public String store(InputStream inputStream, Metadata metadata, String scope) {
+  public FileStorageResult store(InputStream inputStream, Metadata metadata, String scope) {
     // TODO: S3 업로드 구현
-    // 1. S3Client를 사용하여 파일 업로드
-    // 2. PutObjectRequest 생성
-    // 3. 업로드 후 S3 키 반환
+    // 1. ContentHasher.wrap()으로 스트림 감싸기
+    // 2. S3Client를 사용하여 파일 업로드
+    // 3. PutObjectRequest 생성
+    // 4. 업로드 후 S3 키와 contentHash 반환
     throw new UnsupportedOperationException("S3 storage not implemented yet");
   }
 

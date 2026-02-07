@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.dto.command.UploadDocumentCommand;
 import me.joohyuk.datahub.application.dto.result.UploadDocumentResult;
 import me.joohyuk.datahub.application.port.in.service.UploadDocumentUseCase;
-import me.joohyuk.datahub.domain.exception.DatahubDomainErrorCode;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,7 +48,7 @@ public class DocumentController {
     if (file.isEmpty()) {
       throw new DatahubDomainException(
           "File cannot be empty",
-          DatahubDomainErrorCode.INVALID_FILE_EMPTY
+          DatahubErrorCode.INVALID_FILE_EMPTY
       );
     }
 

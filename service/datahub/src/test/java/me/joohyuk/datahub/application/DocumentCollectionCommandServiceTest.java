@@ -3,16 +3,16 @@ package me.joohyuk.datahub.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.UserId;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import me.joohyuk.datahub.application.dto.command.CreateDocumentCollectionCommand;
 import me.joohyuk.datahub.application.dto.result.CreateDocumentCollectionResult;
-import me.joohyuk.datahub.application.service.CreateDocumentCollectionService;
+import me.joohyuk.datahub.application.service.DocumentCollectionCommandService;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import com.spartaecommerce.domain.vo.CollectionId;
 import me.joohyuk.datahub.fake.FakeDateTimeHolder;
 import me.joohyuk.datahub.fake.InMemoryDocumentCollectionRepository;
 import me.joohyuk.datahub.fake.InMemoryIdGenerator;
@@ -22,9 +22,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("CreateDocumentCollectionService 테스트")
-class CreateDocumentCollectionServiceTest {
+class DocumentCollectionCommandServiceTest {
 
-  private CreateDocumentCollectionService service;
+  private DocumentCollectionCommandService service;
   private InMemoryDocumentCollectionRepository repository;
   private InMemoryIdGenerator idGenerator;
   private FakeDateTimeHolder dateTimeHolder;
@@ -35,7 +35,7 @@ class CreateDocumentCollectionServiceTest {
     idGenerator = new InMemoryIdGenerator();
     dateTimeHolder = new FakeDateTimeHolder();
     repository = new InMemoryDocumentCollectionRepository();
-    service = new CreateDocumentCollectionService(idGenerator, dateTimeHolder, repository);
+    service = new DocumentCollectionCommandService(idGenerator, dateTimeHolder, repository);
   }
 
   @Nested
@@ -53,7 +53,7 @@ class CreateDocumentCollectionServiceTest {
       );
 
       // When: 컬렉션 생성 요청
-      CreateDocumentCollectionResult result = service.createCollection(new UserId(1L), command);
+      CreateDocumentCollectionResult result = service.createCollection(command);
 
       // Then: 출력 기반 검증 - 반환된 결과가 올바른가?
       assertThat(result).isNotNull();
@@ -84,7 +84,7 @@ class CreateDocumentCollectionServiceTest {
       );
 
       // When: 컬렉션 생성 요청
-      CreateDocumentCollectionResult result = service.createCollection(new UserId(1L), command);
+      CreateDocumentCollectionResult result = service.createCollection(command);
 
       // Then: 출력 기반 검증 - 설명이 null로 저장되는가?
       assertThat(result).isNotNull();
@@ -121,7 +121,7 @@ class CreateDocumentCollectionServiceTest {
       );
 
       // When & Then: 중복된 이름으로 생성 시도하면 예외 발생
-      assertThatThrownBy(() -> service.createCollection(new UserId(2L), command))
+      assertThatThrownBy(() -> service.createCollection(command))
           .isInstanceOf(DatahubDomainException.class)
           .hasMessageContaining("Collection with name '" + duplicateName + "' already exists");
 
@@ -147,8 +147,8 @@ class CreateDocumentCollectionServiceTest {
       );
 
       // When: 여러 컬렉션 생성
-      CreateDocumentCollectionResult result1 = service.createCollection(new UserId(1L), command1);
-      CreateDocumentCollectionResult result2 = service.createCollection(new UserId(1L), command2);
+      CreateDocumentCollectionResult result1 = service.createCollection(command1);
+      CreateDocumentCollectionResult result2 = service.createCollection(command2);
 
       // Then: 출력 기반 검증 - 각 컬렉션이 고유한 ID를 가지는가?
       assertThat(result1.collectionId()).isNotEqualTo(result2.collectionId());
@@ -169,7 +169,7 @@ class CreateDocumentCollectionServiceTest {
       );
 
       // When: 컬렉션 생성
-      CreateDocumentCollectionResult result = service.createCollection(new UserId(1L), command);
+      CreateDocumentCollectionResult result = service.createCollection(command);
       Instant afterCreation = Instant.now();
 
       // Then: 출력 기반 검증 - 생성 시간이 올바른 범위에 있는가?
@@ -202,6 +202,6 @@ class CreateDocumentCollectionServiceTest {
       String description,
       Long userId  // createCollection(UserId, command) 호출 시 사용되지만 command 자체에는 포함되지 않음
   ) {
-    return new CreateDocumentCollectionCommand(name, description);
+    return new CreateDocumentCollectionCommand(UserId.of(userId), name, description);
   }
 }

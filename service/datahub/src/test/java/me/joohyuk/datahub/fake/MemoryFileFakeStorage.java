@@ -1,5 +1,6 @@
 package me.joohyuk.datahub.fake;
 
+import com.spartaecommerce.domain.vo.ContentHash;
 import com.spartaecommerce.domain.vo.Metadata;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -7,6 +8,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import me.joohyuk.datahub.application.port.out.storage.FileStorage;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
+import me.joohyuk.datahub.infrastructure.util.ContentHasher;
+import me.joohyuk.datahub.infrastructure.util.ContentHasher.HashingInputStream;
 
 public class MemoryFileFakeStorage implements FileStorage {
 
@@ -18,23 +23,28 @@ public class MemoryFileFakeStorage implements FileStorage {
   private RuntimeException deleteException;
 
   @Override
-  public String store(InputStream inputStream, Metadata metadata, String scope) {
+  public FileStorageResult store(InputStream inputStream, Metadata metadata, String scope) {
     String fileKey = scope + "/test-file-" + keyCounter.getAndIncrement();
     try {
-      byte[] data = inputStream.readAllBytes();
+      // 해싱 스트림으로 감싸서 데이터를 읽으면서 해시 계산
+      HashingInputStream hashingStream = ContentHasher.wrap(inputStream);
+      byte[] data = hashingStream.readAllBytes();
+      ContentHash contentHash = hashingStream.getContentHash();
+
       store.put(fileKey, data);
       metadataStore.put(fileKey, metadata);
+
+      return new FileStorageResult(fileKey, contentHash);
     } catch (Exception e) {
-      throw new FileStorageException("Failed to store file", e);
+      throw new DatahubDomainException("Failed to store file", DatahubErrorCode.FILE_STORAGE_FAILED, e);
     }
-    return fileKey;
   }
 
   @Override
   public InputStream retrieve(String fileKey) {
     byte[] data = store.get(fileKey);
     if (data == null) {
-      throw new FileStorageException("File not found: " + fileKey);
+      throw new DatahubDomainException("File not found: " + fileKey, DatahubErrorCode.FILE_NOT_FOUND);
     }
     return new ByteArrayInputStream(data);
   }
@@ -44,7 +54,7 @@ public class MemoryFileFakeStorage implements FileStorage {
     if (throwOnDelete) {
       throw deleteException != null
           ? deleteException
-          : new FileStorageException("Simulated delete failure");
+          : new DatahubDomainException("Simulated delete failure", DatahubErrorCode.FILE_DELETE_FAILED);
     }
     store.remove(fileKey);
     metadataStore.remove(fileKey);

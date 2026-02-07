@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import me.joohyuk.datahub.domain.exception.DatahubDomainErrorCode;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.application.port.out.persistence.DocumentCollectionRepository;
 import com.spartaecommerce.domain.vo.CollectionId;
 import me.joohyuk.datahub.infrastructure.adapter.persistence.entity.DocumentCollectionJpaEntity;
@@ -44,7 +44,7 @@ public class DocumentCollectionRepositoryImpl implements DocumentCollectionRepos
         .orElseThrow(
             () -> new DatahubDomainException(
                 "Collection not found with ID: " + collectionId,
-                DatahubDomainErrorCode.DOCUMENT_COLLECTION_NOT_FOUND
+                DatahubErrorCode.DOCUMENT_COLLECTION_NOT_FOUND
             ));
   }
 

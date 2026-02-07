@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.Objects;
 import lombok.Getter;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import me.joohyuk.datahub.domain.exception.DatahubDomainErrorCode;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import com.spartaecommerce.domain.vo.CollectionId;
 
 @Getter
@@ -28,7 +28,7 @@ public class DocumentCollection extends AggregateRoot<CollectionId> {
     if (name == null || name.isBlank()) {
       throw new DatahubDomainException(
           "Collection name cannot be null or empty",
-          DatahubDomainErrorCode.INVALID_COLLECTION_NAME
+          DatahubErrorCode.INVALID_COLLECTION_NAME
       );
     }
     this.name = name;
@@ -57,7 +57,7 @@ public class DocumentCollection extends AggregateRoot<CollectionId> {
     if (name == null || name.isBlank()) {
       throw new DatahubDomainException(
           "Collection name cannot be null or empty",
-          DatahubDomainErrorCode.INVALID_COLLECTION_NAME
+          DatahubErrorCode.INVALID_COLLECTION_NAME
       );
     }
 

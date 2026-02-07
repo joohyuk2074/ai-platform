@@ -27,11 +27,12 @@ import com.spartaecommerce.exception.DomainErrorCode;
  * );
  * }</pre>
  */
-public enum DatahubDomainErrorCode implements DomainErrorCode {
+public enum DatahubErrorCode implements DomainErrorCode {
 
   // Document 관련 에러 (404)
   DOCUMENT_NOT_FOUND("DOCUMENT_NOT_FOUND"),
   DOCUMENT_COLLECTION_NOT_FOUND("DOCUMENT_COLLECTION_NOT_FOUND"),
+  FILE_NOT_FOUND("FILE_NOT_FOUND"),
 
   // 중복 에러 (409)
   DOCUMENT_ALREADY_EXISTS("DOCUMENT_ALREADY_EXISTS"),
@@ -58,11 +59,13 @@ public enum DatahubDomainErrorCode implements DomainErrorCode {
   INDEXING_FAILED("INDEXING_FAILED"),
   UPLOAD_IN_PROGRESS("UPLOAD_IN_PROGRESS"),
   COLLECTION_NOT_EMPTY("COLLECTION_NOT_EMPTY"),
+  FILE_STORAGE_FAILED("FILE_STORAGE_FAILED"),
+  FILE_DELETE_FAILED("FILE_DELETE_FAILED"),
   ;
 
   private final String code;
 
-  DatahubDomainErrorCode(String code) {
+  DatahubErrorCode(String code) {
     this.code = code;
   }
 

@@ -9,7 +9,7 @@ import com.spartaecommerce.domain.vo.UserId;
 import java.time.Instant;
 import lombok.Getter;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import me.joohyuk.datahub.domain.exception.DatahubDomainErrorCode;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
 @Getter
@@ -118,7 +118,7 @@ public class Document extends AggregateRoot<DocumentId> {
       throw new DatahubDomainException(
           "Cannot request transform. current=" + status + ", expected=UPLOADED"
               + " [documentId=" + getId() + "]",
-          DatahubDomainErrorCode.INVALID_DOCUMENT_STATE
+          DatahubErrorCode.INVALID_DOCUMENT_STATE
       );
     }
     this.status = DocumentStatus.TRANSFORM_REQUESTED;
@@ -137,7 +137,7 @@ public class Document extends AggregateRoot<DocumentId> {
       throw new DatahubDomainException(
           "Cannot mark transformed. current=" + status + ", expected=TRANSFORM_REQUESTED"
               + " [documentId=" + getId() + "]",
-          DatahubDomainErrorCode.INVALID_DOCUMENT_STATE
+          DatahubErrorCode.INVALID_DOCUMENT_STATE
       );
     }
     this.status = DocumentStatus.TRANSFORMED;
@@ -165,7 +165,7 @@ public class Document extends AggregateRoot<DocumentId> {
       throw new DatahubDomainException(
           "Cannot mark transform failed. current=" + status + ", expected=TRANSFORM_REQUESTED"
               + " [documentId=" + getId() + "]",
-          DatahubDomainErrorCode.INVALID_DOCUMENT_STATE
+          DatahubErrorCode.INVALID_DOCUMENT_STATE
       );
     }
     this.status = DocumentStatus.TRANSFORM_FAILED;

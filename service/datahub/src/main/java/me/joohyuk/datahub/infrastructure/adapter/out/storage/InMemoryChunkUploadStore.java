@@ -8,7 +8,8 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import me.joohyuk.datahub.application.port.out.storage.ChunkUploadStore;
-import me.joohyuk.datahub.application.port.out.storage.FileStorage.FileStorageException;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.vo.ChunkUploadSession;
 import org.springframework.stereotype.Component;
 
@@ -45,14 +46,20 @@ public class InMemoryChunkUploadStore implements ChunkUploadStore {
   public void storeChunk(String uploadId, int chunkIndex, InputStream chunkData) {
     ConcurrentHashMap<Integer, byte[]> chunks = chunkDataMap.get(uploadId);
     if (chunks == null) {
-      throw new FileStorageException("Upload session not found: " + uploadId);
+      throw new DatahubDomainException(
+          "Upload session not found: " + uploadId,
+          DatahubErrorCode.FILE_NOT_FOUND
+      );
     }
 
     try {
       chunks.put(chunkIndex, chunkData.readAllBytes());
     } catch (IOException e) {
-      throw new FileStorageException(
-          "Failed to read chunk data for upload: " + uploadId, e);
+      throw new DatahubDomainException(
+          "Failed to read chunk data for upload: " + uploadId,
+          DatahubErrorCode.FILE_STORAGE_FAILED,
+          e
+      );
     }
   }
 
@@ -60,7 +67,10 @@ public class InMemoryChunkUploadStore implements ChunkUploadStore {
   public InputStream assembleChunks(String uploadId) {
     ConcurrentHashMap<Integer, byte[]> chunks = chunkDataMap.get(uploadId);
     if (chunks == null) {
-      throw new FileStorageException("Upload session not found: " + uploadId);
+      throw new DatahubDomainException(
+          "Upload session not found: " + uploadId,
+          DatahubErrorCode.FILE_NOT_FOUND
+      );
     }
 
     try {
@@ -72,8 +82,11 @@ public class InMemoryChunkUploadStore implements ChunkUploadStore {
       }
       return new ByteArrayInputStream(assembled.toByteArray());
     } catch (IOException e) {
-      throw new FileStorageException(
-          "Failed to assemble chunks for upload: " + uploadId, e);
+      throw new DatahubDomainException(
+          "Failed to assemble chunks for upload: " + uploadId,
+          DatahubErrorCode.FILE_STORAGE_FAILED,
+          e
+      );
     }
   }
 

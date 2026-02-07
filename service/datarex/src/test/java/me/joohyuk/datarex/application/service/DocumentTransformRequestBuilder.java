@@ -3,7 +3,6 @@ package me.joohyuk.datarex.application.service;
 import com.spartaecommerce.domain.vo.Metadata;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.DocumentTransformRequest;
 
@@ -18,7 +17,7 @@ public class DocumentTransformRequestBuilder {
   private Long collectionId = 100L;
   private String fileKey = "collections/100/documents/1/file.pdf";
   private String contentHash = "abc123hash";
-  private Metadata metadata = Metadata.of(
+  private Metadata metadata = Metadata.forUpload(
       "test-document.pdf",
       1024L,
       "application/pdf",
@@ -71,7 +70,7 @@ public class DocumentTransformRequestBuilder {
       Long fileSize,
       String contentType
   ) {
-    this.metadata = Metadata.of(fileName, fileSize, contentType, 999L);
+    this.metadata = Metadata.forUpload(fileName, fileSize, contentType, 999L);
     return this;
   }
 

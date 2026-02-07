@@ -4,15 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.spartaecommerce.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.Metadata;
 import com.spartaecommerce.domain.vo.UserId;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.Instant;
 import me.joohyuk.datahub.application.dto.command.UploadDocumentCommand;
+import me.joohyuk.datahub.application.dto.result.UploadDocumentResult;
 import me.joohyuk.datahub.application.service.UploadDocumentService;
 import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHelper;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
-import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.service.DocumentDomainService;
 import me.joohyuk.datahub.fake.FakeDateTimeHolder;
@@ -20,7 +21,6 @@ import me.joohyuk.datahub.fake.InMemoryDocumentCollectionRepository;
 import me.joohyuk.datahub.fake.InMemoryDocumentRepository;
 import me.joohyuk.datahub.fake.InMemoryIdGenerator;
 import me.joohyuk.datahub.fake.MemoryFileFakeStorage;
-import me.joohyuk.datahub.fake.NoOpPassageCreationRequestPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -68,12 +68,15 @@ class UploadDocumentServiceTest {
         DocumentCollection.of(COLLECTION_ID.getValue(), "test-collection", "desc",
             Instant.now(), Instant.now()));
 
-    DocumentDomainService domainService =
-        new DocumentDomainService(idGenerator, dateTimeHolder);
-    var passagePublisher = new NoOpPassageCreationRequestPublisher();
-    DocumentPersistenceHelper persistenceHelper =
-        new DocumentPersistenceHelper(domainService, documentRepository, collectionRepository,
-            passagePublisher, dateTimeHolder);
+    DocumentDomainService domainService = new DocumentDomainService();
+
+    DocumentPersistenceHelper persistenceHelper = new DocumentPersistenceHelper(
+        domainService,
+        documentRepository,
+        collectionRepository,
+        dateTimeHolder,
+        idGenerator
+    );
 
     handler = new UploadDocumentService(fileStorage, persistenceHelper, documentRepository);
   }
@@ -86,23 +89,22 @@ class UploadDocumentServiceTest {
     @DisplayName("유효한 입력이 제공되면 문서를 업로드하고 올바른 이벤트를 반환한다")
     void should_return_uploaded_event_when_upload_succeeds() {
       // Given
-      UploadDocumentCommand command =
-          createUploadCommand("report.pdf", 1024L, "application/pdf", 1L);
+      UploadDocumentCommand command = createUploadCommand(
+          "report.pdf",
+          1024L,
+          "application/pdf",
+          1L
+      );
       InputStream fileInputStream = new ByteArrayInputStream("file content".getBytes());
 
       // When
-      DocumentUploadedEvent event = handler.uploadDocument(command, fileInputStream);
+      UploadDocumentResult result = handler.uploadDocument(command, fileInputStream);
 
       // Then: 출력 기반 검증 - 업로드 성공 시 유효한 이벤트를 반환하는가?
-      assertThat(event).isNotNull();
-      assertThat(event.getDocument()).isNotNull();
-      assertThat(event.getDocument().getId()).isNotNull();
-      assertThat(event.getDocument().getFileKey()).isNotBlank();
-      assertThat(event.getCreatedAt()).isNotNull();
+      assertThat(result).isNotNull();
 
       // And: 상태 기반 검증 - 파일과 문서가 실제로 저장되었는가?
       assertThat(fileStorage.size()).isEqualTo(1);
-      assertThat(fileStorage.exists(event.getDocument().getFileKey())).isTrue();
       assertThat(documentRepository.size()).isEqualTo(1);
     }
 
@@ -115,11 +117,10 @@ class UploadDocumentServiceTest {
       InputStream fileInputStream = new ByteArrayInputStream("markdown content".getBytes());
 
       // When
-      DocumentUploadedEvent event = handler.uploadDocument(command, fileInputStream);
+      UploadDocumentResult result = handler.uploadDocument(command, fileInputStream);
 
       // Then: 상태 기반 검증 - 저장된 파일의 메타데이터가 올바른가?
-      String storedFileKey = event.getDocument().getFileKey();
-      var storedMetadata = fileStorage.getMetadata(storedFileKey);
+      Metadata storedMetadata = fileStorage.getMetadata(result.fileKey());
 
       assertThat(storedMetadata).isNotNull();
       assertThat(storedMetadata.fileName()).isEqualTo("analysis.md");
@@ -198,16 +199,13 @@ class UploadDocumentServiceTest {
           createUploadCommand("doc2.pdf", 200L, "application/pdf", 1L);
 
       // When
-      DocumentUploadedEvent event1 =
-          handler.uploadDocument(command1, new ByteArrayInputStream("content1".getBytes()));
-      DocumentUploadedEvent event2 =
-          handler.uploadDocument(command2, new ByteArrayInputStream("content2".getBytes()));
+      UploadDocumentResult result1 = handler.uploadDocument(command1,
+          new ByteArrayInputStream("content1".getBytes()));
+      UploadDocumentResult result2 = handler.uploadDocument(command2,
+          new ByteArrayInputStream("content2".getBytes()));
 
       // Then: 출력 기반 검증 - 각 문서가 고유한 ID와 파일 키를 가지는가?
-      assertThat(event1.getDocument().getId())
-          .isNotEqualTo(event2.getDocument().getId());
-      assertThat(event1.getDocument().getFileKey())
-          .isNotEqualTo(event2.getDocument().getFileKey());
+      assertThat(result1.documentId()).isNotEqualTo(result2.documentId());
 
       // And: 상태 기반 검증 - 두 문서 모두 저장되었는가?
       assertThat(documentRepository.size()).isEqualTo(2);

@@ -2,7 +2,6 @@ package me.joohyuk.datahub.application.service;
 
 import com.spartaecommerce.domain.vo.ContentHash;
 import com.spartaecommerce.domain.vo.Metadata;
-import com.spartaecommerce.exception.ErrorCode;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +13,8 @@ import me.joohyuk.datahub.application.port.out.storage.FileStorage;
 import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHelper;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import me.joohyuk.datahub.domain.exception.DatahubDomainErrorCode;
-import me.joohyuk.datahub.infrastructure.util.ContentHasher;
-import me.joohyuk.datahub.infrastructure.util.ContentHasher.HashingInputStream;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -36,21 +33,19 @@ public class UploadDocumentService implements UploadDocumentUseCase {
   ) {
     log.info("Starting message upload: {}", uploadDocumentCommand.fileName());
 
-    Metadata metadata = Metadata.of(
+    Metadata metadata = Metadata.forUpload(
         uploadDocumentCommand.fileName(),
         uploadDocumentCommand.fileSize(),
         uploadDocumentCommand.contentType(),
         uploadDocumentCommand.uploadedBy().getValue()
     );
 
-    // Phase 1: 스트림을 감싸서 저장소에 전달 (저장 중 SHA-256 해시를 동시에 계산)
-    HashingInputStream hashingStream = ContentHasher.wrap(fileInputStream);
-
+    // 파일 저장 (저장소 어댑터가 SHA-256 해시를 함께 계산하여 반환)
     String scope = "collections/" + uploadDocumentCommand.collectionId().getValue();
-    String fileKey = fileStorage.store(hashingStream, metadata, scope);
+    FileStorage.FileStorageResult result = fileStorage.store(fileInputStream, metadata, scope);
 
-    // Phase 2: 스트림 소비 후 해시 추출
-    ContentHash contentHash = hashingStream.getContentHash();
+    String fileKey = result.fileKey();
+    ContentHash contentHash = result.contentHash();
     log.info("File stored successfully with key: {}, contentHash: {}", fileKey, contentHash);
 
     if (documentRepository.existsByContentHash(contentHash)) {
@@ -58,14 +53,13 @@ public class UploadDocumentService implements UploadDocumentUseCase {
       compensateFileUpload(fileKey);
       throw new DatahubDomainException(
           "Duplicate file detected. contentHash: " + contentHash,
-          DatahubDomainErrorCode.DOCUMENT_ALREADY_EXISTS
+          DatahubErrorCode.DOCUMENT_ALREADY_EXISTS
       );
     }
 
     Document document = Document.create(
         uploadDocumentCommand.collectionId(), fileKey, contentHash, metadata);
 
-    // DB 저장 (트랜잭션 안에서 수행) - Helper에 위임
     try {
       DocumentUploadedEvent documentUploadedEvent = persistenceHelper.persistDocument(document);
       return UploadDocumentResult.from(documentUploadedEvent.getDocument());
@@ -76,7 +70,7 @@ public class UploadDocumentService implements UploadDocumentUseCase {
       compensateFileUpload(fileKey);
       throw new DatahubDomainException(
           "Failed to save document to database",
-          DatahubDomainErrorCode.DOCUMENT_PROCESSING_FAILED,
+          DatahubErrorCode.DOCUMENT_PROCESSING_FAILED,
           e
       );
     }

@@ -16,7 +16,7 @@ import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import me.joohyuk.datahub.domain.exception.DatahubDomainErrorCode;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +34,7 @@ public class TransformDocumentService implements TransformDocumentUseCase {
     if (!documentCollectionRepository.existsById(collectionId)) {
       throw new DatahubDomainException(
           "Failed to find Collection. collectionId: " + collectionId.getValue(),
-          DatahubDomainErrorCode.DOCUMENT_COLLECTION_NOT_FOUND
+          DatahubErrorCode.DOCUMENT_COLLECTION_NOT_FOUND
       );
     }
 

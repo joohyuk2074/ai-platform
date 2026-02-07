@@ -18,11 +18,12 @@ public class MinioFileStorage implements FileStorage {
   // private final String bucketName;
 
   @Override
-  public String store(InputStream inputStream, Metadata metadata, String scope) {
+  public FileStorageResult store(InputStream inputStream, Metadata metadata, String scope) {
     // TODO: MinIO 업로드 구현
-    // 1. MinioClient를 사용하여 파일 업로드
-    // 2. PutObjectArgs 생성
-    // 3. 업로드 후 키 반환
+    // 1. ContentHasher.wrap()으로 스트림 감싸기
+    // 2. MinioClient를 사용하여 파일 업로드
+    // 3. PutObjectArgs 생성
+    // 4. 업로드 후 키와 contentHash 반환
     throw new UnsupportedOperationException("MinIO storage not implemented yet");
   }
 

@@ -11,8 +11,7 @@ import me.joohyuk.datahub.application.port.out.persistence.DocumentCollectionRep
 import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
-import me.joohyuk.datahub.domain.exception.DatahubDomainErrorCode;
-import me.joohyuk.datahub.domain.exception.DatahubDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.domain.service.DocumentDomainService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +32,7 @@ public class DocumentPersistenceHelper {
     if (!documentCollectionRepository.existsById(document.getCollectionId())) {
       throw new DomainException(
           "Failed to find Collection. collectionId: " + document.getCollectionId().getValue(),
-          DatahubDomainErrorCode.DOCUMENT_COLLECTION_NOT_FOUND
+          DatahubErrorCode.DOCUMENT_COLLECTION_NOT_FOUND
       );
     }
 

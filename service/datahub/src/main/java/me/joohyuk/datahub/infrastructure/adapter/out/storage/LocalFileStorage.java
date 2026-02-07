@@ -1,5 +1,6 @@
 package me.joohyuk.datahub.infrastructure.adapter.storage;
 
+import com.spartaecommerce.domain.vo.ContentHash;
 import com.spartaecommerce.domain.vo.Metadata;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +9,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import me.joohyuk.datahub.application.port.out.storage.FileStorage;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
+import me.joohyuk.datahub.infrastructure.util.ContentHasher;
+import me.joohyuk.datahub.infrastructure.util.ContentHasher.HashingInputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,12 +28,16 @@ public class LocalFileStorage implements FileStorage {
     try {
       Files.createDirectories(this.baseDirectory);
     } catch (IOException e) {
-      throw new FileStorageException("Failed to create base directory: " + baseDirectory, e);
+      throw new DatahubDomainException(
+          "Failed to create base directory: " + baseDirectory,
+          DatahubErrorCode.FILE_STORAGE_FAILED,
+          e
+      );
     }
   }
 
   @Override
-  public String store(InputStream inputStream, Metadata metadata, String scope) {
+  public FileStorageResult store(InputStream inputStream, Metadata metadata, String scope) {
     try {
       // 파일 키 생성: {scope}/{timestamp}_{fileName}
       String fileKey = generateFileKey(metadata, scope);
@@ -37,12 +46,22 @@ public class LocalFileStorage implements FileStorage {
       // 디렉토리가 없으면 생성
       Files.createDirectories(targetPath.getParent());
 
-      // 파일 저장
-      Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
+      // Phase 1: 스트림을 감싸서 SHA-256 해시를 동시에 계산
+      HashingInputStream hashingStream = ContentHasher.wrap(inputStream);
 
-      return fileKey;
+      // 파일 저장
+      Files.copy(hashingStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+      // Phase 2: 스트림 소비 후 해시 추출
+      ContentHash contentHash = hashingStream.getContentHash();
+
+      return new FileStorageResult(fileKey, contentHash);
     } catch (IOException e) {
-      throw new FileStorageException("Failed to store file: " + metadata.fileName(), e);
+      throw new DatahubDomainException(
+          "Failed to store file: " + metadata.fileName(),
+          DatahubErrorCode.FILE_STORAGE_FAILED,
+          e
+      );
     }
   }
 
@@ -51,11 +70,18 @@ public class LocalFileStorage implements FileStorage {
     try {
       Path filePath = baseDirectory.resolve(fileKey);
       if (!Files.exists(filePath)) {
-        throw new FileStorageException("File not found: " + fileKey);
+        throw new DatahubDomainException(
+            "File not found: " + fileKey,
+            DatahubErrorCode.FILE_NOT_FOUND
+        );
       }
       return Files.newInputStream(filePath);
     } catch (IOException e) {
-      throw new FileStorageException("Failed to retrieve file: " + fileKey, e);
+      throw new DatahubDomainException(
+          "Failed to retrieve file: " + fileKey,
+          DatahubErrorCode.FILE_STORAGE_FAILED,
+          e
+      );
     }
   }
 
@@ -65,7 +91,11 @@ public class LocalFileStorage implements FileStorage {
       Path filePath = baseDirectory.resolve(fileKey);
       Files.deleteIfExists(filePath);
     } catch (IOException e) {
-      throw new FileStorageException("Failed to delete file: " + fileKey, e);
+      throw new DatahubDomainException(
+          "Failed to delete file: " + fileKey,
+          DatahubErrorCode.FILE_DELETE_FAILED,
+          e
+      );
     }
   }
 

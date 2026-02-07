@@ -2,7 +2,7 @@ package me.joohyuk.datahub.application.dto.command;
 
 import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.UserId;
-import me.joohyuk.datahub.domain.exception.DatahubDomainErrorCode;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 
 public record UploadDocumentCommand(
@@ -17,19 +17,19 @@ public record UploadDocumentCommand(
     if (fileName == null || fileName.isBlank()) {
       throw new DatahubDomainException(
           "File name cannot be empty",
-          DatahubDomainErrorCode.INVALID_FILE_NAME
+          DatahubErrorCode.INVALID_FILE_NAME
       );
     }
     if (fileSize == null || fileSize <= 0) {
       throw new DatahubDomainException(
           "File size must be positive",
-          DatahubDomainErrorCode.INVALID_FILE_SIZE
+          DatahubErrorCode.INVALID_FILE_SIZE
       );
     }
     if (contentType == null || contentType.isBlank()) {
       throw new DatahubDomainException(
           "Content type cannot be empty",
-          DatahubDomainErrorCode.INVALID_CONTENT_TYPE
+          DatahubErrorCode.INVALID_CONTENT_TYPE
       );
     }
   }
