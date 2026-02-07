@@ -1,8 +1,9 @@
 package me.joohyuk.datahub.infrastructure.adapter.storage;
 
+import com.spartaecommerce.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.Metadata;
 import java.io.InputStream;
 import me.joohyuk.datahub.application.port.out.storage.FileStorage;
-import com.spartaecommerce.domain.vo.Metadata;
 
 /**
  * MinIO 기반 파일 저장소 구현체
@@ -18,11 +19,11 @@ public class MinioFileStorage implements FileStorage {
   // private final String bucketName;
 
   @Override
-  public FileStorageResult store(InputStream inputStream, Metadata metadata, String scope) {
+  public FileStorageResult store(InputStream inputStream, Metadata metadata, CollectionId collectionId) {
     // TODO: MinIO 업로드 구현
     // 1. ContentHasher.wrap()으로 스트림 감싸기
     // 2. MinioClient를 사용하여 파일 업로드
-    // 3. PutObjectArgs 생성
+    // 3. PutObjectArgs 생성 (경로: collections/{collectionId}/{timestamp}_{fileName})
     // 4. 업로드 후 키와 contentHash 반환
     throw new UnsupportedOperationException("MinIO storage not implemented yet");
   }

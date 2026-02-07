@@ -6,6 +6,7 @@ import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.dto.command.UploadDocumentCommand;
+import me.joohyuk.datahub.application.dto.result.FileStorageResult;
 import me.joohyuk.datahub.application.dto.result.UploadDocumentResult;
 import me.joohyuk.datahub.application.port.in.service.UploadDocumentUseCase;
 import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
@@ -41,8 +42,11 @@ public class UploadDocumentService implements UploadDocumentUseCase {
     );
 
     // 파일 저장 (저장소 어댑터가 SHA-256 해시를 함께 계산하여 반환)
-    String scope = "collections/" + uploadDocumentCommand.collectionId().getValue();
-    FileStorage.FileStorageResult result = fileStorage.store(fileInputStream, metadata, scope);
+    FileStorageResult result = fileStorage.store(
+        fileInputStream,
+        metadata,
+        uploadDocumentCommand.collectionId()
+    );
 
     String fileKey = result.fileKey();
     ContentHash contentHash = result.contentHash();

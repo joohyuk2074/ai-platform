@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.Metadata;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -42,7 +43,7 @@ class LocalFileStorageTest {
         new ByteArrayInputStream("테스트 내용".getBytes(StandardCharsets.UTF_8));
     Metadata metadata = Metadata.forUpload("test.md", 12L, "text/markdown", 1L);
 
-    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, "collections/1");
+    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
 
     assertNotNull(result);
     assertNotNull(result.fileKey());
@@ -52,16 +53,16 @@ class LocalFileStorageTest {
   }
 
   @Test
-  @DisplayName("반환된 파일 키의 형식이 {scope}/{timestamp}_{fileName}이다")
+  @DisplayName("반환된 파일 키의 형식이 collections/{collectionId}/{timestamp}_{fileName}이다")
   void store_파일키_형식이_올바름() {
     InputStream inputStream = new ByteArrayInputStream("내용".getBytes(StandardCharsets.UTF_8));
     Metadata metadata = Metadata.forUpload("report.pdf", 2L, "application/pdf", 1L);
 
-    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, "collections/1");
+    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
 
     assertTrue(
         result.fileKey().matches("collections/1/\\d+_report\\.pdf"),
-        "파일 키 형식이 '{scope}/{timestamp}_{fileName}'이어야 한다. 실제값: " + result.fileKey());
+        "파일 키 형식이 'collections/{collectionId}/{timestamp}_{fileName}'이어야 한다. 실제값: " + result.fileKey());
   }
 
   @Test
@@ -73,7 +74,7 @@ class LocalFileStorageTest {
     Metadata metadata = Metadata.forUpload("content.txt", (long) contentBytes.length, "text/plain",
         1L);
 
-    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, "collections/1");
+    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
 
     Path storedFilePath = tempDir.resolve(result.fileKey());
     assertTrue(Files.exists(storedFilePath), "파일이 디스크에 존재해야 한다");
@@ -82,12 +83,12 @@ class LocalFileStorageTest {
   }
 
   @Test
-  @DisplayName("baseDirectory 아래에 scope 하위 디렉토리를 생성한다")
+  @DisplayName("baseDirectory 아래에 collections/{collectionId} 하위 디렉토리를 생성한다")
   void store_scope_하위_디렉토리_생성() {
     InputStream inputStream = new ByteArrayInputStream("내용".getBytes(StandardCharsets.UTF_8));
     Metadata metadata = Metadata.forUpload("dir-test.md", 2L, "text/markdown", 1L);
 
-    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, "collections/1");
+    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
 
     Path collectionsDir = tempDir.resolve("collections/1");
     assertTrue(Files.isDirectory(collectionsDir), "collections/1 디렉토리가 생성되어야 한다");
@@ -99,7 +100,7 @@ class LocalFileStorageTest {
     InputStream emptyStream = new ByteArrayInputStream(new byte[0]);
     Metadata metadata = Metadata.forUpload("empty.txt", 0L, "text/plain", 1L);
 
-    FileStorage.FileStorageResult result = storage.store(emptyStream, metadata, "collections/1");
+    FileStorage.FileStorageResult result = storage.store(emptyStream, metadata, CollectionId.of(1L));
 
     Path storedFilePath = tempDir.resolve(result.fileKey());
     assertTrue(Files.exists(storedFilePath), "빈 파일도 디스크에 존재해야 한다");
@@ -126,7 +127,7 @@ class LocalFileStorageTest {
     DatahubDomainException exception =
         assertThrows(
             DatahubDomainException.class,
-            () -> storage.store(brokenStream, metadata, "collections/1"));
+            () -> storage.store(brokenStream, metadata, CollectionId.of(1L)));
 
     assertTrue(
         exception.getMessage().contains("Failed to store file: broken.md"),

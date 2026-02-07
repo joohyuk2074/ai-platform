@@ -1,5 +1,6 @@
 package me.joohyuk.datahub.infrastructure.adapter.storage;
 
+import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.ContentHash;
 import com.spartaecommerce.domain.vo.Metadata;
 import java.io.IOException;
@@ -37,10 +38,10 @@ public class LocalFileStorage implements FileStorage {
   }
 
   @Override
-  public FileStorageResult store(InputStream inputStream, Metadata metadata, String scope) {
+  public FileStorageResult store(InputStream inputStream, Metadata metadata, CollectionId collectionId) {
     try {
-      // 파일 키 생성: {scope}/{timestamp}_{fileName}
-      String fileKey = generateFileKey(metadata, scope);
+      // 파일 키 생성: collections/{collectionId}/{timestamp}_{fileName}
+      String fileKey = generateFileKey(metadata, collectionId);
       Path targetPath = baseDirectory.resolve(fileKey);
 
       // 디렉토리가 없으면 생성
@@ -106,11 +107,13 @@ public class LocalFileStorage implements FileStorage {
   }
 
   /**
-   * 메타데이터와 scope로부터 파일 키를 생성합니다. 형식: {scope}/{timestamp}_{fileName}
+   * 메타데이터와 collectionId로부터 파일 키를 생성합니다.
+   * 형식: collections/{collectionId}/{timestamp}_{fileName}
    */
-  private String generateFileKey(Metadata metadata, String scope) {
+  private String generateFileKey(Metadata metadata, CollectionId collectionId) {
     String timestamp = String.valueOf(System.currentTimeMillis());
     String fileName = metadata.fileName();
+    String scope = "collections/" + collectionId.getValue();
     return String.format("%s/%s_%s", scope, timestamp, fileName);
   }
 }

@@ -1,5 +1,6 @@
 package me.joohyuk.datahub.fake;
 
+import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.ContentHash;
 import com.spartaecommerce.domain.vo.Metadata;
 import java.io.ByteArrayInputStream;
@@ -23,7 +24,8 @@ public class MemoryFileFakeStorage implements FileStorage {
   private RuntimeException deleteException;
 
   @Override
-  public FileStorageResult store(InputStream inputStream, Metadata metadata, String scope) {
+  public FileStorageResult store(InputStream inputStream, Metadata metadata, CollectionId collectionId) {
+    String scope = "collections/" + collectionId.getValue();
     String fileKey = scope + "/test-file-" + keyCounter.getAndIncrement();
     try {
       // 해싱 스트림으로 감싸서 데이터를 읽으면서 해시 계산
