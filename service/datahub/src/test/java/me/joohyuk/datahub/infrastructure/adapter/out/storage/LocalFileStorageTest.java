@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import me.joohyuk.datahub.domain.port.out.storage.FileStorage;
+import me.joohyuk.datahub.application.port.out.storage.FileStorage;
 import me.joohyuk.datahub.infrastructure.adapter.storage.LocalFileStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

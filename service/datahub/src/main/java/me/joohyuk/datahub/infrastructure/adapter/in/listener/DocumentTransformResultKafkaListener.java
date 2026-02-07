@@ -3,7 +3,7 @@ package me.joohyuk.datahub.infrastructure.adapter.in.listener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.domain.entity.PassageResponse;
-import me.joohyuk.datahub.domain.port.in.listener.PassageCreationResultListener;
+import me.joohyuk.datahub.application.port.in.listener.TransformDocumentListener;
 import me.joohyuk.messaging.events.DocumentTransformCompletedMessage;
 import me.joohyuk.messaging.events.DocumentTransformFailedMessage;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DocumentTransformResultKafkaListener {
 
-  private final PassageCreationResultListener passageCreationResultListener;
+  private final TransformDocumentListener transformDocumentListener;
 
   /**
    * Document Transform 완료 메시지 수신.
@@ -54,7 +54,7 @@ public class DocumentTransformResultKafkaListener {
           .occurredAt(message.occurredAt())
           .build();
 
-      passageCreationResultListener.onCompleted(response);
+      transformDocumentListener.onCompleted(response);
 
       // 수동 커밋
       if (acknowledgment != null) {
@@ -95,7 +95,7 @@ public class DocumentTransformResultKafkaListener {
           .occurredAt(message.occurredAt())
           .build();
 
-      passageCreationResultListener.onFailed(response);
+      transformDocumentListener.onFailed(response);
 
       // 수동 커밋
       if (acknowledgment != null) {

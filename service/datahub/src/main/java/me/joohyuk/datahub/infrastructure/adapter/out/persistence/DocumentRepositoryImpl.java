@@ -9,7 +9,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
+import me.joohyuk.datahub.domain.exception.DatahubDomainErrorCode;
+import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 import me.joohyuk.datahub.infrastructure.adapter.out.persistence.entity.DocumentJpaEntity;
 import org.springframework.stereotype.Repository;
@@ -38,7 +39,10 @@ public class DocumentRepositoryImpl implements DocumentRepository {
     return jpaRepository.findById(documentId.getValue())
         .map(DocumentJpaEntity::toDomain)
         .orElseThrow(
-            () -> new DatahubDomainException("Document not found with ID: " + documentId));
+            () -> new DatahubDomainException(
+                "Document not found with ID: " + documentId,
+                DatahubDomainErrorCode.DOCUMENT_NOT_FOUND
+            ));
   }
 
   @Override

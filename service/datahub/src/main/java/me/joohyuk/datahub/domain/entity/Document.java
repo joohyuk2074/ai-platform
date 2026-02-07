@@ -9,6 +9,7 @@ import com.spartaecommerce.domain.vo.UserId;
 import java.time.Instant;
 import lombok.Getter;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubDomainErrorCode;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
 @Getter
@@ -95,8 +96,8 @@ public class Document extends AggregateRoot<DocumentId> {
     return doc;
   }
 
-  public void initialize(Long id, Instant now) {
-    super.setId(new DocumentId(id));
+  public void initialize(DocumentId documentId, Instant now) {
+    super.setId(documentId);
     this.createdAt = now;
     this.updatedAt = now;
   }
@@ -116,7 +117,9 @@ public class Document extends AggregateRoot<DocumentId> {
     if (status != DocumentStatus.UPLOADED) {
       throw new DatahubDomainException(
           "Cannot request transform. current=" + status + ", expected=UPLOADED"
-              + " [documentId=" + getId() + "]");
+              + " [documentId=" + getId() + "]",
+          DatahubDomainErrorCode.INVALID_DOCUMENT_STATE
+      );
     }
     this.status = DocumentStatus.TRANSFORM_REQUESTED;
     this.updatedAt = now;
@@ -133,7 +136,9 @@ public class Document extends AggregateRoot<DocumentId> {
     if (status != DocumentStatus.TRANSFORM_REQUESTED) {
       throw new DatahubDomainException(
           "Cannot mark transformed. current=" + status + ", expected=TRANSFORM_REQUESTED"
-              + " [documentId=" + getId() + "]");
+              + " [documentId=" + getId() + "]",
+          DatahubDomainErrorCode.INVALID_DOCUMENT_STATE
+      );
     }
     this.status = DocumentStatus.TRANSFORMED;
     this.passageCount = passageCount;
@@ -159,7 +164,9 @@ public class Document extends AggregateRoot<DocumentId> {
     if (status != DocumentStatus.TRANSFORM_REQUESTED) {
       throw new DatahubDomainException(
           "Cannot mark transform failed. current=" + status + ", expected=TRANSFORM_REQUESTED"
-              + " [documentId=" + getId() + "]");
+              + " [documentId=" + getId() + "]",
+          DatahubDomainErrorCode.INVALID_DOCUMENT_STATE
+      );
     }
     this.status = DocumentStatus.TRANSFORM_FAILED;
     this.attempt++;

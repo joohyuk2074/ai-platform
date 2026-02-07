@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import me.joohyuk.datahub.domain.port.out.storage.FileStorage;
+import me.joohyuk.datahub.application.port.out.storage.FileStorage;
 
 public class MemoryFileFakeStorage implements FileStorage {
 

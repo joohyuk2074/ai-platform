@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import me.joohyuk.datahub.domain.port.out.persistence.DocumentCollectionRepository;
+import me.joohyuk.datahub.application.port.out.persistence.DocumentCollectionRepository;
 import com.spartaecommerce.domain.vo.CollectionId;
 
 /**

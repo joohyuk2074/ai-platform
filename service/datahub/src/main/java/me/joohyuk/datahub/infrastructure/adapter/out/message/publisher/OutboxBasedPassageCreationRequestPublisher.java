@@ -2,8 +2,8 @@ package me.joohyuk.datahub.infrastructure.adapter.out.message.publisher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.datahub.domain.event.PassageCreationRequestEvent;
-import me.joohyuk.datahub.domain.port.out.message.publisher.PassageCreationRequestPublisher;
+import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
+import me.joohyuk.datahub.application.port.out.message.publisher.PassageCreationRequestPublisher;
 import me.joohyuk.datahub.infrastructure.adapter.PassageMessagingDataMapper;
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
 import me.joohyuk.messaging.topics.KafkaTopics;
@@ -19,7 +19,7 @@ public class OutboxBasedPassageCreationRequestPublisher implements PassageCreati
   private final PassageMessagingDataMapper passageMessagingDataMapper;
 
   @Override
-  public void publish(PassageCreationRequestEvent event) {
+  public void publish(TransformDocumentEvent event) {
 
     // TODO: avro 직렬화 적용
     DocumentTransformRequestedMessage message =

@@ -10,8 +10,10 @@ import me.joohyuk.datahub.application.dto.result.TransformDocumentResult;
 import me.joohyuk.datahub.application.dto.command.CreateDocumentCollectionCommand;
 import me.joohyuk.datahub.application.dto.command.UpdateDocumentCollectionCommand;
 import me.joohyuk.datahub.application.dto.result.CreateDocumentCollectionResult;
-import me.joohyuk.datahub.domain.port.in.service.DocumentCollectionCommandService;
-import me.joohyuk.datahub.domain.port.in.service.DocumentCommandService;
+import me.joohyuk.datahub.application.port.in.service.CreateDocumentCollectionUseCase;
+import me.joohyuk.datahub.application.port.in.service.DeleteDocumentCollectionUseCase;
+import me.joohyuk.datahub.application.port.in.service.TransformDocumentUseCase;
+import me.joohyuk.datahub.application.port.in.service.UpdateDocumentCollectionUseCase;
 import me.joohyuk.datahub.infrastructure.adapter.in.web.dto.DocumentTransformRequestResponse;
 import me.joohyuk.datahub.infrastructure.adapter.web.auth.AuthenticatedUser;
 import org.springframework.http.HttpStatus;
@@ -31,8 +33,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class DocumentCollectionController {
 
-    private final DocumentCollectionCommandService documentCollectionCommandService;
-    private final DocumentCommandService documentCommandService;
+    private final CreateDocumentCollectionUseCase createDocumentCollectionUseCase;
+    private final UpdateDocumentCollectionUseCase updateDocumentCollectionUseCase;
+    private final DeleteDocumentCollectionUseCase deleteDocumentCollectionUseCase;
+    private final TransformDocumentUseCase transformDocumentUseCase;
 
     @PostMapping
     public ResponseEntity<CommonResponse<CreateDocumentCollectionResult>> createCollection(
@@ -43,7 +47,7 @@ public class DocumentCollectionController {
         log.info("User {} creating collection: {}", userId, command.name());
 
         CreateDocumentCollectionResult result =
-            documentCollectionCommandService.createCollection(new UserId(userId), command);
+            createDocumentCollectionUseCase.createCollection(new UserId(userId), command);
 
         CommonResponse<CreateDocumentCollectionResult> response = CommonResponse.success(result);
 
@@ -62,7 +66,7 @@ public class DocumentCollectionController {
             passport.userId().getValue(), passport.username(), collectionId);
 
         CreateDocumentCollectionResult result =
-            documentCollectionCommandService.updateCollection(CollectionId.of(collectionId), command);
+            updateDocumentCollectionUseCase.updateCollection(CollectionId.of(collectionId), command);
 
         CommonResponse<CreateDocumentCollectionResult> response = CommonResponse.success(result);
 
@@ -76,7 +80,7 @@ public class DocumentCollectionController {
     ) {
         log.info("User {} deleting collection: {}", passport.userId().getValue(), collectionId);
 
-        documentCollectionCommandService.deleteCollection(CollectionId.of(collectionId));
+        deleteDocumentCollectionUseCase.deleteCollection(CollectionId.of(collectionId));
 
         return ResponseEntity
             .noContent()
@@ -91,7 +95,7 @@ public class DocumentCollectionController {
         log.info("User {} requesting document transformation for collectionId={}", userId, collectionId);
 
         TransformDocumentResult result =
-            documentCommandService.requestPassageCreationByCollection(CollectionId.of(collectionId));
+            transformDocumentUseCase.transform(CollectionId.of(collectionId));
 
         log.info("Document transformation request completed: collectionId={}, total={}, successful={}, failed={}",
             collectionId, result.totalDocumentsFound(), result.successfullyRequested(),
@@ -100,5 +104,30 @@ public class DocumentCollectionController {
         DocumentTransformRequestResponse response = DocumentTransformRequestResponse.from(result);
 
         return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    /**
+     * 전체 ETL 파이프라인 실행
+     * 1. Transform (문서 청킹)
+     * 2. 청킹 완료 이벤트 리스닝
+     * 3. 청킹된 파일에서 Passage 생성 및 저장
+     * 4. VecDash 서비스로 임베딩 요청
+     */
+    @PostMapping("/{collectionId}/etl-pipeline")
+    public ResponseEntity<CommonResponse<TransformDocumentResult>> executeEtlPipeline(
+        @RequestHeader("X-Request-UserId") Long userId,
+        @PathVariable String collectionId
+    ) {
+        log.info("User {} requesting full ETL pipeline for collectionId={}", userId, collectionId);
+
+//        TransformDocumentResult transformDocumentResult =
+//            documentCommandService.autoIndexing(CollectionId.of(collectionId));
+
+        // TODO: 전체 ETL 파이프라인 실행 로직 구현
+        // - Transform 요청
+        // - 이벤트 리스닝 및 Passage 생성
+        // - VecDash 임베딩 요청
+
+        return ResponseEntity.ok(CommonResponse.success(null));
     }
 }

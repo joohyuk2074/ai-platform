@@ -7,8 +7,8 @@ import java.io.InputStream;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-import me.joohyuk.datahub.domain.port.out.storage.ChunkUploadStore;
-import me.joohyuk.datahub.domain.port.out.storage.FileStorage.FileStorageException;
+import me.joohyuk.datahub.application.port.out.storage.ChunkUploadStore;
+import me.joohyuk.datahub.application.port.out.storage.FileStorage.FileStorageException;
 import me.joohyuk.datahub.domain.vo.ChunkUploadSession;
 import org.springframework.stereotype.Component;
 

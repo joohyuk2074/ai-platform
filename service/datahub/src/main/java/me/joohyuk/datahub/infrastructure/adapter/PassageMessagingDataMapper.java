@@ -5,7 +5,7 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import me.joohyuk.datahub.domain.entity.Document;
-import me.joohyuk.datahub.domain.event.PassageCreationRequestEvent;
+import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
 import me.joohyuk.datahub.infrastructure.adapter.out.persistence.converter.MetadataConverter;
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.DocumentTransformRequest;
@@ -17,7 +17,7 @@ public class PassageMessagingDataMapper {
 
   private final MetadataConverter metadataConverter;
 
-  public DocumentTransformRequestedMessage eventToMessage(PassageCreationRequestEvent event) {
+  public DocumentTransformRequestedMessage eventToMessage(TransformDocumentEvent event) {
     Document document = event.getDocument();
 
     DocumentTransformRequest transformRequest = new DocumentTransformRequest(
@@ -48,7 +48,7 @@ public class PassageMessagingDataMapper {
   }
 
   public PassageCreationRequestAvroModel passageCreationRequestEventToPassageCreationRequestAvroModel(
-      PassageCreationRequestEvent event
+      TransformDocumentEvent event
   ) {
     Document document = event.getDocument();
     return PassageCreationRequestAvroModel.builder()

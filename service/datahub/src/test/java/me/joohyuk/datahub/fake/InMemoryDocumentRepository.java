@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
+import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
 import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.ContentHash;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;

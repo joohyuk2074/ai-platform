@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import me.joohyuk.datahub.domain.port.out.storage.FileStorage;
+import me.joohyuk.datahub.application.port.out.storage.FileStorage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

@@ -24,6 +24,9 @@ dependencies {
 
   implementation("com.fasterxml.jackson.core:jackson-databind")
 
+  // JSON 형식 로깅을 위한 Logstash 인코더 (프로덕션 환경 로그 수집용)
+  implementation("net.logstash.logback:logstash-logback-encoder:8.0")
+
   runtimeOnly("com.mysql:mysql-connector-j")
 
   compileOnly("org.projectlombok:lombok")

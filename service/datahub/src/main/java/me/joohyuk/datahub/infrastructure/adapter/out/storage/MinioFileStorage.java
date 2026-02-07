@@ -1,7 +1,7 @@
 package me.joohyuk.datahub.infrastructure.adapter.storage;
 
 import java.io.InputStream;
-import me.joohyuk.datahub.domain.port.out.storage.FileStorage;
+import me.joohyuk.datahub.application.port.out.storage.FileStorage;
 import com.spartaecommerce.domain.vo.Metadata;
 
 /**
