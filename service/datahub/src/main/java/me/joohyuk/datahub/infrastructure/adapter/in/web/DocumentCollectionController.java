@@ -83,17 +83,17 @@ public class DocumentCollectionController {
             .build();
     }
 
-    @PostMapping("/{collectionId}/passages/request")
-    public ResponseEntity<CommonResponse<DocumentTransformRequestResponse>> requestPassageCreation(
+    @PostMapping("/{collectionId}/transform")
+    public ResponseEntity<CommonResponse<DocumentTransformRequestResponse>> transformDocuments(
         @RequestHeader("X-Request-UserId") Long userId,
         @PathVariable String collectionId
     ) {
-        log.info("User {} requesting passage creation for collectionId={}", userId, collectionId);
+        log.info("User {} requesting document transformation for collectionId={}", userId, collectionId);
 
         TransformDocumentResult result =
             documentCommandService.requestPassageCreationByCollection(CollectionId.of(collectionId));
 
-        log.info("Passage creation request completed: collectionId={}, total={}, successful={}, failed={}",
+        log.info("Document transformation request completed: collectionId={}, total={}, successful={}, failed={}",
             collectionId, result.totalDocumentsFound(), result.successfullyRequested(),
             result.totalDocumentsFound() - result.successfullyRequested());
 

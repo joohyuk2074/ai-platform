@@ -1,4 +1,4 @@
-package me.joohyuk.datarex.infrastructure.adapter.in;
+package me.joohyuk.datarex.infrastructure.adapter.in.message;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -36,7 +36,10 @@ public class DocumentTransformResultKafkaListener {
       groupId = "datahub-consumer",
       containerFactory = "kafkaListenerContainerFactory"
   )
-  public void onTransformCompleted(DocumentTransformCompletedMessage message, Acknowledgment acknowledgment) {
+  public void onTransformCompleted(
+      DocumentTransformCompletedMessage message,
+      Acknowledgment acknowledgment
+  ) {
     log.info("Received transform completed message: eventId={}, documentId={}, passageCount={}",
         message.eventId(), message.documentId(), message.passageCount());
 
