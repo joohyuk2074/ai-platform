@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
 import me.joohyuk.datahub.domain.event.PassageCreationRequestEvent;
-import me.joohyuk.datahub.domain.exception.IngestionDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.port.out.message.publisher.PassageCreationRequestPublisher;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentCollectionRepository;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
@@ -29,7 +29,7 @@ public class DocumentPersistenceHelper {
   @Transactional
   public DocumentUploadedEvent persistDocument(Document document) {
     if (!documentCollectionRepository.existsById(document.getCollectionId())) {
-      throw new IngestionDomainException(
+      throw new DatahubDomainException(
           "Failed to find Collection. collectionId: " + document.getCollectionId().getValue());
     }
 

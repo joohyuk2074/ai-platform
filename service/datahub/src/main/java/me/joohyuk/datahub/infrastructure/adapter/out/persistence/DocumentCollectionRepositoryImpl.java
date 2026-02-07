@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
-import me.joohyuk.datahub.domain.exception.IngestionDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentCollectionRepository;
 import com.spartaecommerce.domain.vo.CollectionId;
 import me.joohyuk.datahub.infrastructure.adapter.persistence.entity.DocumentCollectionJpaEntity;
@@ -41,7 +41,7 @@ public class DocumentCollectionRepositoryImpl implements DocumentCollectionRepos
     return jpaRepository.findById(collectionId.getValue())
         .map(DocumentCollectionJpaEntity::toDomain)
         .orElseThrow(
-            () -> new IngestionDomainException("Collection not found with ID: " + collectionId));
+            () -> new DatahubDomainException("Collection not found with ID: " + collectionId));
   }
 
   @Override

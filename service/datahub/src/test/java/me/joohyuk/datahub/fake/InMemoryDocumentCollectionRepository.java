@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
-import me.joohyuk.datahub.domain.exception.IngestionDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentCollectionRepository;
 import com.spartaecommerce.domain.vo.CollectionId;
 
@@ -39,7 +39,7 @@ public class InMemoryDocumentCollectionRepository implements DocumentCollectionR
   public DocumentCollection getById(CollectionId collectionId) {
     DocumentCollection documentCollection = store.get(collectionId);
     if (documentCollection == null) {
-      throw new IngestionDomainException(ErrorCode.ENTITY_NOT_FOUND.getMessage());
+      throw new DatahubDomainException(ErrorCode.ENTITY_NOT_FOUND.getMessage());
     }
     return documentCollection;
   }

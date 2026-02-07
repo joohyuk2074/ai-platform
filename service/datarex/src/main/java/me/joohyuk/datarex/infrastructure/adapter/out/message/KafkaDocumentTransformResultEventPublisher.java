@@ -1,8 +1,8 @@
 package me.joohyuk.datarex.infrastructure.adapter.out.message;
 
 import lombok.RequiredArgsConstructor;
-import me.joohyuk.datarex.domain.entity.DocumentTransformCompletedMessage;
-import me.joohyuk.datarex.domain.entity.DocumentTransformFailedMessage;
+import me.joohyuk.messaging.events.DocumentTransformCompletedMessage;
+import me.joohyuk.messaging.events.DocumentTransformFailedMessage;
 import me.joohyuk.datarex.domain.port.out.message.DocumentTransformResultEventPublisher;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;

@@ -1,7 +1,7 @@
 package me.joohyuk.datarex.domain.port.out.message;
 
-import me.joohyuk.datarex.domain.entity.DocumentTransformCompletedMessage;
-import me.joohyuk.datarex.domain.entity.DocumentTransformFailedMessage;
+import me.joohyuk.messaging.events.DocumentTransformCompletedMessage;
+import me.joohyuk.messaging.events.DocumentTransformFailedMessage;
 
 public interface DocumentTransformResultEventPublisher {
 

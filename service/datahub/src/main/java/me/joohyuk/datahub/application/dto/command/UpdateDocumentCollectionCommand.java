@@ -1,4 +1,4 @@
-package me.joohyuk.datahub.application.dto.request;
+package me.joohyuk.datahub.application.dto.command;
 
 public record UpdateDocumentCollectionCommand(
     String name,

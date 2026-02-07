@@ -8,7 +8,7 @@ import com.spartaecommerce.domain.vo.Metadata;
 import com.spartaecommerce.domain.vo.UserId;
 import java.time.Instant;
 import lombok.Getter;
-import me.joohyuk.datahub.domain.exception.IngestionDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
 @Getter
@@ -110,11 +110,11 @@ public class Document extends AggregateRoot<DocumentId> {
   /**
    * {@code UPLOADED → TRANSFORM_REQUESTED} 로 전이합니다. Kafka 이벤트 publish 직전에 호출합니다.
    *
-   * @throws IngestionDomainException 현재 상태가 UPLOADED가 아닌 경우
+   * @throws DatahubDomainException 현재 상태가 UPLOADED가 아닌 경우
    */
   public void transform(Instant now) {
     if (status != DocumentStatus.UPLOADED) {
-      throw new IngestionDomainException(
+      throw new DatahubDomainException(
           "Cannot request transform. current=" + status + ", expected=UPLOADED"
               + " [documentId=" + getId() + "]");
     }
@@ -127,11 +127,11 @@ public class Document extends AggregateRoot<DocumentId> {
    *
    * @param passageCount 생성된 청크 수
    * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
-   * @throws IngestionDomainException 현재 상태가 TRANSFORM_REQUESTED가 아닌 경우
+   * @throws DatahubDomainException 현재 상태가 TRANSFORM_REQUESTED가 아닌 경우
    */
   public void markPassageCreated(int passageCount, String eventId, Instant now) {
     if (status != DocumentStatus.TRANSFORM_REQUESTED) {
-      throw new IngestionDomainException(
+      throw new DatahubDomainException(
           "Cannot mark transformed. current=" + status + ", expected=TRANSFORM_REQUESTED"
               + " [documentId=" + getId() + "]");
     }
@@ -148,7 +148,7 @@ public class Document extends AggregateRoot<DocumentId> {
    * @param errorCode    실패 이벤트의 에러 코드
    * @param errorMessage 실패 이벤트의 에러 메시지 (500자 초과 시 절단)
    * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
-   * @throws IngestionDomainException 현재 상태가 TRANSFORM_REQUESTED가 아닌 경우
+   * @throws DatahubDomainException 현재 상태가 TRANSFORM_REQUESTED가 아닌 경우
    */
   public void markPassageFailed(
       String errorCode,
@@ -157,7 +157,7 @@ public class Document extends AggregateRoot<DocumentId> {
       Instant now
   ) {
     if (status != DocumentStatus.TRANSFORM_REQUESTED) {
-      throw new IngestionDomainException(
+      throw new DatahubDomainException(
           "Cannot mark transform failed. current=" + status + ", expected=TRANSFORM_REQUESTED"
               + " [documentId=" + getId() + "]");
     }

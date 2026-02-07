@@ -24,32 +24,55 @@ public class PassageCreationSaga implements
   private final DocumentCollectionRepository documentCollectionRepository;
   private final DocumentRepository documentRepository;
 
-  // Passage 생성 실패인경우 passage 생성 요청을 롤백하면 됨
-  // 로컬 데이터베이스 작업, saga 흐름은 멈출 것
+  /**
+   * Document Transform 성공 처리.
+   *
+   * <p>Document 상태를 TRANSFORM_REQUESTED → TRANSFORMED로 전이시킵니다.
+   * 로컬 데이터베이스 작업이며, saga 흐름은 여기서 완료됩니다.
+   */
   @Override
   @Transactional
   public PassageCreationRequestEvent process(PassageResponse passageResponse) {
-    log.info("Completing passaging for message with documentId: {}", passageResponse.getDocumentId());
+    log.info("Processing transform completion for documentId: {}", passageResponse.getDocumentId());
+
     Document document = documentRepository.getById(new DocumentId(passageResponse.getDocumentId()));
-    PassageCreationRequestEvent domainEvent = documentDomainService.createPassage(document);
+    PassageCreationRequestEvent domainEvent = documentDomainService.createPassage(
+        document,
+        passageResponse.getPassageCount(),
+        passageResponse.getEventId()
+    );
 
     documentRepository.save(document);
 
-    log.info("Document with documentId: {} is created to passages", document.getId().getValue());
+    log.info("Document with documentId: {} transformed successfully with {} passages",
+        document.getId().getValue(), passageResponse.getPassageCount());
 
     return domainEvent;
   }
 
+  /**
+   * Document Transform 실패 처리 (롤백).
+   *
+   * <p>Document 상태를 TRANSFORM_REQUESTED → TRANSFORM_FAILED로 전이시킵니다.
+   * 로컬 데이터베이스 작업이며, saga 흐름은 여기서 멈춥니다.
+   */
   @Override
   @Transactional
   public EmptyEvent rollback(PassageResponse passageResponse) {
-    log.info("Cancelling with documentId: {}", passageResponse.getDocumentId());
+    log.info("Rolling back transform for documentId: {}", passageResponse.getDocumentId());
+
     Document document = documentRepository.getById(new DocumentId(passageResponse.getDocumentId()));
-    documentDomainService.cancelCreatePassage(document, passageResponse.getFailureMessages());
+    documentDomainService.cancelCreatePassage(
+        document,
+        passageResponse.getErrorCode(),
+        passageResponse.getErrorMessage(),
+        passageResponse.getEventId()
+    );
 
     documentRepository.save(document);
 
-    log.info("Document with documentId: {} is cancelled", document.getId().getValue());
+    log.info("Document with documentId: {} transform failed with error: {}",
+        document.getId().getValue(), passageResponse.getErrorCode());
 
     return EmptyEvent.INSTANCE;
   }

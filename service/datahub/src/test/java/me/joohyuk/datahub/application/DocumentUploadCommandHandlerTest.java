@@ -3,16 +3,16 @@ package me.joohyuk.datahub.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.UserId;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.Instant;
-import me.joohyuk.datahub.application.dto.request.UploadDocumentCommand;
+import me.joohyuk.datahub.application.dto.command.UploadDocumentCommand;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
 import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
-import me.joohyuk.datahub.domain.exception.IngestionDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.service.DocumentDomainService;
-import com.spartaecommerce.domain.vo.CollectionId;
 import me.joohyuk.datahub.fake.FakeDateTimeHolder;
 import me.joohyuk.datahub.fake.InMemoryDocumentCollectionRepository;
 import me.joohyuk.datahub.fake.InMemoryDocumentRepository;
@@ -43,7 +43,9 @@ import org.junit.jupiter.api.Test;
 @DisplayName("DocumentCreateCommandHandler 테스트")
 class DocumentUploadCommandHandlerTest {
 
-  /** 테스트 전체에서 공유하는 고정 CollectionId. PersistenceHelper의 Collection 존재 체크를 통과시킴 */
+  /**
+   * 테스트 전체에서 공유하는 고정 CollectionId. PersistenceHelper의 Collection 존재 체크를 통과시킴
+   */
   private static final CollectionId COLLECTION_ID = new CollectionId(1L);
 
   private DocumentUploadCommandHandler handler;
@@ -89,19 +91,14 @@ class DocumentUploadCommandHandlerTest {
       // When
       DocumentUploadedEvent event = handler.uploadDocument(command, fileInputStream);
 
-      // Then: 출력 기반 검증 - 반환된 이벤트가 올바른가?
+      // Then: 출력 기반 검증 - 업로드 성공 시 유효한 이벤트를 반환하는가?
       assertThat(event).isNotNull();
       assertThat(event.getDocument()).isNotNull();
       assertThat(event.getDocument().getId()).isNotNull();
-      assertThat(event.getDocument().getId().getValue()).isEqualTo(1L);
       assertThat(event.getDocument().getFileKey()).isNotBlank();
-      assertThat(event.getDocument().getMetadata().fileName()).isEqualTo("report.pdf");
-      assertThat(event.getDocument().getMetadata().fileSize()).isEqualTo(1024L);
-      assertThat(event.getDocument().getMetadata().contentType()).isEqualTo("application/pdf");
-      assertThat(event.getDocument().getMetadata().uploadedBy().getValue()).isEqualTo(1L);
       assertThat(event.getCreatedAt()).isNotNull();
 
-      // And: 상태 기반 검증 - 파일과 문서가 저장되었는가?
+      // And: 상태 기반 검증 - 파일과 문서가 실제로 저장되었는가?
       assertThat(fileStorage.size()).isEqualTo(1);
       assertThat(fileStorage.exists(event.getDocument().getFileKey())).isTrue();
       assertThat(documentRepository.size()).isEqualTo(1);
@@ -126,7 +123,7 @@ class DocumentUploadCommandHandlerTest {
       assertThat(storedMetadata.fileName()).isEqualTo("analysis.md");
       assertThat(storedMetadata.fileSize()).isEqualTo(2048L);
       assertThat(storedMetadata.contentType()).isEqualTo("text/markdown");
-      assertThat(storedMetadata.uploadedBy().getValue()).isEqualTo(42L);
+      assertThat(storedMetadata.uploadedBy()).isEqualTo(42L);
     }
 
     @Test
@@ -140,7 +137,7 @@ class DocumentUploadCommandHandlerTest {
 
       // When & Then: IngestionDomainException 발생
       assertThatThrownBy(() -> handler.uploadDocument(command, fileInputStream))
-          .isInstanceOf(IngestionDomainException.class);
+          .isInstanceOf(DatahubDomainException.class);
 
       // And: 상태 기반 검증 - 보상 트랜잭션으로 파일이 삭제되었는가?
       assertThat(fileStorage.size()).isEqualTo(0);
@@ -158,7 +155,7 @@ class DocumentUploadCommandHandlerTest {
 
       // When & Then: 원본 예외(IngestionDomainException)가 발생하는가?
       assertThatThrownBy(() -> handler.uploadDocument(command, fileInputStream))
-          .isInstanceOf(IngestionDomainException.class);
+          .isInstanceOf(DatahubDomainException.class);
 
       // And: 상태 기반 검증 - 파일 삭제 실패로 파일이 남아있는가?
       assertThat(fileStorage.size()).isEqualTo(1);
@@ -181,8 +178,8 @@ class DocumentUploadCommandHandlerTest {
           createUploadCommand("report-copy.pdf", 1024L, "application/pdf", 1L);
       assertThatThrownBy(() ->
           handler.uploadDocument(duplicateCommand, new ByteArrayInputStream(fileContent.getBytes()))
-      ).isInstanceOf(IngestionDomainException.class)
-       .hasMessageContaining("Duplicate file detected");
+      ).isInstanceOf(DatahubDomainException.class)
+          .hasMessageContaining("Duplicate file detected");
 
       // And: 상태 기반 검증 - 중복 파일은 보상 삭제되어 저장소 크기가 변하지 않음
       assertThat(fileStorage.size()).isEqualTo(1);

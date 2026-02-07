@@ -6,12 +6,13 @@ import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.UserId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.datahub.application.dto.PassageCreationRequestResult;
-import me.joohyuk.datahub.application.dto.request.CreateDocumentCollectionCommand;
-import me.joohyuk.datahub.application.dto.request.UpdateDocumentCollectionCommand;
-import me.joohyuk.datahub.application.dto.response.CreateDocumentCollectionResult;
+import me.joohyuk.datahub.application.dto.result.TransformDocumentResult;
+import me.joohyuk.datahub.application.dto.command.CreateDocumentCollectionCommand;
+import me.joohyuk.datahub.application.dto.command.UpdateDocumentCollectionCommand;
+import me.joohyuk.datahub.application.dto.result.CreateDocumentCollectionResult;
 import me.joohyuk.datahub.domain.port.in.service.DocumentCollectionCommandService;
 import me.joohyuk.datahub.domain.port.in.service.DocumentCommandService;
+import me.joohyuk.datahub.infrastructure.adapter.in.web.dto.DocumentTransformRequestResponse;
 import me.joohyuk.datahub.infrastructure.adapter.web.auth.AuthenticatedUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -83,20 +84,20 @@ public class DocumentCollectionController {
     }
 
     @PostMapping("/{collectionId}/passages/request")
-    public ResponseEntity<CommonResponse<PassageCreationRequestResponse>> requestPassageCreation(
+    public ResponseEntity<CommonResponse<DocumentTransformRequestResponse>> requestPassageCreation(
         @RequestHeader("X-Request-UserId") Long userId,
         @PathVariable String collectionId
     ) {
         log.info("User {} requesting passage creation for collectionId={}", userId, collectionId);
 
-        PassageCreationRequestResult result =
+        TransformDocumentResult result =
             documentCommandService.requestPassageCreationByCollection(CollectionId.of(collectionId));
 
         log.info("Passage creation request completed: collectionId={}, total={}, successful={}, failed={}",
             collectionId, result.totalDocumentsFound(), result.successfullyRequested(),
             result.totalDocumentsFound() - result.successfullyRequested());
 
-        PassageCreationRequestResponse response = PassageCreationRequestResponse.from(result);
+        DocumentTransformRequestResponse response = DocumentTransformRequestResponse.from(result);
 
         return ResponseEntity.ok(CommonResponse.success(response));
     }

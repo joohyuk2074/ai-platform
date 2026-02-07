@@ -7,10 +7,10 @@ import com.spartaecommerce.domain.vo.UserId;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import me.joohyuk.datahub.application.dto.request.CreateDocumentCollectionCommand;
-import me.joohyuk.datahub.application.dto.response.CreateDocumentCollectionResult;
+import me.joohyuk.datahub.application.dto.command.CreateDocumentCollectionCommand;
+import me.joohyuk.datahub.application.dto.result.CreateDocumentCollectionResult;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
-import me.joohyuk.datahub.domain.exception.IngestionDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import com.spartaecommerce.domain.vo.CollectionId;
 import me.joohyuk.datahub.fake.FakeDateTimeHolder;
 import me.joohyuk.datahub.fake.InMemoryDocumentCollectionRepository;
@@ -121,7 +121,7 @@ class DocumentCollectionCommandServiceImplTest {
 
       // When & Then: 중복된 이름으로 생성 시도하면 예외 발생
       assertThatThrownBy(() -> service.createCollection(new UserId(2L), command))
-          .isInstanceOf(IngestionDomainException.class)
+          .isInstanceOf(DatahubDomainException.class)
           .hasMessageContaining("Collection with name '" + duplicateName + "' already exists");
 
       // And: 상태 기반 검증 - 기존 컬렉션만 존재하고 새 컬렉션은 저장되지 않음

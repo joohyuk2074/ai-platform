@@ -6,11 +6,11 @@ import com.spartaecommerce.util.DateTimeHolder;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.datahub.application.dto.request.CreateDocumentCollectionCommand;
-import me.joohyuk.datahub.application.dto.request.UpdateDocumentCollectionCommand;
-import me.joohyuk.datahub.application.dto.response.CreateDocumentCollectionResult;
+import me.joohyuk.datahub.application.dto.command.CreateDocumentCollectionCommand;
+import me.joohyuk.datahub.application.dto.command.UpdateDocumentCollectionCommand;
+import me.joohyuk.datahub.application.dto.result.CreateDocumentCollectionResult;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
-import me.joohyuk.datahub.domain.exception.IngestionDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.port.in.service.DocumentCollectionCommandService;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentCollectionRepository;
 import com.spartaecommerce.domain.vo.CollectionId;
@@ -35,7 +35,7 @@ public class DocumentCollectionCommandServiceImpl implements DocumentCollectionC
     log.info("Processing collection creation request: {}", command.name());
 
     if (documentCollectionRepository.existsByName(command.name())) {
-      throw new IngestionDomainException(
+      throw new DatahubDomainException(
           "Collection with name '" + command.name() + "' already exists"
       );
     }
@@ -69,7 +69,7 @@ public class DocumentCollectionCommandServiceImpl implements DocumentCollectionC
     documentCollectionRepository.findByName(command.name())
         .ifPresent(existingCollection -> {
           if (!existingCollection.getId().equals(collection.getId())) {
-            throw new IngestionDomainException(
+            throw new DatahubDomainException(
                 "Collection with name '" + command.name() + "' already exists"
             );
           }
@@ -87,7 +87,7 @@ public class DocumentCollectionCommandServiceImpl implements DocumentCollectionC
   @Override
   public void deleteCollection(CollectionId collectionId) {
     DocumentCollection collection = documentCollectionRepository.findById(collectionId)
-        .orElseThrow(() -> new IngestionDomainException(
+        .orElseThrow(() -> new DatahubDomainException(
             "Collection not found with ID: " + collectionId
         ));
 

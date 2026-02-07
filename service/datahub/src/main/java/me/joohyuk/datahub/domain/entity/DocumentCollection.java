@@ -4,7 +4,7 @@ import com.spartaecommerce.domain.entity.AggregateRoot;
 import java.time.Instant;
 import java.util.Objects;
 import lombok.Getter;
-import me.joohyuk.datahub.domain.exception.IngestionDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import com.spartaecommerce.domain.vo.CollectionId;
 
 @Getter
@@ -25,7 +25,7 @@ public class DocumentCollection extends AggregateRoot<CollectionId> {
     super.setId(Objects.requireNonNull(id, "Collection ID cannot be null"));
 
     if (name == null || name.isBlank()) {
-      throw new IngestionDomainException("Collection name cannot be null or empty");
+      throw new DatahubDomainException("Collection name cannot be null or empty");
     }
     this.name = name;
     this.description = description;
@@ -51,7 +51,7 @@ public class DocumentCollection extends AggregateRoot<CollectionId> {
 
   public void modify(String name, String description, Instant updatedAt) {
     if (name == null || name.isBlank()) {
-      throw new IngestionDomainException("Collection name cannot be null or empty");
+      throw new DatahubDomainException("Collection name cannot be null or empty");
     }
 
     this.name = name;

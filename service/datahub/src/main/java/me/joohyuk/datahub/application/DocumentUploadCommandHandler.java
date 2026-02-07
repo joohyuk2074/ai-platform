@@ -5,10 +5,10 @@ import com.spartaecommerce.exception.ErrorCode;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.datahub.application.dto.request.UploadDocumentCommand;
+import me.joohyuk.datahub.application.dto.command.UploadDocumentCommand;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
-import me.joohyuk.datahub.domain.exception.IngestionDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.domain.port.out.storage.FileStorage;
 import com.spartaecommerce.domain.vo.ContentHash;
@@ -50,7 +50,7 @@ public class DocumentUploadCommandHandler {
     if (documentRepository.existsByContentHash(contentHash)) {
       log.warn("Duplicate file detected. contentHash={}, fileKey={}", contentHash, fileKey);
       compensateFileUpload(fileKey);
-      throw new IngestionDomainException("Duplicate file detected. contentHash: " + contentHash);
+      throw new DatahubDomainException("Duplicate file detected. contentHash: " + contentHash);
     }
 
     Document document = Document.create(
@@ -64,7 +64,7 @@ public class DocumentUploadCommandHandler {
       log.error("DB save failed, initiating compensating transaction to delete uploaded file: {}",
           fileKey, e);
       compensateFileUpload(fileKey);
-      throw new IngestionDomainException(ErrorCode.INVALID_REQUEST.getMessage(), e);
+      throw new DatahubDomainException(ErrorCode.INVALID_REQUEST.getMessage(), e);
     }
   }
 

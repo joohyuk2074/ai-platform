@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import me.joohyuk.datahub.domain.entity.Document;
-import me.joohyuk.datahub.domain.exception.IngestionDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.port.out.persistence.DocumentRepository;
 import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.ContentHash;
@@ -53,7 +53,7 @@ public class InMemoryDocumentRepository implements DocumentRepository {
   public Document getById(DocumentId documentId) {
     Document doc = store.get(documentId);
     if (doc == null) {
-      throw new IngestionDomainException(ErrorCode.ENTITY_NOT_FOUND.getMessage());
+      throw new DatahubDomainException(ErrorCode.ENTITY_NOT_FOUND.getMessage());
     }
     return doc;
   }

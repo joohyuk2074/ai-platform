@@ -1,8 +1,8 @@
-package me.joohyuk.datahub.infrastructure.adapter.in.web;
+package me.joohyuk.datahub.infrastructure.adapter.in.web.dto;
 
 import java.time.Instant;
 import java.util.List;
-import me.joohyuk.datahub.application.dto.PassageCreationRequestResult;
+import me.joohyuk.datahub.application.dto.result.TransformDocumentResult;
 
 /**
  * Passage 생성 요청 발행 API 응답 DTO
@@ -21,7 +21,7 @@ import me.joohyuk.datahub.application.dto.PassageCreationRequestResult;
  * @param allRequestPublished 모든 요청이 발행되었는지 여부
  * @param documentResults 각 Document별 요청 발행 결과
  */
-public record PassageCreationRequestResponse(
+public record DocumentTransformRequestResponse(
     String collectionId,
     int totalDocumentsFound,
     int successfullyRequested,
@@ -31,12 +31,12 @@ public record PassageCreationRequestResponse(
     List<DocumentResult> documentResults
 ) {
 
-    public static PassageCreationRequestResponse from(PassageCreationRequestResult result) {
+    public static DocumentTransformRequestResponse from(TransformDocumentResult result) {
         List<DocumentResult> documentResults = result.documentResults().stream()
             .map(DocumentResult::from)
             .toList();
 
-        return new PassageCreationRequestResponse(
+        return new DocumentTransformRequestResponse(
             String.valueOf(result.collectionId().getValue()),
             result.totalDocumentsFound(),
             result.successfullyRequested(),
@@ -60,7 +60,7 @@ public record PassageCreationRequestResponse(
         String errorMessage
     ) {
 
-        public static DocumentResult from(PassageCreationRequestResult.DocumentRequestResult result) {
+        public static DocumentResult from(TransformDocumentResult.DocumentRequestResult result) {
             return new DocumentResult(
                 String.valueOf(result.documentId().getValue()),
                 result.success(),
