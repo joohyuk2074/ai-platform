@@ -11,7 +11,7 @@ import me.joohyuk.datahub.application.dto.result.UploadDocumentResult;
 import me.joohyuk.datahub.application.port.in.service.UploadDocumentUseCase;
 import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.application.port.out.storage.FileStorage;
-import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHelper;
+import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHandler;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
 import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 public class UploadDocumentService implements UploadDocumentUseCase {
 
   private final FileStorage fileStorage;
-  private final DocumentPersistenceHelper persistenceHelper;
+  private final DocumentPersistenceHandler persistenceHelper;
   private final DocumentRepository documentRepository;
 
   @Override

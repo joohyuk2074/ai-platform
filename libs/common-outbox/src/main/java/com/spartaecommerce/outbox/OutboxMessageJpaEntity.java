@@ -50,13 +50,13 @@ public class OutboxMessageJpaEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
-  private OutboxMessageStatus status;
+  private OutboxStatus status;
 
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
 
   /**
-   * Kafka publish 성공 시점. {@link OutboxMessageStatus#SENT} 상태로 전이될 때 채워집니다.
+   * Kafka publish 성공 시점. {@link OutboxStatus#SENT} 상태로 전이될 때 채워집니다.
    */
   @Column(name = "sent_at")
   private Instant sentAt;
@@ -74,7 +74,7 @@ public class OutboxMessageJpaEntity {
   private String lastError;
 
   /**
-   * 새 아웃박스 메시지를 {@link OutboxMessageStatus#PENDING} 상태로 생성합니다.
+   * 새 아웃박스 메시지를 {@link OutboxStatus#PENDING} 상태로 생성합니다.
    *
    * @param topic        목적지 Kafka 토픽
    * @param partitionKey 파티셔닝 키
@@ -90,25 +90,25 @@ public class OutboxMessageJpaEntity {
     this.topic = topic;
     this.partitionKey = partitionKey;
     this.payloadJson = payloadJson;
-    this.status = OutboxMessageStatus.PENDING;
+    this.status = OutboxStatus.PENDING;
     this.createdAt = createdAt;
     this.retryCount = 0;
   }
 
   /**
-   * Kafka publish 성공 시 {@link OutboxMessageStatus#SENT}로 전이합니다.
+   * Kafka publish 성공 시 {@link OutboxStatus#SENT}로 전이합니다.
    *
    * @param sentAt 전송 완료 시점
    */
   public void markSent(Instant sentAt) {
-    this.status = OutboxMessageStatus.SENT;
+    this.status = OutboxStatus.SENT;
     this.sentAt = sentAt;
     this.lastError = null;
   }
 
   /**
    * publish 실패 시 재시도 횟수를 증가시키고 오류 정보를 저장합니다.
-   * 상태는 {@link OutboxMessageStatus#PENDING}으로 유지되어 다음 폴링에서 재시도됩니다.
+   * 상태는 {@link OutboxStatus#PENDING}으로 유지되어 다음 폴링에서 재시도됩니다.
    *
    * @param error 오류 메시지
    */
@@ -118,12 +118,12 @@ public class OutboxMessageJpaEntity {
   }
 
   /**
-   * 최대 재시도 횟수를 초과하면 {@link OutboxMessageStatus#FAILED}로 전이합니다.
+   * 최대 재시도 횟수를 초과하면 {@link OutboxStatus#FAILED}로 전이합니다.
    *
    * @param error 마지막 오류 메시지
    */
   public void markFailed(String error) {
-    this.status = OutboxMessageStatus.FAILED;
+    this.status = OutboxStatus.FAILED;
     this.lastError = truncate(error);
   }
 

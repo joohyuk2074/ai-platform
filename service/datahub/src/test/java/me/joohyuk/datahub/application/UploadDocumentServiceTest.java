@@ -12,7 +12,7 @@ import java.time.Instant;
 import me.joohyuk.datahub.application.dto.command.UploadDocumentCommand;
 import me.joohyuk.datahub.application.dto.result.UploadDocumentResult;
 import me.joohyuk.datahub.application.service.UploadDocumentService;
-import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHelper;
+import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHandler;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.service.DocumentDomainService;
@@ -70,7 +70,7 @@ class UploadDocumentServiceTest {
 
     DocumentDomainService domainService = new DocumentDomainService();
 
-    DocumentPersistenceHelper persistenceHelper = new DocumentPersistenceHelper(
+    DocumentPersistenceHandler persistenceHelper = new DocumentPersistenceHandler(
         domainService,
         documentRepository,
         collectionRepository,

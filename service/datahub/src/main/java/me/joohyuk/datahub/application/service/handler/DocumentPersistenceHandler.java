@@ -4,7 +4,7 @@ import com.spartaecommerce.domain.port.IdGenerator;
 import com.spartaecommerce.domain.vo.DocumentId;
 import com.spartaecommerce.exception.DomainException;
 import com.spartaecommerce.util.DateTimeHolder;
-import java.time.Instant;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.port.out.persistence.DocumentCollectionRepository;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DocumentPersistenceHelper {
+public class DocumentPersistenceHandler {
 
   private final DocumentDomainService documentDomainService;
   private final DocumentRepository documentRepository;
@@ -36,23 +36,25 @@ public class DocumentPersistenceHelper {
       );
     }
 
-    // 1. Document ID 초기화 및 DocumentUploadedEvent 생성
     DocumentUploadedEvent uploadEvent = documentDomainService.upload(
         new DocumentId(idGenerator.generateId()),
         document,
         dateTimeHolder.now()
     );
 
-    // 2. UPLOADED → TRANSFORM_REQUESTED 상태 전이
-    Instant now = dateTimeHolder.now();
-    document.transform(now);
-
-    // 3. Document 저장 (TRANSFORM_REQUESTED 상태)
     Document savedDocument = documentRepository.save(document);
 
     log.info("Document saved: documentId={}, status={}",
         savedDocument.getId().getValue(), savedDocument.getStatus());
 
     return uploadEvent;
+  }
+
+  @Transactional
+  public void saveAll(List<Document> documents) {
+    if (!documents.isEmpty()) {
+      documentRepository.saveAll(documents);
+      log.info("Batch saved {} documents", documents.size());
+    }
   }
 }

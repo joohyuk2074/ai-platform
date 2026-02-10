@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  */
 public record DocumentTransformRequestedMessage(
     DocumentTransformRequest message,
-    LocalDateTime createdAt
+    Instant createdAt
 ) {
 
   public record DocumentTransformRequest(

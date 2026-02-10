@@ -1,7 +1,6 @@
 package me.joohyuk.datahub.infrastructure.adapter;
 
 import com.spartaecommerce.domain.vo.Metadata;
-import java.time.ZoneOffset;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import me.joohyuk.datahub.domain.entity.Document;
@@ -57,7 +56,7 @@ public class PassageMessagingDataMapper {
         .userId(document.getUploader().getValue().toString())
         .collectionId(document.getCollectionId().getValue().toString())
         .metadata(metadataConverter.convertToDatabaseColumn(document.getMetadata()))
-        .createdAt(event.getCreatedAt().toInstant(ZoneOffset.UTC))
+        .createdAt(event.getCreatedAt())
         .documentStatus(document.getStatus())
         .build();
   }

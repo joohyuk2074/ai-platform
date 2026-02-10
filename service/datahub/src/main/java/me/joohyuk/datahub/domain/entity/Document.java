@@ -5,15 +5,24 @@ import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.ContentHash;
 import com.spartaecommerce.domain.vo.DocumentId;
 import com.spartaecommerce.domain.vo.Metadata;
+import com.spartaecommerce.domain.vo.TrackingId;
 import com.spartaecommerce.domain.vo.UserId;
 import java.time.Instant;
+import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Document extends AggregateRoot<DocumentId> {
+
+  private final CollectionId collectionId;
 
   /**
    * 파일 저장소에서 원본 파일의 위치를 가리키는 키 예: "documents/1234567890_sample.md"
@@ -25,10 +34,9 @@ public class Document extends AggregateRoot<DocumentId> {
    */
   private final ContentHash contentHash;
 
-  private final CollectionId collectionId;
-
   private final Metadata metadata;
 
+  private TrackingId trackingId;
   private DocumentStatus status;
   private int attempt;
   private String lastErrorCode;
@@ -39,31 +47,22 @@ public class Document extends AggregateRoot<DocumentId> {
   private Instant createdAt;
   private Instant updatedAt;
 
-  private Document(
-      CollectionId collectionId,
-      String fileKey,
-      ContentHash contentHash,
-      Metadata metadata,
-      DocumentStatus status
-  ) {
-    validate(collectionId, fileKey, contentHash, metadata, status);
-
-    this.collectionId = collectionId;
-    this.fileKey = fileKey;
-    this.contentHash = contentHash;
-    this.metadata = metadata;
-    this.status = status;
-    this.attempt = 0;
-    this.passageCount = 0;
-  }
-
   public static Document create(
       CollectionId collectionId,
       String fileKey,
       ContentHash contentHash,
       Metadata metadata
   ) {
-    return new Document(collectionId, fileKey, contentHash, metadata, DocumentStatus.UPLOADED);
+    validate(collectionId, fileKey, contentHash, metadata, DocumentStatus.UPLOADED);
+
+    return Document.builder()
+        .collectionId(collectionId)
+        .fileKey(fileKey)
+        .contentHash(contentHash)
+        .metadata(metadata)
+        .trackingId(new TrackingId(UUID.randomUUID()))
+        .status(DocumentStatus.UPLOADED)
+        .build();
   }
 
   public static Document restore(
@@ -72,6 +71,7 @@ public class Document extends AggregateRoot<DocumentId> {
       String fileKey,
       ContentHash contentHash,
       Metadata metadata,
+      TrackingId trackingId,
       DocumentStatus status,
       int attempt,
       String lastErrorCode,
@@ -83,17 +83,25 @@ public class Document extends AggregateRoot<DocumentId> {
   ) {
     validate(collectionId, fileKey, contentHash, metadata, status);
 
-    Document doc = new Document(collectionId, fileKey, contentHash, metadata, status);
-    doc.setId(id);
-    doc.attempt = attempt;
-    doc.lastErrorCode = lastErrorCode;
-    doc.lastErrorMessage = lastErrorMessage;
-    doc.passageCount = passageCount;
-    doc.lastResultEventId = lastResultEventId;
-    doc.createdAt = createdAt;
-    doc.updatedAt = updatedAt;
+    Document document = Document.builder()
+        .collectionId(collectionId)
+        .fileKey(fileKey)
+        .contentHash(contentHash)
+        .metadata(metadata)
+        .trackingId(trackingId)
+        .status(status)
+        .attempt(attempt)
+        .lastErrorCode(lastErrorCode)
+        .lastErrorMessage(lastErrorMessage)
+        .passageCount(passageCount)
+        .lastResultEventId(lastResultEventId)
+        .createdAt(createdAt)
+        .updatedAt(updatedAt)
+        .build();
 
-    return doc;
+    document.setId(id);
+
+    return document;
   }
 
   public void initialize(DocumentId documentId, Instant now) {

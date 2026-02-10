@@ -2,6 +2,7 @@ package me.joohyuk.datahub.infrastructure.adapter.out.persistence.entity;
 
 import com.spartaecommerce.domain.vo.DocumentId;
 import com.spartaecommerce.domain.vo.Metadata;
+import com.spartaecommerce.domain.vo.TrackingId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -52,6 +54,9 @@ public class DocumentJpaEntity {
   @Convert(converter = MetadataConverter.class)
   private Metadata metadata;
 
+  @Column(name = "tracking_id", nullable = false)
+  private UUID trackingId;
+
   @Column(name = "document_status", nullable = false)
   @Enumerated(EnumType.STRING)
   private DocumentStatus documentStatus;
@@ -83,6 +88,7 @@ public class DocumentJpaEntity {
       String fileKey,
       String contentHash,
       Metadata metadata,
+      UUID trackingId,
       DocumentStatus documentStatus,
       int attempt,
       String lastErrorCode,
@@ -97,6 +103,7 @@ public class DocumentJpaEntity {
     this.fileKey = fileKey;
     this.contentHash = contentHash;
     this.metadata = metadata;
+    this.trackingId = trackingId;
     this.documentStatus = documentStatus;
     this.attempt = attempt;
     this.lastErrorCode = lastErrorCode;
@@ -114,6 +121,7 @@ public class DocumentJpaEntity {
         domain.getFileKey(),
         domain.getContentHash().getValue(),
         domain.getMetadata(),
+        domain.getTrackingId().getValue(),
         domain.getStatus(),
         domain.getAttempt(),
         domain.getLastErrorCode(),
@@ -132,6 +140,7 @@ public class DocumentJpaEntity {
         this.fileKey,
         ContentHash.of(this.contentHash),
         this.metadata,
+        new TrackingId(this.trackingId),
         this.documentStatus,
         this.attempt,
         this.lastErrorCode,

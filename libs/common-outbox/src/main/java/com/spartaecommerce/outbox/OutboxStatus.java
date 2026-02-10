@@ -10,7 +10,7 @@ package com.spartaecommerce.outbox;
  *       처리가 필요합니다.</li>
  * </ul>
  */
-public enum OutboxMessageStatus {
+public enum OutboxStatus {
   PENDING,
   SENT,
   FAILED

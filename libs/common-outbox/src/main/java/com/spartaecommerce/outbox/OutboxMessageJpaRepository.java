@@ -14,10 +14,10 @@ public interface OutboxMessageJpaRepository extends JpaRepository<OutboxMessageJ
   /**
    * 지정된 상태의 아웃박스 메시지를 생성 시간 오름차순으로 조회합니다.
    *
-   * <p>스케줄러에서 {@link OutboxMessageStatus#PENDING} 메시지를 폴링할 때 사용됩니다.
+   * <p>스케줄러에서 {@link OutboxStatus#PENDING} 메시지를 폴링할 때 사용됩니다.
    *
    * @param status 조회할 상태
    * @return 조건에 맞는 메시지 목록 (생성 시간 오름차순)
    */
-  List<OutboxMessageJpaEntity> findByStatusOrderByCreatedAt(OutboxMessageStatus status);
+  List<OutboxMessageJpaEntity> findByStatusOrderByCreatedAt(OutboxStatus status);
 }

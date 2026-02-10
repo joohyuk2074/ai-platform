@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 아웃박스 테이블에서 {@link OutboxMessageStatus#PENDING} 메시지를 주기적으로 읽어 Kafka로 발행하는
+ * 아웃박스 테이블에서 {@link OutboxStatus#PENDING} 메시지를 주기적으로 읽어 Kafka로 발행하는
  * 스케줄러입니다.
  *
  * <h3>처리 흐름</h3>
@@ -22,13 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>각 메시지의 {@code payloadJson}을 {@code Map}으로 역직렬화합니다.</li>
  *   <li>{@link KafkaTemplate}을 통해 해당 토픽으로 발행합니다. {@code partition_key}를 메시지 키로 사용하여
  *       동일 키의 이벤트 순서를 보장합니다.</li>
- *   <li>발행 성공 시 {@link OutboxMessageStatus#SENT}로 전이합니다.</li>
+ *   <li>발행 성공 시 {@link OutboxStatus#SENT}로 전이합니다.</li>
  * </ol>
  *
  * <h3>재시도 정책</h3>
  * <ul>
  *   <li>발행 실패 시 {@code retryCount}를 증가시키고 {@code PENDING} 상태를 유지합니다.</li>
- *   <li>{@code retryCount}가 {@link #MAX_RETRY_COUNT}를 초과하면 {@link OutboxMessageStatus#FAILED}로
+ *   <li>{@code retryCount}가 {@link #MAX_RETRY_COUNT}를 초과하면 {@link OutboxStatus#FAILED}로
  *       전이합니다. FAILED 메시지는 수동 조사 또는 별도 DLQ 처리가 필요합니다.</li>
  * </ul>
  *
@@ -61,7 +61,7 @@ public class OutboxMessageScheduler {
   public void processOutboxMessages() {
     try {
       List<OutboxMessageJpaEntity> pendingMessages =
-          outboxRepository.findByStatusOrderByCreatedAt(OutboxMessageStatus.PENDING);
+          outboxRepository.findByStatusOrderByCreatedAt(OutboxStatus.PENDING);
 
       if (pendingMessages.isEmpty()) {
         return;
@@ -83,7 +83,7 @@ public class OutboxMessageScheduler {
    * 단일 아웃박스 메시지를 Kafka로 발행합니다.
    *
    * <p>{@link KafkaTemplate#send}는 비동기적으로 동작하므로, {@code get()}을 호출하여 동기적으로
-   * 결과를 확인합니다. 발행 성공 시 {@link OutboxMessageStatus#SENT}로, 실패 시 재시도 카운터를
+   * 결과를 확인합니다. 발행 성공 시 {@link OutboxStatus#SENT}로, 실패 시 재시도 카운터를
    * 증가시킵니다.
    */
   private void publishMessage(OutboxMessageJpaEntity message) {

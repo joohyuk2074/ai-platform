@@ -97,4 +97,12 @@ public class DocumentRepositoryImpl implements DocumentRepository {
   public boolean existsByContentHash(ContentHash contentHash) {
     return jpaRepository.existsByContentHash(contentHash.getValue());
   }
+
+  @Override
+  public void saveAll(List<Document> documents) {
+    List<DocumentJpaEntity> jpaEntities = documents.stream()
+        .map(DocumentJpaEntity::from)
+        .collect(Collectors.toList());
+    jpaRepository.saveAll(jpaEntities);
+  }
 }

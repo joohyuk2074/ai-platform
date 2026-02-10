@@ -3,10 +3,11 @@ package me.joohyuk.datahub.infrastructure.adapter.in.web;
 import com.spartaecommerce.api.response.CommonResponse;
 import com.spartaecommerce.domain.vo.CollectionId;
 import jakarta.validation.Valid;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.dto.result.CreateDocumentCollectionResult;
-import me.joohyuk.datahub.application.dto.result.TransformDocumentResult;
+import me.joohyuk.datahub.application.dto.result.TransformDocumentRequestsResult;
 import me.joohyuk.datahub.application.port.in.service.CreateDocumentCollectionUseCase;
 import me.joohyuk.datahub.application.port.in.service.DeleteDocumentCollectionUseCase;
 import me.joohyuk.datahub.application.port.in.service.TransformDocumentUseCase;
@@ -86,15 +87,16 @@ public class DocumentCollectionController {
     log.info("User {} requesting document transformation for collectionId={}", userId,
         collectionId);
 
-    TransformDocumentResult result =
+    Instant requestedAt = Instant.now();
+    TransformDocumentRequestsResult result =
         transformDocumentUseCase.transform(CollectionId.of(collectionId));
 
     log.info(
-        "Document transformation request completed: collectionId={}, total={}, successful={}, failed={}",
-        collectionId, result.totalDocumentsFound(), result.successfullyRequested(),
-        result.totalDocumentsFound() - result.successfullyRequested());
+        "Document transformation request completed: collectionId={}, total={}",
+        collectionId, result.transformTrackingIds().size());
 
-    DocumentTransformRequestResponse response = DocumentTransformRequestResponse.from(result);
+    DocumentTransformRequestResponse response =
+        DocumentTransformRequestResponse.of(result, collectionId, requestedAt);
 
     return ResponseEntity.ok(CommonResponse.success(response));
   }
@@ -104,7 +106,7 @@ public class DocumentCollectionController {
    * 서비스로 임베딩 요청
    */
   @PostMapping("/{collectionId}/etl-pipeline")
-  public ResponseEntity<CommonResponse<TransformDocumentResult>> executeEtlPipeline(
+  public ResponseEntity<CommonResponse<TransformDocumentRequestsResult>> executeEtlPipeline(
       @RequestHeader("X-Request-UserId") Long userId,
       @PathVariable String collectionId
   ) {
