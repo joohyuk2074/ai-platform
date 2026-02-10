@@ -1,9 +1,9 @@
 package me.joohyuk.datahub.infrastructure.adapter.out.message.publisher;
 
+import com.spartaecommerce.domain.event.publisher.DomainEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
-import me.joohyuk.datahub.application.port.out.message.publisher.PassageCreationRequestPublisher;
 import me.joohyuk.datahub.infrastructure.adapter.PassageMessagingDataMapper;
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
 import me.joohyuk.messaging.topics.KafkaTopics;
@@ -13,7 +13,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OutboxBasedPassageCreationRequestPublisher implements PassageCreationRequestPublisher {
+public class OutboxBasedPassageCreationRequestPublisher implements
+    DomainEventPublisher<TransformDocumentEvent> {
 
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private final PassageMessagingDataMapper passageMessagingDataMapper;

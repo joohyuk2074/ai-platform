@@ -108,6 +108,21 @@ public class InMemoryDocumentRepository implements DocumentRepository {
     return store.values().stream().anyMatch(d -> d.getContentHash().equals(contentHash));
   }
 
+  @Override
+  public void saveAll(List<Document> documents) {
+    if (throwOnSave) {
+      throw saveException != null
+          ? saveException
+          : new RuntimeException("Simulated DB save failure");
+    }
+    Objects.requireNonNull(documents, "Documents list cannot be null");
+    documents.forEach(document -> {
+      Objects.requireNonNull(document, "Document cannot be null");
+      Objects.requireNonNull(document.getId(), "Document ID cannot be null");
+      store.put(document.getId(), document);
+    });
+  }
+
   // ─── 테스트 헬퍼 ──────────────────────────────────────────────
 
   /**

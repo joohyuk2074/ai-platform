@@ -1,8 +1,9 @@
 package me.joohyuk.datarex.application.service;
 
 import com.spartaecommerce.domain.vo.Metadata;
+import com.spartaecommerce.util.DateTimeHolder;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import me.joohyuk.datarex.fake.FakeDateTimeHolder;
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.DocumentTransformRequest;
 
@@ -10,6 +11,7 @@ import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.DocumentTra
  * Builder for creating DocumentTransformRequestedMessage test fixtures.
  * <p>
  * Provides a fluent API for constructing test messages with sensible defaults and specific overrides.
+ * Uses DateTimeHolder for time control in tests.
  */
 public class DocumentTransformRequestBuilder {
 
@@ -29,15 +31,24 @@ public class DocumentTransformRequestBuilder {
   private String lastErrorMessage = null;
   private int passageCount = 0;
   private String lastResultEventId = null;
-  private Instant createdAt = Instant.now();
-  private Instant updatedAt = Instant.now();
-  private LocalDateTime messageCreatedAt = LocalDateTime.now();
+  private DateTimeHolder dateTimeHolder;
+  private Instant createdAt;
+  private Instant updatedAt;
+  private Instant messageCreatedAt;
 
-  private DocumentTransformRequestBuilder() {
+  private DocumentTransformRequestBuilder(DateTimeHolder dateTimeHolder) {
+    this.dateTimeHolder = dateTimeHolder;
+    this.createdAt = dateTimeHolder.now();
+    this.updatedAt = dateTimeHolder.now();
+    this.messageCreatedAt = dateTimeHolder.now();
   }
 
   public static DocumentTransformRequestBuilder aRequest() {
-    return new DocumentTransformRequestBuilder();
+    return new DocumentTransformRequestBuilder(new FakeDateTimeHolder());
+  }
+
+  public static DocumentTransformRequestBuilder aRequest(DateTimeHolder dateTimeHolder) {
+    return new DocumentTransformRequestBuilder(dateTimeHolder);
   }
 
   public DocumentTransformRequestBuilder withDocumentId(Long documentId) {

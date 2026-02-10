@@ -15,9 +15,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import me.joohyuk.datahub.application.dto.result.FileStorageResult;
 import me.joohyuk.datahub.application.port.out.storage.FileStorage;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import me.joohyuk.datahub.infrastructure.adapter.storage.LocalFileStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ class LocalFileStorageTest {
         new ByteArrayInputStream("테스트 내용".getBytes(StandardCharsets.UTF_8));
     Metadata metadata = Metadata.forUpload("test.md", 12L, "text/markdown", 1L);
 
-    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
+    FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
 
     assertNotNull(result);
     assertNotNull(result.fileKey());
@@ -58,7 +58,7 @@ class LocalFileStorageTest {
     InputStream inputStream = new ByteArrayInputStream("내용".getBytes(StandardCharsets.UTF_8));
     Metadata metadata = Metadata.forUpload("report.pdf", 2L, "application/pdf", 1L);
 
-    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
+    FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
 
     assertTrue(
         result.fileKey().matches("collections/1/\\d+_report\\.pdf"),
@@ -74,7 +74,7 @@ class LocalFileStorageTest {
     Metadata metadata = Metadata.forUpload("content.txt", (long) contentBytes.length, "text/plain",
         1L);
 
-    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
+    FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
 
     Path storedFilePath = tempDir.resolve(result.fileKey());
     assertTrue(Files.exists(storedFilePath), "파일이 디스크에 존재해야 한다");
@@ -88,7 +88,7 @@ class LocalFileStorageTest {
     InputStream inputStream = new ByteArrayInputStream("내용".getBytes(StandardCharsets.UTF_8));
     Metadata metadata = Metadata.forUpload("dir-test.md", 2L, "text/markdown", 1L);
 
-    FileStorage.FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
+    FileStorageResult result = storage.store(inputStream, metadata, CollectionId.of(1L));
 
     Path collectionsDir = tempDir.resolve("collections/1");
     assertTrue(Files.isDirectory(collectionsDir), "collections/1 디렉토리가 생성되어야 한다");
@@ -100,7 +100,7 @@ class LocalFileStorageTest {
     InputStream emptyStream = new ByteArrayInputStream(new byte[0]);
     Metadata metadata = Metadata.forUpload("empty.txt", 0L, "text/plain", 1L);
 
-    FileStorage.FileStorageResult result = storage.store(emptyStream, metadata, CollectionId.of(1L));
+    FileStorageResult result = storage.store(emptyStream, metadata, CollectionId.of(1L));
 
     Path storedFilePath = tempDir.resolve(result.fileKey());
     assertTrue(Files.exists(storedFilePath), "빈 파일도 디스크에 존재해야 한다");
