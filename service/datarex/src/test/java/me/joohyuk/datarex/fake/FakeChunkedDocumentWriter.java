@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import me.joohyuk.datarex.domain.port.out.storage.ChunkedDocumentWriter;
+import me.joohyuk.datarex.application.port.out.storage.ChunkedDocumentWriter;
 import me.joohyuk.datarex.domain.vo.DocumentContent;
 
 /**

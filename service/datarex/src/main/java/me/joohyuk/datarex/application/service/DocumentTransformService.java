@@ -9,13 +9,13 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datarex.domain.exception.DatarexDomainException;
-import me.joohyuk.datarex.domain.port.in.service.DocumentTransformService;
-import me.joohyuk.datarex.domain.port.out.chunking.DocumentTransformer;
-import me.joohyuk.datarex.domain.port.out.chunking.DocumentTransformer.ChunkingConfig;
-import me.joohyuk.datarex.domain.port.out.message.DocumentTransformResultEventPublisher;
-import me.joohyuk.datarex.domain.port.out.storage.ChunkedDocumentWriter;
-import me.joohyuk.datarex.domain.port.out.storage.ChunkedDocumentWriter.StorageConfig;
-import me.joohyuk.datarex.domain.port.out.storage.DocumentReader;
+import me.joohyuk.datarex.application.port.in.DocumentTransformUseCase;
+import me.joohyuk.datarex.application.port.out.chunking.DocumentTransformer;
+import me.joohyuk.datarex.application.port.out.chunking.DocumentTransformer.ChunkingConfig;
+import me.joohyuk.datarex.application.port.out.message.DocumentTransformResultEventPublisher;
+import me.joohyuk.datarex.application.port.out.storage.ChunkedDocumentWriter;
+import me.joohyuk.datarex.application.port.out.storage.ChunkedDocumentWriter.StorageConfig;
+import me.joohyuk.datarex.application.port.out.storage.DocumentReader;
 import me.joohyuk.datarex.domain.vo.DocumentContent;
 import me.joohyuk.messaging.events.DocumentTransformCompletedMessage;
 import me.joohyuk.messaging.events.DocumentTransformFailedMessage;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DocumentTransformServiceImpl implements DocumentTransformService {
+public class DocumentTransformService implements DocumentTransformUseCase {
 
   private final DocumentReader documentReader;
   private final DocumentTransformer documentTransformer;

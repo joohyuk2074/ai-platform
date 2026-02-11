@@ -12,7 +12,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datarex.domain.exception.DatarexDomainException;
-import me.joohyuk.datarex.domain.port.out.storage.ChunkedDocumentWriter;
+import me.joohyuk.datarex.application.port.out.storage.ChunkedDocumentWriter;
 import me.joohyuk.datarex.domain.vo.DocumentContent;
 import org.springframework.stereotype.Component;
 

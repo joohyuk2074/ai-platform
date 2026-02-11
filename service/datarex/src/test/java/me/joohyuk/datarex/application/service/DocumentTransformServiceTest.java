@@ -4,7 +4,6 @@ import static me.joohyuk.datarex.application.service.DocumentTransformRequestBui
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.io.IOException;
 import java.util.List;
 import me.joohyuk.datarex.domain.exception.DatarexDomainException;
 import me.joohyuk.datarex.domain.vo.DocumentContent;
@@ -21,7 +20,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("문서 변환 서비스 구현체 테스트")
-class DocumentTransformServiceImplTest {
+class DocumentTransformServiceTest {
 
   // Fake dependencies - these behave like real implementations but in-memory
   private FakeDocumentReader documentReader;
@@ -30,7 +29,7 @@ class DocumentTransformServiceImplTest {
   private FakeDocumentTransformResultEventPublisher eventPublisher;
 
   // System under test - using real implementation with fake dependencies
-  private DocumentTransformServiceImpl transformService;
+  private DocumentTransformService transformService;
 
   @BeforeEach
   void setUp() {
@@ -41,7 +40,7 @@ class DocumentTransformServiceImplTest {
     eventPublisher = new FakeDocumentTransformResultEventPublisher();
 
     // Wire together real service with fake dependencies
-    transformService = new DocumentTransformServiceImpl(
+    transformService = new DocumentTransformService(
         documentReader,
         documentTransformer,
         chunkedDocumentWriter,

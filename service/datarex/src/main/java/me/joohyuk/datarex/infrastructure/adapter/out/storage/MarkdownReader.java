@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import me.joohyuk.datarex.domain.exception.DatarexDomainException;
-import me.joohyuk.datarex.domain.port.out.storage.DocumentReader;
+import me.joohyuk.datarex.application.port.out.storage.DocumentReader;
 import me.joohyuk.datarex.domain.vo.DocumentContent;
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.DocumentTransformRequest;
 import org.springframework.ai.document.Document;

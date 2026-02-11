@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.datarex.domain.port.out.storage.FileContentLoader;
+import me.joohyuk.datarex.application.port.out.storage.FileContentLoader;
 import org.springframework.stereotype.Component;
 
 @Slf4j

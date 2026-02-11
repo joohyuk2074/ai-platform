@@ -1,4 +1,4 @@
-package me.joohyuk.datarex.domain.port.out.message;
+package me.joohyuk.datarex.application.port.out.message;
 
 import me.joohyuk.messaging.events.DocumentTransformCompletedMessage;
 import me.joohyuk.messaging.events.DocumentTransformFailedMessage;

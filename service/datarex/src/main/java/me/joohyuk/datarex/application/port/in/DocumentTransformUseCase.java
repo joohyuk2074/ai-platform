@@ -1,8 +1,8 @@
-package me.joohyuk.datarex.domain.port.in.service;
+package me.joohyuk.datarex.application.port.in;
 
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
 
-public interface DocumentTransformService {
+public interface DocumentTransformUseCase {
 
   void transformDocument(DocumentTransformRequestedMessage message);
 }

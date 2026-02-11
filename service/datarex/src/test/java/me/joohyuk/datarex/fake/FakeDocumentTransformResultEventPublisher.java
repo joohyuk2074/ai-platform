@@ -2,7 +2,7 @@ package me.joohyuk.datarex.fake;
 
 import java.util.ArrayList;
 import java.util.List;
-import me.joohyuk.datarex.domain.port.out.message.DocumentTransformResultEventPublisher;
+import me.joohyuk.datarex.application.port.out.message.DocumentTransformResultEventPublisher;
 import me.joohyuk.messaging.events.DocumentTransformCompletedMessage;
 import me.joohyuk.messaging.events.DocumentTransformFailedMessage;
 

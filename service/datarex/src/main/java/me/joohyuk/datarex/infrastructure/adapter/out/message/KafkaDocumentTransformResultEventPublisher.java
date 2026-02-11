@@ -4,7 +4,7 @@ import static me.joohyuk.messaging.topics.KafkaTopics.DOCUMENT_TRANSFORM_COMPLET
 import static me.joohyuk.messaging.topics.KafkaTopics.DOCUMENT_TRANSFORM_FAILED;
 
 import lombok.RequiredArgsConstructor;
-import me.joohyuk.datarex.domain.port.out.message.DocumentTransformResultEventPublisher;
+import me.joohyuk.datarex.application.port.out.message.DocumentTransformResultEventPublisher;
 import me.joohyuk.messaging.events.DocumentTransformCompletedMessage;
 import me.joohyuk.messaging.events.DocumentTransformFailedMessage;
 import org.springframework.kafka.core.KafkaTemplate;

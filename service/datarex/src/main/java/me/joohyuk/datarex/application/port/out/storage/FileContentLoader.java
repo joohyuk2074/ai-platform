@@ -1,4 +1,4 @@
-package me.joohyuk.datarex.domain.port.out.storage;
+package me.joohyuk.datarex.application.port.out.storage;
 
 public interface FileContentLoader {
 
