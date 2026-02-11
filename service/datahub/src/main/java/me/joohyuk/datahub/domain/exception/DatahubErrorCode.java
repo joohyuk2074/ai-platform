@@ -15,6 +15,7 @@ import com.spartaecommerce.exception.DomainErrorCode;
  *   <li>UNAUTHORIZED로 끝나는 경우 → HTTP 401</li>
  *   <li>FORBIDDEN으로 끝나는 경우 → HTTP 403</li>
  *   <li>INVALID로 시작하는 경우 → HTTP 400</li>
+ *   <li>INTERNAL_SERVER_ERROR인 경우 → HTTP 500</li>
  *   <li>그 외 → HTTP 422</li>
  * </ul>
  *
@@ -62,6 +63,9 @@ public enum DatahubErrorCode implements DomainErrorCode {
   COLLECTION_NOT_EMPTY("COLLECTION_NOT_EMPTY"),
   FILE_STORAGE_FAILED("FILE_STORAGE_FAILED"),
   FILE_DELETE_FAILED("FILE_DELETE_FAILED"),
+
+  // 서버 내부 에러 (500)
+  INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR"),
   ;
 
   private final String code;

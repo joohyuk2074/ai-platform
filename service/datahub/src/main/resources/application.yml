@@ -36,3 +36,9 @@ spring:
 #      enable-auto-commit: false
 #      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 #      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+kafka:
+  topic:
+    transform-document: ${KAFKA_TOPIC_TRANSFORM_DOCUMENT:transform-document}
+    passage-creation: ${KAFKA_TOPIC_PASSAGE_CREATION:passage-creation}
+    document-transform-result: ${KAFKA_TOPIC_DOCUMENT_TRANSFORM_RESULT:document-transform-result}

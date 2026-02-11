@@ -1,10 +1,13 @@
 package me.joohyuk.datahub.fake;
 
+import com.spartaecommerce.outbox.OutboxStatus;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.application.port.out.persistence.TransformDocumentOutboxRepository;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
 
@@ -52,6 +55,25 @@ public class InMemoryTransformDocumentOutboxRepository implements
     });
 
     return outboxes;
+  }
+
+  @Override
+  public List<TransformDocumentOutbox> findAllByTypeAndOutboxStatusAndSagaStatus(
+      String sagaType,
+      OutboxStatus outboxStatus,
+      SagaStatus... sagaStatuses
+  ) {
+    Objects.requireNonNull(sagaType, "Saga type cannot be null");
+    Objects.requireNonNull(outboxStatus, "Outbox status cannot be null");
+    Objects.requireNonNull(sagaStatuses, "Saga statuses cannot be null");
+
+    List<SagaStatus> targetSagaStatuses = Arrays.asList(sagaStatuses);
+
+    return store.values().stream()
+        .filter(outbox -> sagaType.equals(outbox.getType()))
+        .filter(outbox -> outboxStatus.equals(outbox.getOutboxStatus()))
+        .filter(outbox -> targetSagaStatuses.contains(outbox.getSagaStatus()))
+        .toList();
   }
 
   // ─── 테스트 헬퍼 ──────────────────────────────────────────────

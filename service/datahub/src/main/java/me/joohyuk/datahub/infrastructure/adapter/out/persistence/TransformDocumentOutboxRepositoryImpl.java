@@ -1,7 +1,11 @@
 package me.joohyuk.datahub.infrastructure.adapter.out.persistence;
 
+import com.spartaecommerce.outbox.OutboxStatus;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.application.port.out.persistence.TransformDocumentOutboxRepository;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
 import me.joohyuk.datahub.infrastructure.adapter.out.persistence.entity.TransformDocumentOutboxJpaEntity;
@@ -22,7 +26,8 @@ public class TransformDocumentOutboxRepositoryImpl implements TransformDocumentO
   }
 
   @Override
-  public List<TransformDocumentOutbox> saveAll(List<TransformDocumentOutbox> transformDocumentOutboxes) {
+  public List<TransformDocumentOutbox> saveAll(
+      List<TransformDocumentOutbox> transformDocumentOutboxes) {
     List<TransformDocumentOutboxJpaEntity> jpaEntities = transformDocumentOutboxes.stream()
         .map(TransformDocumentOutboxJpaEntity::from)
         .toList();
@@ -32,5 +37,21 @@ public class TransformDocumentOutboxRepositoryImpl implements TransformDocumentO
     return savedJpaEntities.stream()
         .map(TransformDocumentOutboxJpaEntity::toDomain)
         .toList();
+  }
+
+  @Override
+  public List<TransformDocumentOutbox> findAllByTypeAndOutboxStatusAndSagaStatus(
+      String sagaType,
+      OutboxStatus outboxStatus,
+      SagaStatus... sagaStatus
+  ) {
+    return jpaRepository.findAllByTypeAndOutboxStatusAndSagaStatusIn(
+            sagaType,
+            outboxStatus,
+            Arrays.asList(sagaStatus)
+        )
+        .stream()
+        .map(TransformDocumentOutboxJpaEntity::toDomain)
+        .collect(Collectors.toList());
   }
 }

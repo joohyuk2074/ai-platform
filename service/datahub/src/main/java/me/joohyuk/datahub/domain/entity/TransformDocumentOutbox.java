@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
@@ -21,6 +22,7 @@ public class TransformDocumentOutbox {
   private String payload;
 
   private SagaStatus sagaStatus;
+  @Setter
   private OutboxStatus outboxStatus;
 
   private DocumentStatus documentStatus;
@@ -29,4 +31,5 @@ public class TransformDocumentOutbox {
 
   private LocalDateTime createdAt;
   private LocalDateTime processedAt;
+
 }

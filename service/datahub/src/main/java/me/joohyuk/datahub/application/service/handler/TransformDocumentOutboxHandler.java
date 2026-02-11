@@ -1,5 +1,7 @@
 package me.joohyuk.datahub.application.service.handler;
 
+import static me.joohyuk.commonsaga.SagaConstants.DOCUMENT_TRANSFORM_SAGA_NAME;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spartaecommerce.domain.port.IdGenerator;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
+@Transactional
 @RequiredArgsConstructor
 public class TransformDocumentOutboxHandler {
 
@@ -27,7 +30,10 @@ public class TransformDocumentOutboxHandler {
   private final IdGenerator idGenerator;
   private final ObjectMapper objectMapper;
 
-  @Transactional
+  public void save(TransformDocumentOutbox transformDocumentOutbox) {
+    transformDocumentOutboxRepository.save(transformDocumentOutbox);
+  }
+
   public void saveAll(
       List<TransformDocumentEvent> events,
       List<SagaStatus> sagaStatuses
@@ -51,18 +57,24 @@ public class TransformDocumentOutboxHandler {
     log.info("TransformDocumentOutbox bulk saved - count: {}", savedOutboxes.size());
   }
 
-  /**
-   * TransformDocumentEvent로부터 Outbox 엔티티를 생성합니다.
-   */
+  @Transactional(readOnly = true)
+  public List<TransformDocumentOutbox> getTransformDocumentOutboxByOutboxStatusAndSagaStatus(
+      OutboxStatus outboxStatus,
+      SagaStatus... sagaStatus
+  ) {
+    return transformDocumentOutboxRepository.findAllByTypeAndOutboxStatusAndSagaStatus(
+        DOCUMENT_TRANSFORM_SAGA_NAME,
+        outboxStatus,
+        sagaStatus
+    );
+  }
+
   private TransformDocumentOutbox createOutbox(
-      TransformDocumentEvent event, Long sagaId, SagaStatus sagaStatus) {
-    String payload;
-    try {
-      payload = objectMapper.writeValueAsString(event);
-    } catch (JsonProcessingException e) {
-      log.error("Failed to serialize TransformDocumentEvent to JSON", e);
-      throw new RuntimeException("Failed to create outbox payload", e);
-    }
+      TransformDocumentEvent event,
+      Long sagaId,
+      SagaStatus sagaStatus
+  ) {
+    String payload = serializeEventToPayload(event);
 
     return TransformDocumentOutbox.builder()
         .id(idGenerator.generateId())
@@ -76,5 +88,18 @@ public class TransformDocumentOutboxHandler {
         .createdAt(LocalDateTime.now())
         .processedAt(null)
         .build();
+  }
+
+  private String serializeEventToPayload(TransformDocumentEvent event) {
+    try {
+      return objectMapper.writeValueAsString(event);
+    } catch (JsonProcessingException e) {
+      log.error("Failed to serialize TransformDocumentEvent to JSON", e);
+      throw new DatahubDomainException(
+          "Failed to serialize event to JSON payload",
+          DatahubErrorCode.INTERNAL_SERVER_ERROR,
+          e
+      );
+    }
   }
 }
