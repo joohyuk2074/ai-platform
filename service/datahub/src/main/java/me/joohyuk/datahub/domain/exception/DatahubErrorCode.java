@@ -23,7 +23,7 @@ import com.spartaecommerce.exception.DomainErrorCode;
  * <pre>{@code
  * // 도메인 서비스나 애플리케이션 서비스에서 사용
  * throw new DomainException(
- *     "Document not found with id: " + documentId,
+ *     "Document not found with documentId: " + documentId,
  *     DatahubDomainErrorCode.DOCUMENT_NOT_FOUND
  * );
  * }</pre>

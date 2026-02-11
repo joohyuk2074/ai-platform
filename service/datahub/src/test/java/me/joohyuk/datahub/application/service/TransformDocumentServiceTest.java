@@ -70,13 +70,6 @@ class TransformDocumentServiceTest {
     // Given: Wire real collaborators (Classical approach)
     TransformDocumentSagaHandler transformDocumentSagaHandler = new TransformDocumentSagaHandler();
 
-    // Real collaborators (Classical approach - no mocks)
-    DocumentTransformHandler documentTransformHandler = new DocumentTransformHandler(
-        documentRepository,
-        documentCollectionRepository,
-        dateTimeHolder
-    );
-
     // DomainService not used in saveAll
     DocumentPersistenceHandler documentPersistenceHandler = new DocumentPersistenceHandler(
         null, // DomainService not used in saveAll
@@ -84,6 +77,13 @@ class TransformDocumentServiceTest {
         documentCollectionRepository,
         dateTimeHolder,
         documentIdGenerator
+    );
+
+    // Real collaborators (Classical approach - no mocks)
+    DocumentTransformHandler documentTransformHandler = new DocumentTransformHandler(
+        documentRepository,
+        documentCollectionRepository,
+        dateTimeHolder
     );
 
     TransformDocumentOutboxHandler transformDocumentOutboxHandler = new TransformDocumentOutboxHandler(
@@ -95,7 +95,6 @@ class TransformDocumentServiceTest {
     // Given: System under test with real collaborators
     transformDocumentService = new TransformDocumentService(
         documentTransformHandler,
-        documentPersistenceHandler,
         transformDocumentOutboxHandler,
         transformDocumentSagaHandler
     );
@@ -283,7 +282,7 @@ class TransformDocumentServiceTest {
   ) {
     assertThat(outboxes)
         .allSatisfy(outbox -> {
-          assertThat(outbox.getType()).isEqualTo("TransformDocumentRequested");
+          assertThat(outbox.getType()).isEqualTo("TransformDocumentSaga");
           assertThat(outbox.getDocumentStatus()).isEqualTo(DocumentStatus.TRANSFORM_REQUESTED);
           assertThat(outbox.getSagaStatus().name()).isEqualTo("STARTED");
           assertThat(outbox.getOutboxStatus().name()).isEqualTo("PENDING");

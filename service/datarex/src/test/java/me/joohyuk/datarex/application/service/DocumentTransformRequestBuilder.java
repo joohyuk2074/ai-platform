@@ -5,7 +5,7 @@ import com.spartaecommerce.util.DateTimeHolder;
 import java.time.Instant;
 import me.joohyuk.datarex.fake.FakeDateTimeHolder;
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
-import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.DocumentTransformRequest;
+import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.Document;
 
 /**
  * Builder for creating DocumentTransformRequestedMessage test fixtures.
@@ -25,12 +25,14 @@ public class DocumentTransformRequestBuilder {
       "application/pdf",
       999L
   );
+  private String trackingId = "tracking-123";
   private String status = "PENDING";
   private int attempt = 0;
   private String lastErrorCode = null;
   private String lastErrorMessage = null;
   private int passageCount = 0;
   private String lastResultEventId = null;
+  private Long uploader = 999L;
   private DateTimeHolder dateTimeHolder;
   private Instant createdAt;
   private Instant updatedAt;
@@ -112,12 +114,13 @@ public class DocumentTransformRequestBuilder {
   }
 
   public DocumentTransformRequestedMessage build() {
-    DocumentTransformRequest request = new DocumentTransformRequest(
+    Document document = new Document(
         documentId,
         collectionId,
         fileKey,
         contentHash,
         metadata,
+        trackingId,
         status,
         attempt,
         lastErrorCode,
@@ -125,10 +128,11 @@ public class DocumentTransformRequestBuilder {
         passageCount,
         lastResultEventId,
         createdAt,
-        updatedAt
+        updatedAt,
+        uploader
     );
 
-    return new DocumentTransformRequestedMessage(request, messageCreatedAt);
+    return new DocumentTransformRequestedMessage(document, messageCreatedAt);
   }
 
   /**

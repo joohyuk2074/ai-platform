@@ -33,11 +33,13 @@ public class DocumentTransformHandler {
     }
 
     Instant now = dateTimeHolder.now();
+    documents.forEach(document -> document.transform(now));
+
+    documentRepository.saveAll(documents);
+    log.info("Batch saved {} documents for transform", documents.size());
+
     List<TransformDocumentEvent> events = documents.stream()
-        .map(document -> {
-          document.transform(now);
-          return TransformDocumentEvent.of(document, now);
-        })
+        .map(document -> TransformDocumentEvent.of(document, now))
         .toList();
 
     log.debug("Processed {} documents for transform - collectionId: {}",

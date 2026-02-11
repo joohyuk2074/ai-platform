@@ -28,11 +28,11 @@ public class OutboxBasedPassageCreationRequestPublisher implements
 
     kafkaTemplate.send(
         KafkaTopics.DOCUMENT_TRANSFORM_REQUESTED,
-        String.valueOf(message.message().documentId()),
+        String.valueOf(message.document().documentId()),
         message
     );
 
     log.info("Document transform requested message published: documentId={}, collectionId={}",
-        message.message().documentId(), message.message().collectionId());
+        message.document().documentId(), message.document().collectionId());
   }
 }

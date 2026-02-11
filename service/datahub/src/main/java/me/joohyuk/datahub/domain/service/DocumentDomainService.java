@@ -43,7 +43,7 @@ public class DocumentDomainService {
         document.getId().getValue(), passageCount);
 
     // TODO: 추후 Passage 처리 이벤트로 변경 필요
-    return new TransformDocumentEvent(document, now);
+    return TransformDocumentEvent.of(document, now);
   }
 
   /**

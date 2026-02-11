@@ -28,7 +28,7 @@ public class KafkaConsumerConfig {
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
 
-  @Value("${spring.kafka.consumer.group-id:datahub-consumer}")
+  @Value("${spring.kafka.consumer.group-documentId:datahub-consumer}")
   private String groupId;
 
   @Value("${spring.kafka.consumer.auto-offset-reset:earliest}")

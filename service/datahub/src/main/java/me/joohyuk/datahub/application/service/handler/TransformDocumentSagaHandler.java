@@ -20,4 +20,9 @@ public class TransformDocumentSagaHandler {
       case TRANSFORM_COMPENSATED -> SagaStatus.COMPENSATED;  // 보상 완료, 롤백됨
     };
   }
+
+  public SagaStatus documentStatusNameToSagaStatus(String documentStatusName) {
+    DocumentStatus documentStatus = DocumentStatus.valueOf(documentStatusName);
+    return documentStatusToSagaStatus(documentStatus);
+  }
 }

@@ -20,9 +20,8 @@ public class TransformDocumentListenerImpl implements TransformDocumentListener 
   @Override
   public void onCompleted(PassageResponse passageResponse) {
     TransformDocumentEvent domainEvent = passageCreationSaga.process(passageResponse);
-    log.info("Publishing PassageCreationEvent for message documentId: {}",
+    log.info("Document transformed for documentId: {}",
         passageResponse.getDocumentId());
-    domainEvent.fire();
   }
 
   @Override

@@ -20,7 +20,6 @@ import me.joohyuk.datarex.domain.vo.DocumentContent;
 import me.joohyuk.messaging.events.DocumentTransformCompletedMessage;
 import me.joohyuk.messaging.events.DocumentTransformFailedMessage;
 import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
-import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.DocumentTransformRequest;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -35,7 +34,7 @@ public class DocumentTransformService implements DocumentTransformUseCase {
 
   @Override
   public void transformDocument(DocumentTransformRequestedMessage message) {
-    DocumentTransformRequest document = message.message();
+    DocumentTransformRequestedMessage.Document document = message.document();
     String eventId = UUID.randomUUID().toString();
     String passageVersion = document.contentHash();
 

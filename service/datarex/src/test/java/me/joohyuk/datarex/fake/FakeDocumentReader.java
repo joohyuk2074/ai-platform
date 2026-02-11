@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import me.joohyuk.datarex.application.port.out.storage.DocumentReader;
 import me.joohyuk.datarex.domain.vo.DocumentContent;
-import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.DocumentTransformRequest;
+import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.Document;
 
 /**
  * Fake implementation of DocumentReader for testing.
@@ -19,13 +19,13 @@ public class FakeDocumentReader implements DocumentReader {
 
   private final Map<Long, List<DocumentContent>> documentStore = new HashMap<>();
   private final Map<Long, RuntimeException> failureStore = new HashMap<>();
-  private DocumentTransformRequest lastRequest;
+  private Document lastRequest;
 
   @Override
-  public List<DocumentContent> read(DocumentTransformRequest request) {
-    lastRequest = request;
+  public List<DocumentContent> read(Document document) {
+    lastRequest = document;
 
-    Long documentId = request.documentId();
+    Long documentId = document.documentId();
 
     // Check if failure is configured for this document
     if (failureStore.containsKey(documentId)) {
@@ -51,9 +51,9 @@ public class FakeDocumentReader implements DocumentReader {
   }
 
   /**
-   * Returns the last request received by this reader.
+   * Returns the last document received by this reader.
    */
-  public DocumentTransformRequest getLastRequest() {
+  public Document getLastRequest() {
     return lastRequest;
   }
 
