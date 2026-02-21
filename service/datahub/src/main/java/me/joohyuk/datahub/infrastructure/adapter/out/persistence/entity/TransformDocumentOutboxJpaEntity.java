@@ -48,7 +48,8 @@ public class TransformDocumentOutboxJpaEntity {
   private int version;
 
   public static TransformDocumentOutboxJpaEntity from(
-      TransformDocumentOutbox transformDocumentOutbox) {
+      TransformDocumentOutbox transformDocumentOutbox
+  ) {
     return TransformDocumentOutboxJpaEntity.builder()
         .id(transformDocumentOutbox.getId())
         .sagaId(transformDocumentOutbox.getSagaId())

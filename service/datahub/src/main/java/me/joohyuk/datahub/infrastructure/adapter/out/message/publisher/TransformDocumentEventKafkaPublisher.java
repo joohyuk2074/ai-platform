@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.port.out.message.publisher.TransformDocumentMessagePublisher;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
-import me.joohyuk.datahub.infrastructure.config.KafkaTopicProperties;
+import me.joohyuk.messaging.topics.KafkaTopics;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 public class TransformDocumentEventKafkaPublisher implements TransformDocumentMessagePublisher {
 
   private final KafkaTemplate<String, Object> kafkaTemplate;
-  private final KafkaTopicProperties kafkaTopicProperties;
 
   @Override
   public void publish(
@@ -26,7 +25,7 @@ public class TransformDocumentEventKafkaPublisher implements TransformDocumentMe
     try {
       String key = String.valueOf(transformDocumentOutbox.getSagaId());
       kafkaTemplate.send(
-              kafkaTopicProperties.getTransformDocument(),
+              KafkaTopics.DOCUMENT_TRANSFORM_REQUESTED,
               key,
               transformDocumentOutbox.getPayload()
           )

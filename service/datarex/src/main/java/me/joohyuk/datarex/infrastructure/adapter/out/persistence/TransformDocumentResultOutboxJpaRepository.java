@@ -8,5 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface TransformDocumentResultOutboxJpaRepository
     extends JpaRepository<TransformDocumentResultOutboxJpaEntity, Long> {
 
-  List<TransformDocumentResultOutboxJpaEntity> findAllByOutboxStatus(OutboxStatus outboxStatus);
+  List<TransformDocumentResultOutboxJpaEntity> findAllByTypeAndOutboxStatus(
+      String type,
+      OutboxStatus outboxStatus
+  );
 }

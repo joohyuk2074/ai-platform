@@ -22,30 +22,14 @@ public class FakeTransformDocumentResultOutboxRepository implements
 
   @Override
   public TransformDocumentResultOutbox save(TransformDocumentResultOutbox outbox) {
-    store.put(outbox.id(), outbox);
+    store.put(outbox.getId(), outbox);
     saveHistory.add(outbox);
     return outbox;
   }
 
   @Override
-  public List<TransformDocumentResultOutbox> findAllByOutboxStatus(OutboxStatus outboxStatus) {
-    return store.values().stream()
-        .filter(outbox -> outbox.outboxStatus().equals(outboxStatus))
-        .toList();
-  }
-
-  /**
-   * findById는 인터페이스에 정의되어 있지 않지만 테스트에서 유용하게 사용할 수 있습니다.
-   */
-  public Optional<TransformDocumentResultOutbox> findById(Long id) {
-    return Optional.ofNullable(store.get(id));
-  }
-
-  /**
-   * 모든 저장된 outbox를 반환합니다.
-   */
-  public List<TransformDocumentResultOutbox> findAll() {
-    return new ArrayList<>(store.values());
+  public List<TransformDocumentResultOutbox> findAllByOutboxStatus(String sagaType, OutboxStatus outboxStatus) {
+    return List.of();
   }
 
   /**
@@ -62,14 +46,6 @@ public class FakeTransformDocumentResultOutboxRepository implements
     return store.size();
   }
 
-  /**
-   * 특정 sagaId로 outbox를 찾습니다.
-   */
-  public Optional<TransformDocumentResultOutbox> findBySagaId(Long sagaId) {
-    return store.values().stream()
-        .filter(outbox -> outbox.sagaId().equals(sagaId))
-        .findFirst();
-  }
 
   /**
    * 저장소를 초기화합니다.

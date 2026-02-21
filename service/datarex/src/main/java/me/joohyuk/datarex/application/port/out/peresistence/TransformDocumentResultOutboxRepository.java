@@ -8,5 +8,8 @@ public interface TransformDocumentResultOutboxRepository {
 
   TransformDocumentResultOutbox save(TransformDocumentResultOutbox transformDocumentResultOutbox);
 
-  List<TransformDocumentResultOutbox> findAllByOutboxStatus(OutboxStatus outboxStatus);
+  List<TransformDocumentResultOutbox> findAllByOutboxStatus(
+      String sagaType,
+      OutboxStatus outboxStatus
+  );
 }

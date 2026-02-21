@@ -17,14 +17,18 @@ public class TransformDocumentResultOutboxRepositoryImpl implements
 
   @Override
   public TransformDocumentResultOutbox save(TransformDocumentResultOutbox outbox) {
-    TransformDocumentResultOutboxJpaEntity entity = TransformDocumentResultOutboxJpaEntity.from(outbox);
+    TransformDocumentResultOutboxJpaEntity entity = TransformDocumentResultOutboxJpaEntity.from(
+        outbox);
     TransformDocumentResultOutboxJpaEntity saved = jpaRepository.save(entity);
     return saved.toDomain();
   }
 
   @Override
-  public List<TransformDocumentResultOutbox> findAllByOutboxStatus(OutboxStatus outboxStatus) {
-    return jpaRepository.findAllByOutboxStatus(outboxStatus).stream()
+  public List<TransformDocumentResultOutbox> findAllByOutboxStatus(
+      String sagaType,
+      OutboxStatus outboxStatus
+  ) {
+    return jpaRepository.findAllByTypeAndOutboxStatus(sagaType, outboxStatus).stream()
         .map(TransformDocumentResultOutboxJpaEntity::toDomain)
         .toList();
   }

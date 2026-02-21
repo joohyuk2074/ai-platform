@@ -3,14 +3,14 @@ package me.joohyuk.datarex.application.service;
 import static me.joohyuk.datarex.application.service.DocumentTransformRequestBuilder.aRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.List;
 import me.joohyuk.datarex.application.dto.command.TransformDocumentCommand;
 import me.joohyuk.datarex.application.service.handler.TransformDocumentHandler;
 import me.joohyuk.datarex.application.service.handler.TransformDocumentResultOutboxHandler;
 import me.joohyuk.datarex.domain.vo.DocumentContent;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import me.joohyuk.datarex.fake.FakeChunkedDocumentWriter;
 import me.joohyuk.datarex.fake.FakeDateTimeHolder;
 import me.joohyuk.datarex.fake.FakeDocumentReader;
@@ -84,7 +84,7 @@ class DocumentTransformServiceTest {
     }
     var lastOutbox = outboxList.getLast();
     try {
-      return objectMapper.readValue(lastOutbox.payload(), TransformDocumentCompletedEvent.class);
+      return objectMapper.readValue(lastOutbox.getPayload(), TransformDocumentCompletedEvent.class);
     } catch (Exception e) {
       throw new RuntimeException("Failed to deserialize event from outbox", e);
     }
@@ -97,7 +97,7 @@ class DocumentTransformServiceTest {
     return outboxRepository.getSaveHistory().stream()
         .map(outbox -> {
           try {
-            return objectMapper.readValue(outbox.payload(), TransformDocumentCompletedEvent.class);
+            return objectMapper.readValue(outbox.getPayload(), TransformDocumentCompletedEvent.class);
           } catch (Exception e) {
             throw new RuntimeException("Failed to deserialize event from outbox", e);
           }

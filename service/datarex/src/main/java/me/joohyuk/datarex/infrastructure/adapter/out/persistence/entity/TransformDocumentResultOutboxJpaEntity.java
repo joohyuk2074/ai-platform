@@ -28,6 +28,7 @@ public class TransformDocumentResultOutboxJpaEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+  private String type;
 
   @Column(nullable = false)
   private Long sagaId;
@@ -44,25 +45,29 @@ public class TransformDocumentResultOutboxJpaEntity {
 
   private LocalDateTime processedAt;
 
-  public static TransformDocumentResultOutboxJpaEntity from(TransformDocumentResultOutbox domain) {
+  public static TransformDocumentResultOutboxJpaEntity from(
+      TransformDocumentResultOutbox domain
+  ) {
     return TransformDocumentResultOutboxJpaEntity.builder()
-        .id(domain.id())
-        .sagaId(domain.sagaId())
-        .outboxStatus(domain.outboxStatus())
-        .payload(domain.payload())
-        .createdAt(domain.createdAt())
-        .processedAt(domain.processedAt())
+        .id(domain.getId())
+        .sagaId(domain.getSagaId())
+        .type(domain.getType())
+        .outboxStatus(domain.getOutboxStatus())
+        .payload(domain.getPayload())
+        .createdAt(domain.getCreatedAt())
+        .processedAt(domain.getProcessedAt())
         .build();
   }
 
   public TransformDocumentResultOutbox toDomain() {
     return new TransformDocumentResultOutbox(
-        id,
-        sagaId,
-        outboxStatus,
-        payload,
-        createdAt,
-        processedAt
+        this.id,
+        this.sagaId,
+        this.type,
+        this.outboxStatus,
+        this.payload,
+        this.createdAt,
+        this.processedAt
     );
   }
 }

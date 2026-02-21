@@ -41,9 +41,10 @@ public class TransformDocumentOutboxScheduler implements OutboxScheduler {
     }
 
     log.info("Processing {} TransformDocument outbox messages", outboxMessages.size());
-    outboxMessages.forEach(outboxMessage -> {
-      transformDocumentMessagePublisher.publish(outboxMessage, this::updateOutboxStatus);
-    });
+
+    outboxMessages.forEach(outboxMessage ->
+        transformDocumentMessagePublisher.publish(outboxMessage, this::updateOutboxStatus));
+
     log.info("Completed processing TransformDocument outbox messages");
   }
 
