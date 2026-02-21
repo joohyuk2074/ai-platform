@@ -17,6 +17,7 @@ import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
 import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
+import me.joohyuk.datahub.domain.vo.DocumentStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +49,9 @@ public class TransformDocumentOutboxHandler {
     List<TransformDocumentOutbox> outboxes = new ArrayList<>();
     for (int i = 0; i < events.size(); i++) {
       Long sagaId = idGenerator.generateId();
-      outboxes.add(createOutbox(events.get(i), sagaId, sagaStatuses.get(i)));
+      TransformDocumentEvent enrichedEvent = events.get(i).toBuilder().sagaId(sagaId).build();
+      TransformDocumentOutbox outbox = createOutbox(enrichedEvent, sagaId, sagaStatuses.get(i));
+      outboxes.add(outbox);
     }
 
     List<TransformDocumentOutbox> savedOutboxes = transformDocumentOutboxRepository.saveAll(
@@ -81,7 +84,7 @@ public class TransformDocumentOutboxHandler {
         .sagaId(sagaId)
         .type(DOCUMENT_TRANSFORM_SAGA_NAME)
         .payload(payload)
-        .documentStatus(me.joohyuk.datahub.domain.vo.DocumentStatus.valueOf(event.getStatus()))
+        .documentStatus(DocumentStatus.valueOf(event.getStatus()))
         .sagaStatus(sagaStatus)
         .outboxStatus(OutboxStatus.PENDING)
         .version(0)

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datarex.domain.exception.DatarexDomainException;
 import me.joohyuk.datarex.application.port.out.storage.ChunkedDocumentWriter;
+import me.joohyuk.datarex.domain.exception.DatarexErrorCode;
 import me.joohyuk.datarex.domain.vo.DocumentContent;
 import org.springframework.stereotype.Component;
 
@@ -73,7 +74,10 @@ public class FileSystemChunkedDocumentWriter implements ChunkedDocumentWriter {
       }
     } catch (IOException e) {
       log.error("디렉토리 생성 실패: {}", outputPath, e);
-      throw new DatarexDomainException("디렉토리 생성 실패: " + outputPath, e);
+      throw new DatarexDomainException(
+          "디렉토리 생성 실패: " + outputPath,
+          DatarexErrorCode.FILE_STORAGE_FAILED,
+          e);
     }
   }
 
@@ -93,7 +97,7 @@ public class FileSystemChunkedDocumentWriter implements ChunkedDocumentWriter {
       log.debug("청크 파일 쓰기 완료: {} ({} chunks)", outputPath, chunks.size());
     } catch (IOException e) {
       log.error("청크 파일 쓰기 실패: {}", outputPath, e);
-      throw new DatarexDomainException("청크된 문서 파일 저장 실패: " + outputPath, e);
+      throw new DatarexDomainException("청크된 문서 파일 저장 실패: " + outputPath, DatarexErrorCode.FILE_STORAGE_FAILED, e);
     }
   }
 }

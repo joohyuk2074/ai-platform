@@ -8,8 +8,10 @@ import lombok.Getter;
 import me.joohyuk.datahub.domain.entity.Document;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 public class TransformDocumentEvent implements DomainEvent<Document> {
+
+  private final Long sagaId;
 
   private final Long documentId;
   private final Long collectionId;

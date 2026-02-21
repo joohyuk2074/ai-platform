@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import me.joohyuk.datahub.application.dto.result.TransformDocumentRequestsResult;
 import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHandler;
-import me.joohyuk.datahub.application.service.handler.DocumentTransformHandler;
+import me.joohyuk.datahub.application.service.handler.TransformDocumentHandler;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentOutboxHandler;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentSagaHandler;
 import me.joohyuk.datahub.domain.entity.Document;
@@ -80,7 +80,7 @@ class TransformDocumentServiceTest {
     );
 
     // Real collaborators (Classical approach - no mocks)
-    DocumentTransformHandler documentTransformHandler = new DocumentTransformHandler(
+    TransformDocumentHandler transformDocumentHandler = new TransformDocumentHandler(
         documentRepository,
         documentCollectionRepository,
         dateTimeHolder
@@ -94,7 +94,7 @@ class TransformDocumentServiceTest {
 
     // Given: System under test with real collaborators
     transformDocumentService = new TransformDocumentService(
-        documentTransformHandler,
+        transformDocumentHandler,
         transformDocumentOutboxHandler,
         transformDocumentSagaHandler
     );

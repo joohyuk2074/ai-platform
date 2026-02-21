@@ -1,12 +1,10 @@
 package me.joohyuk.datarex.infrastructure.adapter.out.message;
 
 import static me.joohyuk.messaging.topics.KafkaTopics.DOCUMENT_TRANSFORM_COMPLETED;
-import static me.joohyuk.messaging.topics.KafkaTopics.DOCUMENT_TRANSFORM_FAILED;
 
 import lombok.RequiredArgsConstructor;
 import me.joohyuk.datarex.application.port.out.message.DocumentTransformResultEventPublisher;
-import me.joohyuk.messaging.events.DocumentTransformCompletedMessage;
-import me.joohyuk.messaging.events.DocumentTransformFailedMessage;
+import me.joohyuk.messaging.events.TransformDocumentCompletedEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +16,7 @@ public class KafkaDocumentTransformResultEventPublisher implements
   private final KafkaTemplate<String, Object> kafkaTemplate;
 
   @Override
-  public void publishCompleted(DocumentTransformCompletedMessage message) {
+  public void publishCompleted(TransformDocumentCompletedEvent message) {
     kafkaTemplate.send(DOCUMENT_TRANSFORM_COMPLETED, message.documentId(), message);
-  }
-
-  @Override
-  public void publishFailed(DocumentTransformFailedMessage message) {
-    kafkaTemplate.send(DOCUMENT_TRANSFORM_FAILED, message.documentId(), message);
   }
 }

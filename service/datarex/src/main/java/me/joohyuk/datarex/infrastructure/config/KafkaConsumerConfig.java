@@ -71,8 +71,14 @@ public class KafkaConsumerConfig {
         new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(consumerFactory());
 
+    // 배치 리스너 모드 활성화
+    factory.setBatchListener(true);
+
     // 수동 커밋 모드 설정 (enable-auto-commit: false이므로)
     factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+
+    // 배치 처리 타임아웃 설정 (3초 대기)
+    factory.getContainerProperties().setPollTimeout(3000);
 
     return factory;
   }

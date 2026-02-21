@@ -1,5 +1,6 @@
 package me.joohyuk.datahub.application.service.handler;
 
+import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
 import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.util.DateTimeHolder;
 import java.time.Instant;
@@ -9,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.port.out.persistence.DocumentCollectionRepository;
 import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.domain.entity.Document;
-import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DocumentTransformHandler {
+public class TransformDocumentHandler {
 
   private final DocumentRepository documentRepository;
   private final DocumentCollectionRepository documentCollectionRepository;

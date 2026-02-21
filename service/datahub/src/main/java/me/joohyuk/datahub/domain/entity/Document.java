@@ -140,7 +140,7 @@ public class Document extends AggregateRoot<DocumentId> {
    * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
    * @throws DatahubDomainException 현재 상태가 TRANSFORM_REQUESTED가 아닌 경우
    */
-  public void markPassageCreated(int passageCount, String eventId, Instant now) {
+  public void markTransformed(int passageCount, String eventId, Instant now) {
     if (status != DocumentStatus.TRANSFORM_REQUESTED) {
       throw new DatahubDomainException(
           "Cannot mark transformed. current=" + status + ", expected=TRANSFORM_REQUESTED"

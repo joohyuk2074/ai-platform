@@ -1,11 +1,8 @@
 package me.joohyuk.datarex.application.port.out.message;
 
-import me.joohyuk.messaging.events.DocumentTransformCompletedMessage;
-import me.joohyuk.messaging.events.DocumentTransformFailedMessage;
+import me.joohyuk.messaging.events.TransformDocumentCompletedEvent;
 
 public interface DocumentTransformResultEventPublisher {
 
-    void publishCompleted(DocumentTransformCompletedMessage message);
-
-    void publishFailed(DocumentTransformFailedMessage message);
+  void publishCompleted(TransformDocumentCompletedEvent message);
 }

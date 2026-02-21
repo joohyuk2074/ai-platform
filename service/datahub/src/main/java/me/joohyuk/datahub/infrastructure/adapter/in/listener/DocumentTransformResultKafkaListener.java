@@ -2,12 +2,6 @@ package me.joohyuk.datahub.infrastructure.adapter.in.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.datahub.domain.entity.PassageResponse;
-import me.joohyuk.datahub.application.port.in.listener.TransformDocumentListener;
-import me.joohyuk.messaging.events.DocumentTransformCompletedMessage;
-import me.joohyuk.messaging.events.DocumentTransformFailedMessage;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,7 +42,7 @@ public class DocumentTransformResultKafkaListener {
 //          .eventId(message.eventId())
 //          .collectionId(Long.parseLong(message.collectionId()))
 //          .documentId(Long.parseLong(message.documentId()))
-//          .passageVersion(message.passageVersion())
+//          .contentHash(message.contentHash())
 //          .passageCount(message.passageCount())
 //          .success(true)
 //          .occurredAt(message.occurredAt())
@@ -88,7 +82,7 @@ public class DocumentTransformResultKafkaListener {
 //          .eventId(message.eventId())
 //          .collectionId(Long.parseLong(message.collectionId()))
 //          .documentId(Long.parseLong(message.documentId()))
-//          .passageVersion(message.passageVersion())
+//          .contentHash(message.contentHash())
 //          .errorCode(message.errorCode())
 //          .errorMessage(message.errorMessage())
 //          .success(false)

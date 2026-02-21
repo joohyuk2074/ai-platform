@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.application.dto.result.TransformDocumentRequestsResult;
 import me.joohyuk.datahub.application.port.in.service.TransformDocumentUseCase;
-import me.joohyuk.datahub.application.service.handler.DocumentTransformHandler;
+import me.joohyuk.datahub.application.service.handler.TransformDocumentHandler;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentOutboxHandler;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentSagaHandler;
 import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
@@ -19,14 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TransformDocumentService implements TransformDocumentUseCase {
 
-  private final DocumentTransformHandler documentTransformHandler;
+  private final TransformDocumentHandler transformDocumentHandler;
   private final TransformDocumentOutboxHandler transformDocumentOutboxHandler;
   private final TransformDocumentSagaHandler transformDocumentSagaHandler;
 
   @Transactional
   public TransformDocumentRequestsResult transform(CollectionId collectionId) {
     List<TransformDocumentEvent> events =
-        documentTransformHandler.processTransformRequest(collectionId);
+        transformDocumentHandler.processTransformRequest(collectionId);
 
     if (events.isEmpty()) {
       return TransformDocumentRequestsResult.empty();

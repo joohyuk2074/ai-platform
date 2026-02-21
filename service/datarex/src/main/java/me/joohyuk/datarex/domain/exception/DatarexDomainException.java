@@ -1,16 +1,23 @@
 package me.joohyuk.datarex.domain.exception;
 
-public class DatarexDomainException extends RuntimeException {
+import com.spartaecommerce.exception.DomainErrorCode;
+import com.spartaecommerce.exception.DomainException;
 
-  public DatarexDomainException(String message) {
-    super(message);
+public class DatarexDomainException extends DomainException {
+
+  public DatarexDomainException(DomainErrorCode errorCode) {
+    super(errorCode);
   }
 
-  public DatarexDomainException(String message, Throwable cause) {
-    super(message, cause);
+  public DatarexDomainException(String message, DomainErrorCode errorCode) {
+    super(message, errorCode);
   }
 
-  public DatarexDomainException(Throwable cause) {
-    super(cause);
+  public DatarexDomainException(String message, DomainErrorCode errorCode, Throwable cause) {
+    super(message, errorCode, cause);
+  }
+
+  public DatarexDomainException(DomainErrorCode errorCode, Throwable cause) {
+    super(errorCode, cause);
   }
 }

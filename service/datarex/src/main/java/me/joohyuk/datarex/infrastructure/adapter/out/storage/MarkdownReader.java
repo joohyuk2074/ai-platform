@@ -5,10 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import me.joohyuk.datarex.domain.exception.DatarexDomainException;
+import me.joohyuk.datarex.application.dto.command.TransformDocumentCommand;
 import me.joohyuk.datarex.application.port.out.storage.DocumentReader;
+import me.joohyuk.datarex.domain.exception.DatarexDomainException;
+import me.joohyuk.datarex.domain.exception.DatarexErrorCode;
 import me.joohyuk.datarex.domain.vo.DocumentContent;
-import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.markdown.MarkdownDocumentReader;
 import org.springframework.ai.reader.markdown.config.MarkdownDocumentReaderConfig;
@@ -21,15 +22,15 @@ public class MarkdownReader implements DocumentReader {
   private static final String STORAGE_BASE_PATH = "storage/documents/";
 
   @Override
-  public List<DocumentContent> read(DocumentTransformRequestedMessage.Document document) {
+  public List<DocumentContent> read(TransformDocumentCommand document) {
     List<Document> springAiDocuments = loadMarkdown(document);
     return toDocumentContents(springAiDocuments);
   }
 
-  private List<Document> loadMarkdown(DocumentTransformRequestedMessage.Document document) {
+  private List<Document> loadMarkdown(TransformDocumentCommand document) {
     String filePath = document.fileKey();
     if (filePath == null || filePath.isBlank()) {
-      throw new DatarexDomainException("fileKey는 필수입니다");
+      throw new DatarexDomainException("fileKey는 필수입니다", DatarexErrorCode.INVALID_FILE_KEY);
     }
 
     Map<String, Object> metadata = buildMetadata(document);
@@ -45,7 +46,10 @@ public class MarkdownReader implements DocumentReader {
 
     FileSystemResource resource = new FileSystemResource(Path.of(STORAGE_BASE_PATH + filePath));
     if (!resource.exists()) {
-      throw new IllegalStateException("파일이 존재하지 않습니다: " + filePath);
+      throw new DatarexDomainException(
+          "파일이 존재하지 않습니다: " + filePath,
+          DatarexErrorCode.FILE_NOT_FOUND
+      );
     }
 
     MarkdownDocumentReader reader = new MarkdownDocumentReader(resource, config);
@@ -58,7 +62,7 @@ public class MarkdownReader implements DocumentReader {
         .collect(Collectors.toList());
   }
 
-  private Map<String, Object> buildMetadata(DocumentTransformRequestedMessage.Document document) {
+  private Map<String, Object> buildMetadata(TransformDocumentCommand document) {
     Map<String, Object> metadata = new HashMap<>();
 
     // 문서 기본 정보
@@ -88,19 +92,8 @@ public class MarkdownReader implements DocumentReader {
       metadata.put("contentHash", document.contentHash());
     }
 
-    // 문서 상태 정보
-    if (document.status() != null) {
-      metadata.put("status", document.status());
-    }
+    // 재시도 횟수 (벡터 스토어 필터링에 활용)
     metadata.put("attempt", document.attempt());
-
-    // 타임스탬프
-    if (document.createdAt() != null) {
-      metadata.put("createdAt", document.createdAt().toString());
-    }
-    if (document.updatedAt() != null) {
-      metadata.put("updatedAt", document.updatedAt().toString());
-    }
 
     return metadata;
   }

@@ -2,8 +2,6 @@ package me.joohyuk.datahub.domain.service;
 
 import com.spartaecommerce.domain.vo.DocumentId;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.domain.entity.Document;
@@ -37,13 +35,14 @@ public class DocumentDomainService {
       String eventId,
       Instant now
   ) {
-    document.markPassageCreated(passageCount, eventId, now);
+    document.markTransformed(passageCount, eventId, now);
 
     log.info("Document transformed successfully: documentId={}, passageCount={}",
         document.getId().getValue(), passageCount);
 
     // TODO: 추후 Passage 처리 이벤트로 변경 필요
-    return TransformDocumentEvent.of(document, now);
+//    return TransformDocumentEvent.of(document, now);
+    return null;
   }
 
   /**

@@ -1,20 +1,16 @@
 package me.joohyuk.datarex.application.service;
 
 import com.spartaecommerce.domain.vo.Metadata;
-import com.spartaecommerce.util.DateTimeHolder;
-import java.time.Instant;
-import me.joohyuk.datarex.fake.FakeDateTimeHolder;
-import me.joohyuk.messaging.events.DocumentTransformRequestedMessage;
-import me.joohyuk.messaging.events.DocumentTransformRequestedMessage.Document;
+import me.joohyuk.datarex.application.dto.command.TransformDocumentCommand;
 
 /**
- * Builder for creating DocumentTransformRequestedMessage test fixtures.
+ * Builder for creating TransformDocumentCommand test fixtures.
  * <p>
- * Provides a fluent API for constructing test messages with sensible defaults and specific overrides.
- * Uses DateTimeHolder for time control in tests.
+ * Provides a fluent API for constructing test commands with sensible defaults and specific overrides.
  */
 public class DocumentTransformRequestBuilder {
 
+  private Long sagaId = 1001L;
   private Long documentId = 1L;
   private Long collectionId = 100L;
   private String fileKey = "collections/100/documents/1/file.pdf";
@@ -25,32 +21,18 @@ public class DocumentTransformRequestBuilder {
       "application/pdf",
       999L
   );
-  private String trackingId = "tracking-123";
-  private String status = "PENDING";
   private int attempt = 0;
-  private String lastErrorCode = null;
-  private String lastErrorMessage = null;
-  private int passageCount = 0;
-  private String lastResultEventId = null;
-  private Long uploader = 999L;
-  private DateTimeHolder dateTimeHolder;
-  private Instant createdAt;
-  private Instant updatedAt;
-  private Instant messageCreatedAt;
 
-  private DocumentTransformRequestBuilder(DateTimeHolder dateTimeHolder) {
-    this.dateTimeHolder = dateTimeHolder;
-    this.createdAt = dateTimeHolder.now();
-    this.updatedAt = dateTimeHolder.now();
-    this.messageCreatedAt = dateTimeHolder.now();
+  private DocumentTransformRequestBuilder() {
   }
 
   public static DocumentTransformRequestBuilder aRequest() {
-    return new DocumentTransformRequestBuilder(new FakeDateTimeHolder());
+    return new DocumentTransformRequestBuilder();
   }
 
-  public static DocumentTransformRequestBuilder aRequest(DateTimeHolder dateTimeHolder) {
-    return new DocumentTransformRequestBuilder(dateTimeHolder);
+  public DocumentTransformRequestBuilder withSagaId(Long sagaId) {
+    this.sagaId = sagaId;
+    return this;
   }
 
   public DocumentTransformRequestBuilder withDocumentId(Long documentId) {
@@ -87,58 +69,27 @@ public class DocumentTransformRequestBuilder {
     return this;
   }
 
-  public DocumentTransformRequestBuilder withStatus(String status) {
-    this.status = status;
-    return this;
-  }
-
   public DocumentTransformRequestBuilder withAttempt(int attempt) {
     this.attempt = attempt;
     return this;
   }
 
-  public DocumentTransformRequestBuilder withLastError(String errorCode, String errorMessage) {
-    this.lastErrorCode = errorCode;
-    this.lastErrorMessage = errorMessage;
-    return this;
-  }
-
-  public DocumentTransformRequestBuilder withPassageCount(int passageCount) {
-    this.passageCount = passageCount;
-    return this;
-  }
-
-  public DocumentTransformRequestBuilder withCreatedAt(Instant createdAt) {
-    this.createdAt = createdAt;
-    return this;
-  }
-
-  public DocumentTransformRequestedMessage build() {
-    Document document = new Document(
+  public TransformDocumentCommand build() {
+    return new TransformDocumentCommand(
+        sagaId,
         documentId,
         collectionId,
         fileKey,
         contentHash,
         metadata,
-        trackingId,
-        status,
-        attempt,
-        lastErrorCode,
-        lastErrorMessage,
-        passageCount,
-        lastResultEventId,
-        createdAt,
-        updatedAt,
-        uploader
+        attempt
     );
-
-    return new DocumentTransformRequestedMessage(document, messageCreatedAt);
   }
 
   /**
-   * Creates a request for a markdown document.
+   * Creates a command for a markdown document.
    */
-  public static DocumentTransformRequestedMessage markdownDocument() {
+  public static TransformDocumentCommand markdownDocument() {
     return aRequest()
         .withMetadata("README.md", 2048L, "text/markdown")
         .withFileKey("collections/100/documents/1/README.md")
@@ -146,9 +97,9 @@ public class DocumentTransformRequestBuilder {
   }
 
   /**
-   * Creates a request for a PDF document.
+   * Creates a command for a PDF document.
    */
-  public static DocumentTransformRequestedMessage pdfDocument() {
+  public static TransformDocumentCommand pdfDocument() {
     return aRequest()
         .withMetadata("report.pdf", 10240L, "application/pdf")
         .withFileKey("collections/100/documents/1/report.pdf")
@@ -156,9 +107,9 @@ public class DocumentTransformRequestBuilder {
   }
 
   /**
-   * Creates a request for a large document.
+   * Creates a command for a large document.
    */
-  public static DocumentTransformRequestedMessage largeDocument() {
+  public static TransformDocumentCommand largeDocument() {
     return aRequest()
         .withMetadata("large-doc.txt", 1048576L, "text/plain")
         .withFileKey("collections/100/documents/1/large-doc.txt")
