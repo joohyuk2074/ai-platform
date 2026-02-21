@@ -4,11 +4,14 @@ import static me.joohyuk.commonsaga.SagaConstants.DOCUMENT_TRANSFORM_SAGA_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spartaecommerce.domain.port.JsonSerializer;
+import com.spartaecommerce.infrastructure.json.ObjectMapperJsonSerializer;
 import com.spartaecommerce.outbox.OutboxStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentOutboxHandler;
+import me.joohyuk.datahub.application.service.handler.TransformDocumentSagaHandler;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 import me.joohyuk.datahub.fake.FakeTransformDocumentMessagePublisher;
@@ -63,11 +66,18 @@ class TransformDocumentOutboxSchedulerTest {
     objectMapper = new ObjectMapper();
     objectMapper.findAndRegisterModules();
 
+    // Given: Real JsonSerializer with ObjectMapper
+    JsonSerializer jsonSerializer = new ObjectMapperJsonSerializer(objectMapper);
+
+    // Given: Real SagaHandler
+    TransformDocumentSagaHandler sagaHandler = new TransformDocumentSagaHandler();
+
     // Given: Wire real collaborators (Classical approach - real object graph)
     outboxHandler = new TransformDocumentOutboxHandler(
         outboxRepository,
+        sagaHandler,
         idGenerator,
-        objectMapper
+        jsonSerializer
     );
 
     // Given: System under test

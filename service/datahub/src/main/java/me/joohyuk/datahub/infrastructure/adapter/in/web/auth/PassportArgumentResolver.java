@@ -1,7 +1,7 @@
 package me.joohyuk.datahub.infrastructure.adapter.web.auth;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spartaecommerce.domain.entity.Passport;
+import com.spartaecommerce.domain.port.JsonSerializer;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class PassportArgumentResolver implements HandlerMethodArgumentResolver {
 
   private static final String PASSPORT_HEADER = "X-Passport";
 
-  private final ObjectMapper objectMapper;
+  private final JsonSerializer jsonSerializer;
 
   @Override
   public boolean supportsParameter(MethodParameter parameter) {
@@ -65,7 +65,7 @@ public class PassportArgumentResolver implements HandlerMethodArgumentResolver {
           : passportHeader;
 
       // JSON을 Passport 객체로 역직렬화
-      Passport passport = objectMapper.readValue(jsonString, Passport.class);
+      Passport passport = jsonSerializer.deserialize(jsonString, Passport.class);
 
       log.debug("Resolved Passport - userId: {}, username: {}, roles: {}",
           passport.userId().getValue(), passport.username(), passport.roles());

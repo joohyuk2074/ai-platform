@@ -1,6 +1,6 @@
 package me.joohyuk.datahub.application.service.handler;
 
-import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
+import com.spartaecommerce.domain.port.IdGenerator;
 import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.util.DateTimeHolder;
 import java.time.Instant;
@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.port.out.persistence.DocumentCollectionRepository;
 import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.domain.entity.Document;
+import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
@@ -23,6 +24,7 @@ public class TransformDocumentHandler {
   private final DocumentRepository documentRepository;
   private final DocumentCollectionRepository documentCollectionRepository;
   private final DateTimeHolder dateTimeHolder;
+  private final IdGenerator idGenerator;
 
   public List<TransformDocumentEvent> processTransformRequest(CollectionId collectionId) {
     List<Document> documents = fetchValidatedDocuments(collectionId);
@@ -39,7 +41,10 @@ public class TransformDocumentHandler {
     log.info("Batch saved {} documents for transform", documents.size());
 
     List<TransformDocumentEvent> events = documents.stream()
-        .map(document -> TransformDocumentEvent.of(document, now))
+        .map(document -> {
+          Long sagaId = idGenerator.generateId();
+          return TransformDocumentEvent.from(sagaId, document);
+        })
         .toList();
 
     log.debug("Processed {} documents for transform - collectionId: {}",

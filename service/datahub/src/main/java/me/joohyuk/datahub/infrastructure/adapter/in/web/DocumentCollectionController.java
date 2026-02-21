@@ -3,7 +3,6 @@ package me.joohyuk.datahub.infrastructure.adapter.in.web;
 import com.spartaecommerce.api.response.CommonResponse;
 import com.spartaecommerce.domain.vo.CollectionId;
 import jakarta.validation.Valid;
-import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.dto.result.CreateDocumentCollectionResult;
@@ -81,45 +80,14 @@ public class DocumentCollectionController {
 
   @PostMapping("/{collectionId}/transform")
   public ResponseEntity<CommonResponse<DocumentTransformRequestResponse>> transformDocuments(
-      @RequestHeader("X-Request-UserId") Long userId,
       @PathVariable String collectionId
   ) {
-    log.info("User {} requesting document transformation for collectionId={}", userId,
-        collectionId);
-
-    Instant requestedAt = Instant.now();
     TransformDocumentRequestsResult result =
         transformDocumentUseCase.transform(CollectionId.of(collectionId));
 
-    log.info(
-        "Document transformation request completed: collectionId={}, total={}",
-        collectionId, result.transformTrackingIds().size());
-
     DocumentTransformRequestResponse response =
-        DocumentTransformRequestResponse.of(result, collectionId, requestedAt);
+        DocumentTransformRequestResponse.of(result, collectionId);
 
     return ResponseEntity.ok(CommonResponse.success(response));
-  }
-
-  /**
-   * 전체 ETL 파이프라인 실행 1. Transform (문서 청킹) 2. 청킹 완료 이벤트 리스닝 3. 청킹된 파일에서 Passage 생성 및 저장 4. VecDash
-   * 서비스로 임베딩 요청
-   */
-  @PostMapping("/{collectionId}/etl-pipeline")
-  public ResponseEntity<CommonResponse<TransformDocumentRequestsResult>> executeEtlPipeline(
-      @RequestHeader("X-Request-UserId") Long userId,
-      @PathVariable String collectionId
-  ) {
-    log.info("User {} requesting full ETL pipeline for collectionId={}", userId, collectionId);
-
-//        TransformDocumentResult transformDocumentResult =
-//            documentCommandService.autoIndexing(CollectionId.of(collectionId));
-
-    // TODO: 전체 ETL 파이프라인 실행 로직 구현
-    // - Transform 요청
-    // - 이벤트 리스닝 및 Passage 생성
-    // - VecDash 임베딩 요청
-
-    return ResponseEntity.ok(CommonResponse.success(null));
   }
 }

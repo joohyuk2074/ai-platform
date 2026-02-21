@@ -30,8 +30,9 @@ public class TransformDocumentEvent implements DomainEvent<Document> {
   private final Instant eventCreatedAt;
   private final Long uploadedBy;
 
-  public static TransformDocumentEvent of(Document document, Instant eventCreatedAt) {
+  public static TransformDocumentEvent from(Long sagaId, Document document) {
     return TransformDocumentEvent.builder()
+        .sagaId(sagaId)
         .documentId(document.getId().getValue())
         .collectionId(document.getCollectionId().getValue())
         .fileKey(document.getFileKey())
@@ -46,7 +47,7 @@ public class TransformDocumentEvent implements DomainEvent<Document> {
         .lastResultEventId(document.getLastResultEventId())
         .documentCreatedAt(document.getCreatedAt())
         .documentUpdatedAt(document.getUpdatedAt())
-        .eventCreatedAt(eventCreatedAt)
+        .eventCreatedAt(document.getCreatedAt())
         .uploadedBy(document.getUploader().getValue())
         .build();
   }

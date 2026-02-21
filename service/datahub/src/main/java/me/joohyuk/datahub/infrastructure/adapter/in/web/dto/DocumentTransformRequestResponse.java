@@ -1,24 +1,20 @@
 package me.joohyuk.datahub.infrastructure.adapter.in.web.dto;
 
-import java.time.Instant;
 import me.joohyuk.datahub.application.dto.result.TransformDocumentRequestsResult;
 
 public record DocumentTransformRequestResponse(
     String collectionId,
-    int totalRequested,
-    Instant requestedAt
+    int totalRequested
 ) {
 
   public static DocumentTransformRequestResponse of(
       TransformDocumentRequestsResult result,
-      String collectionId,
-      Instant requestedAt
+      String collectionId
   ) {
 
     return new DocumentTransformRequestResponse(
         collectionId,
-        result.transformTrackingIds().size(),
-        requestedAt
+        result.transformTrackingIds().size()
     );
   }
 }

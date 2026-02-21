@@ -4,11 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spartaecommerce.domain.port.JsonSerializer;
 import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.ContentHash;
 import com.spartaecommerce.domain.vo.DocumentId;
 import com.spartaecommerce.domain.vo.Metadata;
 import com.spartaecommerce.domain.vo.TrackingId;
+import com.spartaecommerce.infrastructure.json.ObjectMapperJsonSerializer;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -79,24 +81,28 @@ class TransformDocumentServiceTest {
         documentIdGenerator
     );
 
+    // Real JsonSerializer
+    JsonSerializer jsonSerializer = new ObjectMapperJsonSerializer(objectMapper);
+
     // Real collaborators (Classical approach - no mocks)
     TransformDocumentHandler transformDocumentHandler = new TransformDocumentHandler(
         documentRepository,
         documentCollectionRepository,
-        dateTimeHolder
+        dateTimeHolder,
+        documentIdGenerator
     );
 
     TransformDocumentOutboxHandler transformDocumentOutboxHandler = new TransformDocumentOutboxHandler(
         transformDocumentOutboxRepository,
+        transformDocumentSagaHandler,
         outboxIdGenerator,
-        objectMapper
+        jsonSerializer
     );
 
     // Given: System under test with real collaborators
     transformDocumentService = new TransformDocumentService(
         transformDocumentHandler,
-        transformDocumentOutboxHandler,
-        transformDocumentSagaHandler
+        transformDocumentOutboxHandler
     );
   }
 

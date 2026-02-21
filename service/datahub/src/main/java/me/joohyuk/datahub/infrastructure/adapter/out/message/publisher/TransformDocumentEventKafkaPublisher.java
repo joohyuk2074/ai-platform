@@ -30,16 +30,17 @@ public class TransformDocumentEventKafkaPublisher implements TransformDocumentMe
               transformDocumentOutbox.getPayload()
           )
           .whenComplete((result, ex) -> {
-            if (ex == null) {
-              log.info("Transform document event sent successfully. SagaId: {}, Offset: {}",
-                  transformDocumentOutbox.getSagaId(),
-                  result.getRecordMetadata().offset());
-              outboxCallback.accept(transformDocumentOutbox, OutboxStatus.SENT);
-            } else {
+            if (ex != null) {
               log.error("Failed to send transform document event. SagaId: {}",
                   transformDocumentOutbox.getSagaId(), ex);
               outboxCallback.accept(transformDocumentOutbox, OutboxStatus.FAILED);
+              return;
             }
+
+            log.info("Transform document event sent successfully. SagaId: {}, Offset: {}",
+                transformDocumentOutbox.getSagaId(),
+                result.getRecordMetadata().offset());
+            outboxCallback.accept(transformDocumentOutbox, OutboxStatus.SENT);
           });
     } catch (Exception e) {
       log.error("Error publishing transform document event. SagaId: {}",
