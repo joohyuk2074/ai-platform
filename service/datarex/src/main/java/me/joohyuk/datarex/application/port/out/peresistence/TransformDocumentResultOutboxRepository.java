@@ -2,6 +2,7 @@ package me.joohyuk.datarex.application.port.out.peresistence;
 
 import com.spartaecommerce.outbox.OutboxStatus;
 import java.util.List;
+import java.util.Optional;
 import me.joohyuk.datarex.domain.event.TransformDocumentResultOutbox;
 
 public interface TransformDocumentResultOutboxRepository {
@@ -12,4 +13,6 @@ public interface TransformDocumentResultOutboxRepository {
       String sagaType,
       OutboxStatus outboxStatus
   );
+
+  Optional<TransformDocumentResultOutbox> findBySagaId(Long sagaId);
 }

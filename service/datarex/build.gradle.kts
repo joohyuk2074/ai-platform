@@ -16,6 +16,7 @@ dependencies {
   implementation(project(":libs:common-saga"))
 
   implementation("org.springframework.boot:spring-boot-starter-validation")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
 
   implementation(platform("org.springframework.ai:spring-ai-bom:1.0.0"))
@@ -25,8 +26,9 @@ dependencies {
   implementation("org.springframework.kafka:spring-kafka")
   testImplementation("org.springframework.kafka:spring-kafka-test")
 
-  compileOnly("org.projectlombok:lombok")
+  runtimeOnly("com.mysql:mysql-connector-j")
 
+  compileOnly("org.projectlombok:lombok")
   annotationProcessor("org.projectlombok:lombok")
 }
 

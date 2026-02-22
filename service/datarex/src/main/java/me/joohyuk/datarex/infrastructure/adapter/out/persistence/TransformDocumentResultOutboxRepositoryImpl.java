@@ -2,6 +2,7 @@ package me.joohyuk.datarex.infrastructure.adapter.out.persistence;
 
 import com.spartaecommerce.outbox.OutboxStatus;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import me.joohyuk.datarex.application.port.out.peresistence.TransformDocumentResultOutboxRepository;
 import me.joohyuk.datarex.domain.event.TransformDocumentResultOutbox;
@@ -17,8 +18,8 @@ public class TransformDocumentResultOutboxRepositoryImpl implements
 
   @Override
   public TransformDocumentResultOutbox save(TransformDocumentResultOutbox outbox) {
-    TransformDocumentResultOutboxJpaEntity entity = TransformDocumentResultOutboxJpaEntity.from(
-        outbox);
+    TransformDocumentResultOutboxJpaEntity entity =
+        TransformDocumentResultOutboxJpaEntity.from(outbox);
     TransformDocumentResultOutboxJpaEntity saved = jpaRepository.save(entity);
     return saved.toDomain();
   }
@@ -31,5 +32,11 @@ public class TransformDocumentResultOutboxRepositoryImpl implements
     return jpaRepository.findAllByTypeAndOutboxStatus(sagaType, outboxStatus).stream()
         .map(TransformDocumentResultOutboxJpaEntity::toDomain)
         .toList();
+  }
+
+  @Override
+  public Optional<TransformDocumentResultOutbox> findBySagaId(Long sagaId) {
+    return jpaRepository.findBySagaId(sagaId)
+        .map(TransformDocumentResultOutboxJpaEntity::toDomain);
   }
 }

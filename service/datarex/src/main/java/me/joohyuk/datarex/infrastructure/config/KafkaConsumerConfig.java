@@ -43,9 +43,6 @@ public class KafkaConsumerConfig {
   @Value("${spring.kafka.consumer.value-deserializer}")
   private String valueDeserializer;
 
-  @Value("${spring.kafka.consumer.properties.spring.json.trusted.packages}")
-  private String trustedPackages;
-
   @Bean
   public ConsumerFactory<String, Object> consumerFactory() {
     Map<String, Object> configProps = new HashMap<>();
@@ -56,11 +53,7 @@ public class KafkaConsumerConfig {
     configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);
     configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
 
-    // JsonDeserializer를 위한 trusted packages 설정
-    configProps.put("spring.json.trusted.packages", trustedPackages);
-
-    // Type Mapping: 공통 메시징 DTO를 사용하므로 불필요 (동일한 클래스 사용)
-    // datahub와 datarex 모두 me.joohyuk.messaging.events.DocumentTransformRequestedMessage 사용
+    // StringDeserializer 사용 시 trusted packages 설정 불필요
 
     return new DefaultKafkaConsumerFactory<>(configProps);
   }
