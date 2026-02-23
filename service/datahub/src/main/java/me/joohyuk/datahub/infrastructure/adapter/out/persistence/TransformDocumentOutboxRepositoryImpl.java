@@ -40,6 +40,19 @@ public class TransformDocumentOutboxRepositoryImpl implements TransformDocumentO
   }
 
   @Override
+  public void deleteByTypeAndOutboxStatusAndSagaStatus(
+      String documentTransformSagaName,
+      OutboxStatus outboxStatus,
+      SagaStatus... sagaStatus
+  ) {
+    jpaRepository.deleteAllByTypeAndOutboxStatusAndSagaStatusIn(
+        documentTransformSagaName,
+        outboxStatus,
+        Arrays.asList(sagaStatus)
+    );
+  }
+
+  @Override
   public List<TransformDocumentOutbox> findAllByTypeAndOutboxStatusAndSagaStatus(
       String sagaType,
       OutboxStatus outboxStatus,

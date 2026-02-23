@@ -15,4 +15,10 @@ public interface TransformDocumentOutboxJpaRepository
       OutboxStatus outboxStatus,
       Collection<SagaStatus> sagaStatuses
   );
+
+  void deleteAllByTypeAndOutboxStatusAndSagaStatusIn(
+      String type,
+      OutboxStatus outboxStatus,
+      List<SagaStatus> sagaStatuses
+  );
 }

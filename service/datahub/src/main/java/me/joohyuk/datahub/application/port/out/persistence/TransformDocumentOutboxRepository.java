@@ -16,4 +16,11 @@ public interface TransformDocumentOutboxRepository {
       OutboxStatus outboxStatus,
       SagaStatus... sagaStatus
   );
+
+  void deleteByTypeAndOutboxStatusAndSagaStatus(
+      String documentTransformSagaName,
+      OutboxStatus outboxStatus,
+      SagaStatus... sagaStatus
+  );
+
 }

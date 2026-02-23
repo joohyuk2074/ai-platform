@@ -42,6 +42,17 @@ public class TransformDocumentOutboxHandler {
     log.info("TransformDocumentOutbox bulk saved - count: {}", savedOutboxes.size());
   }
 
+  public void deleteTransformDocumentOutboxMessageByOutboxStatusAndSagaStatus(
+      OutboxStatus outboxStatus,
+      SagaStatus... sagaStatus
+  ) {
+    transformDocumentOutboxRepository.deleteByTypeAndOutboxStatusAndSagaStatus(
+        DOCUMENT_TRANSFORM_SAGA_NAME,
+        outboxStatus,
+        sagaStatus
+    );
+  }
+
   @Transactional(readOnly = true)
   public List<TransformDocumentOutbox> getTransformDocumentOutboxByOutboxStatusAndSagaStatus(
       OutboxStatus outboxStatus,
