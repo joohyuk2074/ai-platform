@@ -7,5 +7,6 @@ public final class SagaConstants {
   }
 
   public static final String DOCUMENT_TRANSFORM_SAGA_NAME = "TransformDocumentSaga";
+  public static final String DOCUMENT_EMBED_SAGA_NAME = "EmbedDocumentSaga";
 
 }

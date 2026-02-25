@@ -2,6 +2,7 @@ package me.joohyuk.datahub.application.service.handler;
 
 import com.spartaecommerce.domain.port.IdGenerator;
 import com.spartaecommerce.domain.vo.CollectionId;
+import com.spartaecommerce.domain.vo.DocumentId;
 import com.spartaecommerce.util.DateTimeHolder;
 import java.time.Instant;
 import java.util.List;
@@ -51,6 +52,18 @@ public class TransformDocumentHandler {
         events.size(), collectionId.getValue());
 
     return events;
+  }
+
+  public void complete(DocumentId documentId, Integer passageCount, String eventId) {
+    Document document = documentRepository.getById(documentId);
+    document.completeTransform(passageCount, eventId, dateTimeHolder.now());
+    documentRepository.save(document);
+  }
+
+  public void failed(DocumentId documentId, String errorCode, String errorMessage, String eventId) {
+    Document document = documentRepository.getById(documentId);
+    document.failTransform(errorCode, errorMessage, eventId, dateTimeHolder.now());
+    documentRepository.save(document);
   }
 
   private List<Document> fetchValidatedDocuments(CollectionId collectionId) {

@@ -140,10 +140,10 @@ public class Document extends AggregateRoot<DocumentId> {
    * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
    * @throws DatahubDomainException 현재 상태가 TRANSFORM_REQUESTED가 아닌 경우
    */
-  public void markTransformed(int passageCount, String eventId, Instant now) {
+  public void completeTransform(int passageCount, String eventId, Instant now) {
     if (status != DocumentStatus.TRANSFORM_REQUESTED) {
       throw new DatahubDomainException(
-          "Cannot mark transformed. current=" + status + ", expected=TRANSFORM_REQUESTED"
+          "Cannot complete transform. current=" + status + ", expected=TRANSFORM_REQUESTED"
               + " [documentId=" + getId() + "]",
           DatahubErrorCode.INVALID_DOCUMENT_STATE
       );
@@ -163,7 +163,7 @@ public class Document extends AggregateRoot<DocumentId> {
    * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
    * @throws DatahubDomainException 현재 상태가 TRANSFORM_REQUESTED가 아닌 경우
    */
-  public void markPassageFailed(
+  public void failTransform(
       String errorCode,
       String errorMessage,
       String eventId,
@@ -171,12 +171,78 @@ public class Document extends AggregateRoot<DocumentId> {
   ) {
     if (status != DocumentStatus.TRANSFORM_REQUESTED) {
       throw new DatahubDomainException(
-          "Cannot mark transform failed. current=" + status + ", expected=TRANSFORM_REQUESTED"
+          "Cannot fail transform. current=" + status + ", expected=TRANSFORM_REQUESTED"
               + " [documentId=" + getId() + "]",
           DatahubErrorCode.INVALID_DOCUMENT_STATE
       );
     }
     this.status = DocumentStatus.TRANSFORM_FAILED;
+    this.attempt++;
+    this.lastErrorCode = errorCode;
+    this.lastErrorMessage = truncateErrorMessage(errorMessage);
+    this.lastResultEventId = eventId;
+    this.updatedAt = now;
+  }
+
+  /**
+   * {@code TRANSFORMED → EMBED_REQUESTED} 로 전이합니다. Transform이 완료되고 Embedding을 요청할 때 호출합니다.
+   *
+   * @throws DatahubDomainException 현재 상태가 TRANSFORMED가 아닌 경우
+   */
+  public void requestEmbed(Instant now) {
+    if (status != DocumentStatus.TRANSFORMED) {
+      throw new DatahubDomainException(
+          "Cannot request embed. current=" + status + ", expected=TRANSFORMED"
+              + " [documentId=" + getId() + "]",
+          DatahubErrorCode.INVALID_DOCUMENT_STATE
+      );
+    }
+    this.status = DocumentStatus.EMBED_REQUESTED;
+    this.updatedAt = now;
+  }
+
+  /**
+   * {@code EMBED_REQUESTED → EMBEDDED} 로 전이합니다. vecdash에서 Embedding 완료 이벤트를 수신하면 호출합니다.
+   *
+   * @param eventId 수신한 결과 이벤트의 ID (멱등성 체크용)
+   * @throws DatahubDomainException 현재 상태가 EMBED_REQUESTED가 아닌 경우
+   */
+  public void completeEmbed(String eventId, Instant now) {
+    if (status != DocumentStatus.EMBED_REQUESTED) {
+      throw new DatahubDomainException(
+          "Cannot complete embed. current=" + status + ", expected=EMBED_REQUESTED"
+              + " [documentId=" + getId() + "]",
+          DatahubErrorCode.INVALID_DOCUMENT_STATE
+      );
+    }
+    this.status = DocumentStatus.EMBEDDED;
+    this.lastResultEventId = eventId;
+    this.updatedAt = now;
+  }
+
+  /**
+   * {@code EMBED_REQUESTED → EMBED_FAILED} 로 전이합니다. vecdash에서 Embedding 실패 이벤트를 수신하면 호출합니다.
+   * {@code attempt}를 1 증가시키고 에러 정보를 저장합니다.
+   *
+   * @param errorCode    실패 이벤트의 에러 코드
+   * @param errorMessage 실패 이벤트의 에러 메시지 (500자 초과 시 절단)
+   * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
+   * @throws DatahubDomainException 현재 상태가 EMBED_REQUESTED가 아닌 경우
+   */
+  public void failEmbed(
+      String errorCode,
+      String errorMessage,
+      String eventId,
+      Instant now
+  ) {
+    if (status != DocumentStatus.EMBED_REQUESTED) {
+      throw new DatahubDomainException(
+          "Cannot fail embed. current=" + status + ", expected=EMBED_REQUESTED"
+              + " [documentId=" + getId() + "]",
+          DatahubErrorCode.INVALID_DOCUMENT_STATE
+      );
+    }
+    this.status = DocumentStatus.EMBED_FAILED;
     this.attempt++;
     this.lastErrorCode = errorCode;
     this.lastErrorMessage = truncateErrorMessage(errorMessage);

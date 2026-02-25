@@ -6,6 +6,8 @@ public final class KafkaTopics {
 
   public static final String DOCUMENT_TRANSFORM_RESULT = "document.transform.result";
 
+  public static final String DOCUMENT_EMBED_REQUESTED = "document.embed.requested";
+
   private KafkaTopics() {
     throw new AssertionError("Cannot instantiate constants class");
   }

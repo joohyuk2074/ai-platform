@@ -35,7 +35,7 @@ public class DocumentDomainService {
       String eventId,
       Instant now
   ) {
-    document.markTransformed(passageCount, eventId, now);
+    document.completeTransform(passageCount, eventId, now);
 
     log.info("Document transformed successfully: documentId={}, passageCount={}",
         document.getId().getValue(), passageCount);
@@ -62,9 +62,53 @@ public class DocumentDomainService {
       String eventId,
       Instant now
   ) {
-    document.markPassageFailed(errorCode, errorMessage, eventId, now);
+    document.failTransform(errorCode, errorMessage, eventId, now);
 
     log.warn("Document transform failed: documentId={}, errorCode={}, errorMessage={}",
+        document.getId().getValue(), errorCode, errorMessage);
+  }
+
+  /**
+   * Document Embedding 성공 처리.
+   *
+   * <p>Document 상태를 EMBED_REQUESTED → EMBEDDED로 전이시킵니다.
+   *
+   * @param document Document 엔티티
+   * @param eventId  수신한 결과 이벤트의 ID (멱등성 체크용)
+   * @param now      현재 시간
+   */
+  public void markEmbedded(
+      Document document,
+      String eventId,
+      Instant now
+  ) {
+    document.completeEmbed(eventId, now);
+
+    log.info("Document embedded successfully: documentId={}",
+        document.getId().getValue());
+  }
+
+  /**
+   * Document Embedding 실패 처리.
+   *
+   * <p>Document 상태를 EMBED_REQUESTED → EMBED_FAILED로 전이시킵니다.
+   *
+   * @param document     Embedding이 실패한 Document
+   * @param errorCode    에러 코드
+   * @param errorMessage 에러 메시지
+   * @param eventId      수신한 이벤트 ID (멱등성 보장용)
+   * @param now          현재 시간
+   */
+  public void cancelEmbed(
+      Document document,
+      String errorCode,
+      String errorMessage,
+      String eventId,
+      Instant now
+  ) {
+    document.failEmbed(errorCode, errorMessage, eventId, now);
+
+    log.warn("Document embedding failed: documentId={}, errorCode={}, errorMessage={}",
         document.getId().getValue(), errorCode, errorMessage);
   }
 }

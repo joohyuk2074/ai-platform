@@ -42,6 +42,18 @@ public class TransformDocumentOutboxHandler {
     log.info("TransformDocumentOutbox bulk saved - count: {}", savedOutboxes.size());
   }
 
+  public void updateSagaStatus(Long sagaId, SagaStatus sagaStatus) {
+    TransformDocumentOutbox outbox = transformDocumentOutboxRepository.findBySagaId(sagaId)
+        .orElseThrow(() -> new IllegalArgumentException(
+            "TransformDocumentOutbox not found for sagaId: " + sagaId));
+
+    outbox.setSagaStatus(sagaStatus);
+    transformDocumentOutboxRepository.save(outbox);
+
+    log.info("TransformDocumentOutbox saga status updated - sagaId: {}, status: {}",
+        sagaId, sagaStatus);
+  }
+
   public void deleteTransformDocumentOutboxMessageByOutboxStatusAndSagaStatus(
       OutboxStatus outboxStatus,
       SagaStatus... sagaStatus

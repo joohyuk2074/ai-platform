@@ -28,6 +28,7 @@ public class TransformDocumentOutbox {
   private String type;
   private String payload;
 
+  @Setter
   private SagaStatus sagaStatus;
   @Setter
   private OutboxStatus outboxStatus;
