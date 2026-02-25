@@ -12,6 +12,7 @@ import me.joohyuk.datahub.application.port.in.service.UploadDocumentUseCase;
 import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.application.port.out.storage.FileStorage;
 import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHandler;
+import me.joohyuk.datahub.application.validation.FileValidationPolicy;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
 import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
@@ -26,6 +27,7 @@ public class UploadDocumentService implements UploadDocumentUseCase {
   private final FileStorage fileStorage;
   private final DocumentPersistenceHandler persistenceHelper;
   private final DocumentRepository documentRepository;
+  private final FileValidationPolicy fileValidationPolicy;
 
   @Override
   public UploadDocumentResult uploadDocument(
@@ -33,6 +35,9 @@ public class UploadDocumentService implements UploadDocumentUseCase {
       InputStream fileInputStream
   ) {
     log.info("Starting message upload: {}", uploadDocumentCommand.fileName());
+
+    // 파일 업로드 정책 검증
+    fileValidationPolicy.validate(uploadDocumentCommand);
 
     Metadata metadata = Metadata.forUpload(
         uploadDocumentCommand.fileName(),

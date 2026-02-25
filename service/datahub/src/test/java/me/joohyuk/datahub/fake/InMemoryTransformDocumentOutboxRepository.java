@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.application.port.out.persistence.TransformDocumentOutboxRepository;
@@ -74,6 +75,17 @@ public class InMemoryTransformDocumentOutboxRepository implements
         .filter(outbox -> outboxStatus.equals(outbox.getOutboxStatus()))
         .filter(outbox -> targetSagaStatuses.contains(outbox.getSagaStatus()))
         .toList();
+  }
+
+  @Override
+  public Optional<TransformDocumentOutbox> findBySagaId(Long sagaId) {
+    return Optional.empty();
+  }
+
+  @Override
+  public void deleteByTypeAndOutboxStatusAndSagaStatus(String documentTransformSagaName,
+      OutboxStatus outboxStatus, SagaStatus... sagaStatus) {
+
   }
 
   // ─── 테스트 헬퍼 ──────────────────────────────────────────────

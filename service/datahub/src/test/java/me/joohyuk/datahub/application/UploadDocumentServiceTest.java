@@ -13,6 +13,7 @@ import me.joohyuk.datahub.application.dto.command.UploadDocumentCommand;
 import me.joohyuk.datahub.application.dto.result.UploadDocumentResult;
 import me.joohyuk.datahub.application.service.UploadDocumentService;
 import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHandler;
+import me.joohyuk.datahub.application.validation.FileValidationPolicy;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
 import me.joohyuk.datahub.domain.service.DocumentDomainService;
@@ -78,7 +79,12 @@ class UploadDocumentServiceTest {
         idGenerator
     );
 
-    handler = new UploadDocumentService(fileStorage, persistenceHelper, documentRepository);
+    handler = new UploadDocumentService(
+        fileStorage,
+        persistenceHelper,
+        documentRepository,
+        new FileValidationPolicy()
+    );
   }
 
   @Nested
