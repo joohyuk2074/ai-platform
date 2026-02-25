@@ -32,6 +32,11 @@ public class FakeTransformDocumentResultOutboxRepository implements
     return List.of();
   }
 
+  @Override
+  public Optional<TransformDocumentResultOutbox> findBySagaId(Long sagaId) {
+    return Optional.empty();
+  }
+
   /**
    * 저장 이력을 반환합니다 (순서 보장).
    */

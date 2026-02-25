@@ -47,6 +47,10 @@ public class Document extends AggregateRoot<DocumentId> {
   private Instant createdAt;
   private Instant updatedAt;
 
+  /**
+   * Document를 생성합니다. (기본 팩터리 메서드, 주로 테스트용)
+   * ID와 timestamp가 없는 불완전한 상태로 생성되므로, 프로덕션 코드에서는 createForUpload()를 사용하세요.
+   */
   public static Document create(
       CollectionId collectionId,
       String fileKey,
@@ -63,6 +67,45 @@ public class Document extends AggregateRoot<DocumentId> {
         .trackingId(new TrackingId(UUID.randomUUID()))
         .status(DocumentStatus.UPLOADED)
         .build();
+  }
+
+  /**
+   * 업로드용 Document를 생성합니다. (프로덕션 코드용)
+   * ID, timestamp, trackingId가 모두 설정된 완전한 상태로 생성됩니다.
+   *
+   * @param collectionId 문서가 속한 컬렉션 ID
+   * @param fileKey 파일 저장소의 파일 키
+   * @param contentHash 파일 콘텐츠의 해시값
+   * @param metadata 문서 메타데이터
+   * @param documentId 문서 ID (IdGenerator로 생성)
+   * @param trackingId 추적 ID (IdGenerator로 생성)
+   * @param now 현재 시간 (DateTimeHolder로 생성)
+   * @return 완전히 초기화된 Document
+   */
+  public static Document createForUpload(
+      CollectionId collectionId,
+      String fileKey,
+      ContentHash contentHash,
+      Metadata metadata,
+      DocumentId documentId,
+      TrackingId trackingId,
+      Instant now
+  ) {
+    validate(collectionId, fileKey, contentHash, metadata, DocumentStatus.UPLOADED);
+
+    Document document = Document.builder()
+        .collectionId(collectionId)
+        .fileKey(fileKey)
+        .contentHash(contentHash)
+        .metadata(metadata)
+        .trackingId(trackingId)
+        .status(DocumentStatus.UPLOADED)
+        .createdAt(now)
+        .updatedAt(now)
+        .build();
+
+    document.setId(documentId);
+    return document;
   }
 
   public static Document restore(
@@ -104,7 +147,12 @@ public class Document extends AggregateRoot<DocumentId> {
     return document;
   }
 
-  public void initialize(DocumentId documentId, Instant now) {
+  /**
+   * @deprecated createForUpload() 팩터리 메서드를 사용하세요.
+   * 이 메서드는 하위 호환성을 위해 유지되지만, 새 코드에서는 사용하지 마세요.
+   */
+  @Deprecated
+  public void upload(DocumentId documentId, Instant now) {
     super.setId(documentId);
     this.createdAt = now;
     this.updatedAt = now;

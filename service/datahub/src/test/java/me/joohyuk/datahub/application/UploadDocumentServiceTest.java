@@ -12,11 +12,10 @@ import java.time.Instant;
 import me.joohyuk.datahub.application.dto.command.UploadDocumentCommand;
 import me.joohyuk.datahub.application.dto.result.UploadDocumentResult;
 import me.joohyuk.datahub.application.service.UploadDocumentService;
-import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHandler;
+import me.joohyuk.datahub.application.service.handler.UploadDocumentHandler;
 import me.joohyuk.datahub.application.validation.FileValidationPolicy;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
-import me.joohyuk.datahub.domain.service.DocumentDomainService;
 import me.joohyuk.datahub.fake.FakeDateTimeHolder;
 import me.joohyuk.datahub.fake.InMemoryDocumentCollectionRepository;
 import me.joohyuk.datahub.fake.InMemoryDocumentRepository;
@@ -34,7 +33,7 @@ import org.junit.jupiter.api.Test;
  * <ul>
  *   <li>InMemoryFileStorage: 파일 저장소 대체</li>
  *   <li>InMemoryDocumentRepository: DB 저장소 대체</li>
- *   <li>실제 DocumentDomainService, DocumentPersistenceHelper 사용</li>
+ *   <li>실제 UploadDocumentHandler 사용</li>
  * </ul>
  *
  * <p>검증 방식:
@@ -69,10 +68,7 @@ class UploadDocumentServiceTest {
         DocumentCollection.of(COLLECTION_ID.getValue(), "test-collection", "desc",
             Instant.now(), Instant.now()));
 
-    DocumentDomainService domainService = new DocumentDomainService();
-
-    DocumentPersistenceHandler persistenceHelper = new DocumentPersistenceHandler(
-        domainService,
+    UploadDocumentHandler persistenceHelper = new UploadDocumentHandler(
         documentRepository,
         collectionRepository,
         dateTimeHolder,

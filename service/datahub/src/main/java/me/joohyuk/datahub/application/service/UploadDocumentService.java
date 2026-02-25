@@ -11,12 +11,11 @@ import me.joohyuk.datahub.application.dto.result.UploadDocumentResult;
 import me.joohyuk.datahub.application.port.in.service.UploadDocumentUseCase;
 import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.application.port.out.storage.FileStorage;
-import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHandler;
+import me.joohyuk.datahub.application.service.handler.UploadDocumentHandler;
 import me.joohyuk.datahub.application.validation.FileValidationPolicy;
-import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.event.DocumentUploadedEvent;
-import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import me.joohyuk.datahub.domain.exception.DatahubDomainException;
+import me.joohyuk.datahub.domain.exception.DatahubErrorCode;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -25,7 +24,7 @@ import org.springframework.stereotype.Component;
 public class UploadDocumentService implements UploadDocumentUseCase {
 
   private final FileStorage fileStorage;
-  private final DocumentPersistenceHandler persistenceHelper;
+  private final UploadDocumentHandler persistenceHelper;
   private final DocumentRepository documentRepository;
   private final FileValidationPolicy fileValidationPolicy;
 
@@ -36,7 +35,6 @@ public class UploadDocumentService implements UploadDocumentUseCase {
   ) {
     log.info("Starting message upload: {}", uploadDocumentCommand.fileName());
 
-    // 파일 업로드 정책 검증
     fileValidationPolicy.validate(uploadDocumentCommand);
 
     Metadata metadata = Metadata.forUpload(
@@ -46,15 +44,24 @@ public class UploadDocumentService implements UploadDocumentUseCase {
         uploadDocumentCommand.uploadedBy().getValue()
     );
 
-    // 파일 저장 (저장소 어댑터가 SHA-256 해시를 함께 계산하여 반환)
-    FileStorageResult result = fileStorage.store(
+    FileStorageResult storageResult = storeAndValidateFile(
         fileInputStream,
         metadata,
-        uploadDocumentCommand.collectionId()
+        uploadDocumentCommand
     );
 
+    return createAndPersistDocument(uploadDocumentCommand, storageResult, metadata);
+  }
+
+  private FileStorageResult storeAndValidateFile(
+      InputStream fileInputStream,
+      Metadata metadata,
+      UploadDocumentCommand command
+  ) {
+    FileStorageResult result = fileStorage.store(fileInputStream, metadata, command.collectionId());
     String fileKey = result.fileKey();
     ContentHash contentHash = result.contentHash();
+
     log.info("File stored successfully with key: {}, contentHash: {}", fileKey, contentHash);
 
     if (documentRepository.existsByContentHash(contentHash)) {
@@ -66,17 +73,28 @@ public class UploadDocumentService implements UploadDocumentUseCase {
       );
     }
 
-    Document document = Document.create(
-        uploadDocumentCommand.collectionId(), fileKey, contentHash, metadata);
+    return result;
+  }
 
+  private UploadDocumentResult createAndPersistDocument(
+      UploadDocumentCommand command,
+      FileStorageResult storageResult,
+      Metadata metadata
+  ) {
     try {
-      DocumentUploadedEvent documentUploadedEvent = persistenceHelper.persistDocument(document);
+      DocumentUploadedEvent documentUploadedEvent = persistenceHelper.persistDocument(
+          command,
+          storageResult,
+          metadata
+      );
       return UploadDocumentResult.from(documentUploadedEvent.getDocument());
     } catch (Exception e) {
-      // DB 저장 실패 시 보상 트랜잭션: 이미 업로드된 파일 삭제
-      log.error("DB save failed, initiating compensating transaction to delete uploaded file: {}",
-          fileKey, e);
-      compensateFileUpload(fileKey);
+      log.error(
+          "DB save failed, initiating compensating transaction to delete uploaded file: {}",
+          storageResult.fileKey(),
+          e
+      );
+      compensateFileUpload(storageResult.fileKey());
       throw new DatahubDomainException(
           "Failed to save document to database",
           DatahubErrorCode.DOCUMENT_PROCESSING_FAILED,
@@ -92,8 +110,8 @@ public class UploadDocumentService implements UploadDocumentUseCase {
     } catch (Exception deleteException) {
       // 파일 삭제 실패는 로그만 남기고 원본 예외를 유지
       // 운영팀이 수동으로 정리하거나 별도의 정리 작업으로 처리
-      log.error(
-          "Failed to delete file during compensation. Manual cleanup may be required for file: {}",
+      log.error("Failed to delete file during compensation. "
+              + "Manual cleanup may be required for file: {}",
           fileKey, deleteException);
     }
   }

@@ -10,7 +10,6 @@ import me.joohyuk.datahub.application.port.out.persistence.DocumentRepository;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.entity.PassageResponse;
 import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
-import me.joohyuk.datahub.domain.service.DocumentDomainService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class PassageCreationSaga implements
     SagaStep<PassageResponse, TransformDocumentEvent, EmptyEvent> {
 
-  private final DocumentDomainService documentDomainService;
   private final DocumentRepository documentRepository;
   private final DateTimeHolder dateTimeHolder;
 
@@ -36,19 +34,22 @@ public class PassageCreationSaga implements
     log.info("Processing transform completion for documentId: {}", passageResponse.getDocumentId());
 
     Document document = documentRepository.getById(new DocumentId(passageResponse.getDocumentId()));
-    TransformDocumentEvent domainEvent = documentDomainService.transform(
-        document,
+    document.completeTransform(
         passageResponse.getPassageCount(),
         passageResponse.getEventId(),
         dateTimeHolder.now()
     );
+
+    log.info("Document transformed successfully: documentId={}, passageCount={}",
+        document.getId().getValue(), passageResponse.getPassageCount());
 
     documentRepository.save(document);
 
     log.info("Document with documentId: {} transformed successfully with {} passages",
         document.getId().getValue(), passageResponse.getPassageCount());
 
-    return domainEvent;
+    // TODO: 추후 Passage 처리 이벤트로 변경 필요
+    return null;
   }
 
   /**
@@ -63,13 +64,15 @@ public class PassageCreationSaga implements
     log.info("Rolling back transform for documentId: {}", passageResponse.getDocumentId());
 
     Document document = documentRepository.getById(new DocumentId(passageResponse.getDocumentId()));
-    documentDomainService.cancelCreatePassage(
-        document,
+    document.failTransform(
         passageResponse.getErrorCode(),
         passageResponse.getErrorMessage(),
         passageResponse.getEventId(),
         dateTimeHolder.now()
     );
+
+    log.warn("Document transform failed: documentId={}, errorCode={}, errorMessage={}",
+        document.getId().getValue(), passageResponse.getErrorCode(), passageResponse.getErrorMessage());
 
     documentRepository.save(document);
 

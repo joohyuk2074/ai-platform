@@ -15,7 +15,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.IntStream;
 import me.joohyuk.datahub.application.dto.result.TransformDocumentRequestsResult;
-import me.joohyuk.datahub.application.service.handler.DocumentPersistenceHandler;
+import me.joohyuk.datahub.application.service.handler.UploadDocumentHandler;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentHandler;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentOutboxHandler;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentSagaHandler;
@@ -72,9 +72,7 @@ class TransformDocumentServiceTest {
     // Given: Wire real collaborators (Classical approach)
     TransformDocumentSagaHandler transformDocumentSagaHandler = new TransformDocumentSagaHandler();
 
-    // DomainService not used in saveAll
-    DocumentPersistenceHandler documentPersistenceHandler = new DocumentPersistenceHandler(
-        null, // DomainService not used in saveAll
+    UploadDocumentHandler uploadDocumentHandler = new UploadDocumentHandler(
         documentRepository,
         documentCollectionRepository,
         dateTimeHolder,
@@ -350,7 +348,7 @@ class TransformDocumentServiceTest {
   ) {
     Document document = Document.create(collectionId, fileKey, contentHash, metadata);
     DocumentId documentId = new DocumentId(documentIdGenerator.generateId());
-    document.initialize(documentId, fixedNow);
+    document.upload(documentId, fixedNow);
 
     return documentRepository.save(document);
   }
