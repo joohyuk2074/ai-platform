@@ -21,20 +21,4 @@ public record DocumentContent(
   public Map<String, Object> metadata() {
     return new HashMap<>(metadata);
   }
-
-  public Object getMetadata(String key) {
-    return metadata.get(key);
-  }
-
-  public DocumentContent withMetadata(String key, Object value) {
-    Map<String, Object> newMetadata = new HashMap<>(this.metadata);
-    newMetadata.put(key, value);
-    return new DocumentContent(this.content, newMetadata);
-  }
-
-  public DocumentContent withMetadata(Map<String, Object> additionalMetadata) {
-    Map<String, Object> newMetadata = new HashMap<>(this.metadata);
-    newMetadata.putAll(additionalMetadata);
-    return new DocumentContent(this.content, newMetadata);
-  }
 }

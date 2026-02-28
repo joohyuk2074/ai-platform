@@ -5,10 +5,10 @@ import static me.joohyuk.commonsaga.SagaConstants.DOCUMENT_TRANSFORM_SAGA_NAME;
 import com.spartaecommerce.domain.port.IdGenerator;
 import com.spartaecommerce.domain.port.JsonSerializer;
 import com.spartaecommerce.outbox.OutboxStatus;
+import com.spartaecommerce.util.DateTimeHolder;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.application.port.out.persistence.TransformDocumentOutboxRepository;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
 import me.joohyuk.datahub.domain.event.TransformDocumentEvent;
@@ -23,9 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class TransformDocumentOutboxHandler {
 
   private final TransformDocumentOutboxRepository transformDocumentOutboxRepository;
-  private final TransformDocumentSagaHandler transformDocumentSagaHandler;
   private final IdGenerator idGenerator;
   private final JsonSerializer jsonSerializer;
+  private final DateTimeHolder dateTimeHolder;
 
   public void save(TransformDocumentOutbox transformDocumentOutbox) {
     transformDocumentOutboxRepository.save(transformDocumentOutbox);
@@ -42,54 +42,34 @@ public class TransformDocumentOutboxHandler {
     log.info("TransformDocumentOutbox bulk saved - count: {}", savedOutboxes.size());
   }
 
-  public void updateSagaStatus(Long sagaId, SagaStatus sagaStatus) {
-    TransformDocumentOutbox outbox = transformDocumentOutboxRepository.findBySagaId(sagaId)
-        .orElseThrow(() -> new IllegalArgumentException(
-            "TransformDocumentOutbox not found for sagaId: " + sagaId));
-
-    outbox.setSagaStatus(sagaStatus);
-    transformDocumentOutboxRepository.save(outbox);
-
-    log.info("TransformDocumentOutbox saga status updated - sagaId: {}, status: {}",
-        sagaId, sagaStatus);
-  }
-
   public void deleteTransformDocumentOutboxMessageByOutboxStatusAndSagaStatus(
-      OutboxStatus outboxStatus,
-      SagaStatus... sagaStatus
+      OutboxStatus outboxStatus
   ) {
-    transformDocumentOutboxRepository.deleteByTypeAndOutboxStatusAndSagaStatus(
+    transformDocumentOutboxRepository.deleteByTypeAndOutboxStatus(
         DOCUMENT_TRANSFORM_SAGA_NAME,
-        outboxStatus,
-        sagaStatus
+        outboxStatus
     );
   }
 
   @Transactional(readOnly = true)
-  public List<TransformDocumentOutbox> getTransformDocumentOutboxByOutboxStatusAndSagaStatus(
-      OutboxStatus outboxStatus,
-      SagaStatus... sagaStatus
+  public List<TransformDocumentOutbox> getTransformDocumentOutboxByOutboxStatus(
+      OutboxStatus outboxStatus
   ) {
-    return transformDocumentOutboxRepository.findAllByTypeAndOutboxStatusAndSagaStatus(
+    return transformDocumentOutboxRepository.findAllByTypeAndOutboxStatus(
         DOCUMENT_TRANSFORM_SAGA_NAME,
-        outboxStatus,
-        sagaStatus
+        outboxStatus
     );
   }
 
   private TransformDocumentOutbox createOutbox(TransformDocumentEvent event) {
     String payload = jsonSerializer.serialize(event);
 
-    SagaStatus sagaStatus = transformDocumentSagaHandler.documentStatusNameToSagaStatus(
-        event.getStatus()
-    );
-
     return TransformDocumentOutbox.createPending(
         idGenerator.generateId(),
-        event.getSagaId(),
+        event.getCorrelationId(),
         payload,
-        DocumentStatus.valueOf(event.getStatus()),
-        sagaStatus
+        DocumentStatus.valueOf(event.getDocumentStatus()),
+        dateTimeHolder.getCurrentDateTime()
     );
   }
 }

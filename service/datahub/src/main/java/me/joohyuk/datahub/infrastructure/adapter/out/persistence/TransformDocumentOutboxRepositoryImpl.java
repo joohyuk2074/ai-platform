@@ -1,12 +1,9 @@
 package me.joohyuk.datahub.infrastructure.adapter.out.persistence;
 
 import com.spartaecommerce.outbox.OutboxStatus;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.application.port.out.persistence.TransformDocumentOutboxRepository;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
 import me.joohyuk.datahub.infrastructure.adapter.out.persistence.entity.TransformDocumentOutboxJpaEntity;
@@ -41,34 +38,24 @@ public class TransformDocumentOutboxRepositoryImpl implements TransformDocumentO
   }
 
   @Override
-  public Optional<TransformDocumentOutbox> findBySagaId(Long sagaId) {
-    return jpaRepository.findBySagaId(sagaId)
-        .map(TransformDocumentOutboxJpaEntity::toDomain);
-  }
-
-  @Override
-  public void deleteByTypeAndOutboxStatusAndSagaStatus(
+  public void deleteByTypeAndOutboxStatus(
       String documentTransformSagaName,
-      OutboxStatus outboxStatus,
-      SagaStatus... sagaStatus
+      OutboxStatus outboxStatus
   ) {
-    jpaRepository.deleteAllByTypeAndOutboxStatusAndSagaStatusIn(
+    jpaRepository.deleteAllByTypeAndOutboxStatus(
         documentTransformSagaName,
-        outboxStatus,
-        Arrays.asList(sagaStatus)
+        outboxStatus
     );
   }
 
   @Override
-  public List<TransformDocumentOutbox> findAllByTypeAndOutboxStatusAndSagaStatus(
-      String sagaType,
-      OutboxStatus outboxStatus,
-      SagaStatus... sagaStatus
+  public List<TransformDocumentOutbox> findAllByTypeAndOutboxStatus(
+      String type,
+      OutboxStatus outboxStatus
   ) {
-    return jpaRepository.findAllByTypeAndOutboxStatusAndSagaStatusIn(
-            sagaType,
-            outboxStatus,
-            Arrays.asList(sagaStatus)
+    return jpaRepository.findAllByTypeAndOutboxStatus(
+            type,
+            outboxStatus
         )
         .stream()
         .map(TransformDocumentOutboxJpaEntity::toDomain)

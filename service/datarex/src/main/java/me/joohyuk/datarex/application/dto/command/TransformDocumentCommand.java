@@ -1,10 +1,12 @@
 package me.joohyuk.datarex.application.dto.command;
 
 import com.spartaecommerce.domain.vo.Metadata;
+import com.spartaecommerce.domain.vo.TrackingId;
 import me.joohyuk.datarex.infrastructure.adapter.in.message.dto.TransformDocumentEventMessage;
 
 public record TransformDocumentCommand(
-    Long sagaId,
+    TrackingId trackingId,
+    String correlationId,
     Long documentId,
     Long collectionId,
     String fileKey,
@@ -21,7 +23,8 @@ public record TransformDocumentCommand(
    */
   public static TransformDocumentCommand of(TransformDocumentEventMessage event) {
     return new TransformDocumentCommand(
-        event.getSagaId(),
+        TrackingId.of(event.getTrackingId()),
+        event.getCollectionId().toString(),
         event.getDocumentId(),
         event.getCollectionId(),
         event.getFileKey(),

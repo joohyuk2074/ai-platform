@@ -11,44 +11,36 @@ import me.joohyuk.datahub.domain.entity.Document;
 @Builder(toBuilder = true)
 public class TransformDocumentEvent implements DomainEvent<Document> {
 
-  private final Long sagaId;
+  private final String trackingId;
+  private final String correlationId;
 
-  private final Long documentId;
   private final Long collectionId;
+  private final Long documentId;
+
+  private final String documentStatus;
   private final String fileKey;
   private final String contentHash;
   private final Metadata metadata;
-  private final String trackingId;
-  private final String status;
-  private final int attempt;
-  private final String lastErrorCode;
-  private final String lastErrorMessage;
-  private final int passageCount;
-  private final String lastResultEventId;
-  private final Instant documentCreatedAt;
-  private final Instant documentUpdatedAt;
-  private final Instant eventCreatedAt;
-  private final Long uploadedBy;
 
-  public static TransformDocumentEvent from(Long sagaId, Document document) {
+  private final int attempt;
+  private final Instant eventCreatedAt;
+
+  public static TransformDocumentEvent from(
+      String correlationId,
+      Document document,
+      Instant eventCreatedAt
+  ) {
     return TransformDocumentEvent.builder()
-        .sagaId(sagaId)
-        .documentId(document.getId().getValue())
+        .trackingId(document.getTrackingId().getValue().toString())
+        .correlationId(correlationId)
         .collectionId(document.getCollectionId().getValue())
+        .documentId(document.getId().getValue())
+        .documentStatus(document.getStatus().name())
         .fileKey(document.getFileKey())
         .contentHash(document.getContentHash().getValue())
         .metadata(document.getMetadata())
-        .trackingId(document.getTrackingId().getValue().toString())
-        .status(document.getStatus().name())
         .attempt(document.getAttempt())
-        .lastErrorCode(document.getLastErrorCode())
-        .lastErrorMessage(document.getLastErrorMessage())
-        .passageCount(document.getPassageCount())
-        .lastResultEventId(document.getLastResultEventId())
-        .documentCreatedAt(document.getCreatedAt())
-        .documentUpdatedAt(document.getUpdatedAt())
-        .eventCreatedAt(document.getCreatedAt())
-        .uploadedBy(document.getUploader().getValue())
+        .eventCreatedAt(eventCreatedAt)
         .build();
   }
 }

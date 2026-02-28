@@ -8,7 +8,6 @@ import com.spartaecommerce.domain.vo.Metadata;
 import com.spartaecommerce.domain.vo.TrackingId;
 import com.spartaecommerce.domain.vo.UserId;
 import java.time.Instant;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,38 +47,15 @@ public class Document extends AggregateRoot<DocumentId> {
   private Instant updatedAt;
 
   /**
-   * Document를 생성합니다. (기본 팩터리 메서드, 주로 테스트용)
-   * ID와 timestamp가 없는 불완전한 상태로 생성되므로, 프로덕션 코드에서는 createForUpload()를 사용하세요.
-   */
-  public static Document create(
-      CollectionId collectionId,
-      String fileKey,
-      ContentHash contentHash,
-      Metadata metadata
-  ) {
-    validate(collectionId, fileKey, contentHash, metadata, DocumentStatus.UPLOADED);
-
-    return Document.builder()
-        .collectionId(collectionId)
-        .fileKey(fileKey)
-        .contentHash(contentHash)
-        .metadata(metadata)
-        .trackingId(new TrackingId(UUID.randomUUID()))
-        .status(DocumentStatus.UPLOADED)
-        .build();
-  }
-
-  /**
-   * 업로드용 Document를 생성합니다. (프로덕션 코드용)
-   * ID, timestamp, trackingId가 모두 설정된 완전한 상태로 생성됩니다.
+   * 업로드용 Document를 생성합니다. (프로덕션 코드용) ID, timestamp, trackingId가 모두 설정된 완전한 상태로 생성됩니다.
    *
    * @param collectionId 문서가 속한 컬렉션 ID
-   * @param fileKey 파일 저장소의 파일 키
-   * @param contentHash 파일 콘텐츠의 해시값
-   * @param metadata 문서 메타데이터
-   * @param documentId 문서 ID (IdGenerator로 생성)
-   * @param trackingId 추적 ID (IdGenerator로 생성)
-   * @param now 현재 시간 (DateTimeHolder로 생성)
+   * @param fileKey      파일 저장소의 파일 키
+   * @param contentHash  파일 콘텐츠의 해시값
+   * @param metadata     문서 메타데이터
+   * @param documentId   문서 ID (IdGenerator로 생성)
+   * @param trackingId   추적 ID (IdGenerator로 생성)
+   * @param now          현재 시간 (DateTimeHolder로 생성)
    * @return 완전히 초기화된 Document
    */
   public static Document createForUpload(
@@ -145,17 +121,6 @@ public class Document extends AggregateRoot<DocumentId> {
     document.setId(id);
 
     return document;
-  }
-
-  /**
-   * @deprecated createForUpload() 팩터리 메서드를 사용하세요.
-   * 이 메서드는 하위 호환성을 위해 유지되지만, 새 코드에서는 사용하지 마세요.
-   */
-  @Deprecated
-  public void upload(DocumentId documentId, Instant now) {
-    super.setId(documentId);
-    this.createdAt = now;
-    this.updatedAt = now;
   }
 
   public DocumentId getId() {
@@ -232,78 +197,11 @@ public class Document extends AggregateRoot<DocumentId> {
     this.updatedAt = now;
   }
 
-  /**
-   * {@code TRANSFORMED → EMBED_REQUESTED} 로 전이합니다. Transform이 완료되고 Embedding을 요청할 때 호출합니다.
-   *
-   * @throws DatahubDomainException 현재 상태가 TRANSFORMED가 아닌 경우
-   */
-  public void requestEmbed(Instant now) {
-    if (status != DocumentStatus.TRANSFORMED) {
-      throw new DatahubDomainException(
-          "Cannot request embed. current=" + status + ", expected=TRANSFORMED"
-              + " [documentId=" + getId() + "]",
-          DatahubErrorCode.INVALID_DOCUMENT_STATE
-      );
-    }
-    this.status = DocumentStatus.EMBED_REQUESTED;
-    this.updatedAt = now;
-  }
-
-  /**
-   * {@code EMBED_REQUESTED → EMBEDDED} 로 전이합니다. vecdash에서 Embedding 완료 이벤트를 수신하면 호출합니다.
-   *
-   * @param eventId 수신한 결과 이벤트의 ID (멱등성 체크용)
-   * @throws DatahubDomainException 현재 상태가 EMBED_REQUESTED가 아닌 경우
-   */
-  public void completeEmbed(String eventId, Instant now) {
-    if (status != DocumentStatus.EMBED_REQUESTED) {
-      throw new DatahubDomainException(
-          "Cannot complete embed. current=" + status + ", expected=EMBED_REQUESTED"
-              + " [documentId=" + getId() + "]",
-          DatahubErrorCode.INVALID_DOCUMENT_STATE
-      );
-    }
-    this.status = DocumentStatus.EMBEDDED;
-    this.lastResultEventId = eventId;
-    this.updatedAt = now;
-  }
-
-  /**
-   * {@code EMBED_REQUESTED → EMBED_FAILED} 로 전이합니다. vecdash에서 Embedding 실패 이벤트를 수신하면 호출합니다.
-   * {@code attempt}를 1 증가시키고 에러 정보를 저장합니다.
-   *
-   * @param errorCode    실패 이벤트의 에러 코드
-   * @param errorMessage 실패 이벤트의 에러 메시지 (500자 초과 시 절단)
-   * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
-   * @throws DatahubDomainException 현재 상태가 EMBED_REQUESTED가 아닌 경우
-   */
-  public void failEmbed(
-      String errorCode,
-      String errorMessage,
-      String eventId,
-      Instant now
-  ) {
-    if (status != DocumentStatus.EMBED_REQUESTED) {
-      throw new DatahubDomainException(
-          "Cannot fail embed. current=" + status + ", expected=EMBED_REQUESTED"
-              + " [documentId=" + getId() + "]",
-          DatahubErrorCode.INVALID_DOCUMENT_STATE
-      );
-    }
-    this.status = DocumentStatus.EMBED_FAILED;
-    this.attempt++;
-    this.lastErrorCode = errorCode;
-    this.lastErrorMessage = truncateErrorMessage(errorMessage);
-    this.lastResultEventId = eventId;
-    this.updatedAt = now;
-  }
-
   public UserId getUploader() {
     return new UserId(this.metadata.uploadedBy());
   }
 
   // ─── private helpers ────────────────────────────────────────────
-
   private static final int MAX_ERROR_MESSAGE_LENGTH = 500;
 
   private static String truncateErrorMessage(String message) {

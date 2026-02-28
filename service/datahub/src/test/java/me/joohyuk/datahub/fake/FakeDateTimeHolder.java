@@ -22,6 +22,8 @@ public class FakeDateTimeHolder implements DateTimeHolder {
 
   public FakeDateTimeHolder(Instant fixedInstant) {
     this.fixedInstant = fixedInstant;
+    // Instant를 LocalDateTime으로 변환 (UTC 기준)
+    this.fixedLocalDateTime = LocalDateTime.ofInstant(fixedInstant, java.time.ZoneId.of("UTC"));
     this.useFixedTime = true;
   }
 

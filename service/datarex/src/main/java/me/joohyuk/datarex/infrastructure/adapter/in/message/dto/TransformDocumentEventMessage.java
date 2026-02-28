@@ -20,7 +20,6 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TransformDocumentEventMessage {
 
-  private Long sagaId;
   private Long documentId;
   private Long collectionId;
   private String fileKey;

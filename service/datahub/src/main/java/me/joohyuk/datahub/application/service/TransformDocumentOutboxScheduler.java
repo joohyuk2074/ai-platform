@@ -5,7 +5,6 @@ import com.spartaecommerce.outbox.OutboxStatus;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.application.port.out.message.publisher.TransformDocumentMessagePublisher;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentOutboxHandler;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
@@ -29,10 +28,8 @@ public class TransformDocumentOutboxScheduler implements OutboxScheduler {
   )
   public void processOutboxMessage() {
     List<TransformDocumentOutbox> outboxMessages =
-        transformDocumentOutboxHandler.getTransformDocumentOutboxByOutboxStatusAndSagaStatus(
-            OutboxStatus.PENDING,
-            SagaStatus.STARTED,
-            SagaStatus.COMPENSATING
+        transformDocumentOutboxHandler.getTransformDocumentOutboxByOutboxStatus(
+            OutboxStatus.PENDING
         );
 
     if (outboxMessages.isEmpty()) {

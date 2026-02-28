@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
-import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.application.port.out.message.publisher.TransformDocumentMessagePublisher;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
 
@@ -50,11 +49,10 @@ public class FakeTransformDocumentMessagePublisher implements
 
     // Record the published message
     publishedMessages.add(new PublishedMessage(
-        transformDocumentOutbox.getSagaId(),
+        transformDocumentOutbox.getCorrelationId(),
         transformDocumentOutbox.getType(),
         transformDocumentOutbox.getPayload(),
-        transformDocumentOutbox.getOutboxStatus(),
-        transformDocumentOutbox.getSagaStatus()
+        transformDocumentOutbox.getOutboxStatus()
     ));
 
     // Execute the callback immediately (simulating successful/failed publishing)
@@ -82,11 +80,11 @@ public class FakeTransformDocumentMessagePublisher implements
   }
 
   /**
-   * 테스트 헬퍼: 특정 SagaId로 발행된 메시지 조회
+   * 테스트 헬퍼: 특정 CorrelationId로 발행된 메시지 조회
    */
-  public List<PublishedMessage> getPublishedMessagesBySagaId(Long sagaId) {
+  public List<PublishedMessage> getPublishedMessagesByCorrelationId(String correlationId) {
     return publishedMessages.stream()
-        .filter(msg -> msg.sagaId().equals(sagaId))
+        .filter(msg -> msg.correlationId().equals(correlationId))
         .toList();
   }
 
@@ -117,11 +115,10 @@ public class FakeTransformDocumentMessagePublisher implements
    * 발행된 메시지 기록
    */
   public record PublishedMessage(
-      Long sagaId,
+      String correlationId,
       String type,
       String payload,
-      OutboxStatus initialOutboxStatus,
-      SagaStatus sagaStatus
+      OutboxStatus initialOutboxStatus
   ) {
 
   }

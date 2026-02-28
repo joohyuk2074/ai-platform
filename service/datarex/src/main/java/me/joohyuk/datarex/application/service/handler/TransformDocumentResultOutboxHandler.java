@@ -35,7 +35,7 @@ public class TransformDocumentResultOutboxHandler {
   }
 
   public void save(TransformDocumentCompletedEvent event) {
-    if (resultOutboxRepository.findBySagaId(event.sagaId()).isPresent()) {
+    if (resultOutboxRepository.findBySagaId(event.trackingId()).isPresent()) {
       log.warn(
           "Outbox already exists for sagaId: {}, skipping duplicate processing",
           event.sagaId()

@@ -2,8 +2,6 @@ package me.joohyuk.datahub.application.port.out.persistence;
 
 import com.spartaecommerce.outbox.OutboxStatus;
 import java.util.List;
-import java.util.Optional;
-import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
 
 public interface TransformDocumentOutboxRepository {
@@ -12,18 +10,14 @@ public interface TransformDocumentOutboxRepository {
 
   List<TransformDocumentOutbox> saveAll(List<TransformDocumentOutbox> transformDocumentOutboxes);
 
-  Optional<TransformDocumentOutbox> findBySagaId(Long sagaId);
-
-  List<TransformDocumentOutbox> findAllByTypeAndOutboxStatusAndSagaStatus(
+  List<TransformDocumentOutbox> findAllByTypeAndOutboxStatus(
       String sagaType,
-      OutboxStatus outboxStatus,
-      SagaStatus... sagaStatus
+      OutboxStatus outboxStatus
   );
 
-  void deleteByTypeAndOutboxStatusAndSagaStatus(
+  void deleteByTypeAndOutboxStatus(
       String documentTransformSagaName,
-      OutboxStatus outboxStatus,
-      SagaStatus... sagaStatus
+      OutboxStatus outboxStatus
   );
 
 }

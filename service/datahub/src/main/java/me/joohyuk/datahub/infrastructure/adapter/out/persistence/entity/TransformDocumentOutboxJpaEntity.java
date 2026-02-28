@@ -13,7 +13,6 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import me.joohyuk.commonsaga.SagaStatus;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
 import me.joohyuk.datahub.domain.vo.DocumentStatus;
 
@@ -26,17 +25,14 @@ public class TransformDocumentOutboxJpaEntity {
 
   @Id
   private Long id;
-  private Long sagaId;
+
+  private String correlationId;
   private String type;
 
   @Column(name = "payload", columnDefinition = "LONGTEXT")
   private String payload;
 
   private LocalDateTime createdAt;
-  private LocalDateTime processedAt;
-
-  @Enumerated(EnumType.STRING)
-  private SagaStatus sagaStatus;
 
   @Enumerated(EnumType.STRING)
   private OutboxStatus outboxStatus;
@@ -52,12 +48,10 @@ public class TransformDocumentOutboxJpaEntity {
   ) {
     return TransformDocumentOutboxJpaEntity.builder()
         .id(transformDocumentOutbox.getId())
-        .sagaId(transformDocumentOutbox.getSagaId())
+        .correlationId(transformDocumentOutbox.getCorrelationId())
         .type(transformDocumentOutbox.getType())
         .payload(transformDocumentOutbox.getPayload())
         .createdAt(transformDocumentOutbox.getCreatedAt())
-        .processedAt(transformDocumentOutbox.getProcessedAt())
-        .sagaStatus(transformDocumentOutbox.getSagaStatus())
         .outboxStatus(transformDocumentOutbox.getOutboxStatus())
         .documentStatus(transformDocumentOutbox.getDocumentStatus())
         .version(transformDocumentOutbox.getVersion())
@@ -67,12 +61,10 @@ public class TransformDocumentOutboxJpaEntity {
   public TransformDocumentOutbox toDomain() {
     return TransformDocumentOutbox.builder()
         .id(this.id)
-        .sagaId(this.sagaId)
+        .correlationId(this.correlationId)
         .type(this.type)
         .payload(this.payload)
         .createdAt(this.createdAt)
-        .processedAt(this.processedAt)
-        .sagaStatus(this.sagaStatus)
         .outboxStatus(this.outboxStatus)
         .documentStatus(this.documentStatus)
         .version(this.version)

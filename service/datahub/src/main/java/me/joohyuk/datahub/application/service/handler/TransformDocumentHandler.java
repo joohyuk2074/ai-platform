@@ -1,11 +1,11 @@
 package me.joohyuk.datahub.application.service.handler;
 
-import com.spartaecommerce.domain.port.IdGenerator;
 import com.spartaecommerce.domain.vo.CollectionId;
 import com.spartaecommerce.domain.vo.DocumentId;
 import com.spartaecommerce.util.DateTimeHolder;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.port.out.persistence.DocumentCollectionRepository;
@@ -25,7 +25,6 @@ public class TransformDocumentHandler {
   private final DocumentRepository documentRepository;
   private final DocumentCollectionRepository documentCollectionRepository;
   private final DateTimeHolder dateTimeHolder;
-  private final IdGenerator idGenerator;
 
   public List<TransformDocumentEvent> processTransformRequest(CollectionId collectionId) {
     List<Document> documents = fetchValidatedDocuments(collectionId);
@@ -43,8 +42,8 @@ public class TransformDocumentHandler {
 
     List<TransformDocumentEvent> events = documents.stream()
         .map(document -> {
-          Long sagaId = idGenerator.generateId();
-          return TransformDocumentEvent.from(sagaId, document);
+          String correlationId = UUID.randomUUID().toString();
+          return TransformDocumentEvent.from(correlationId, document, now);
         })
         .toList();
 

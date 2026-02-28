@@ -23,7 +23,7 @@ public class TransformDocumentEventKafkaPublisher implements TransformDocumentMe
       BiConsumer<TransformDocumentOutbox, OutboxStatus> outboxCallback
   ) {
     try {
-      String key = String.valueOf(transformDocumentOutbox.getSagaId());
+      String key = transformDocumentOutbox.getCorrelationId();
       kafkaTemplate.send(
               KafkaTopics.DOCUMENT_TRANSFORM_REQUESTED,
               key,
@@ -31,20 +31,20 @@ public class TransformDocumentEventKafkaPublisher implements TransformDocumentMe
           )
           .whenComplete((result, ex) -> {
             if (ex != null) {
-              log.error("Failed to send transform document event. SagaId: {}",
-                  transformDocumentOutbox.getSagaId(), ex);
+              log.error("Failed to send transform document event. CorrelationId: {}",
+                  transformDocumentOutbox.getCorrelationId(), ex);
               outboxCallback.accept(transformDocumentOutbox, OutboxStatus.FAILED);
               return;
             }
 
-            log.info("Transform document event sent successfully. SagaId: {}, Offset: {}",
-                transformDocumentOutbox.getSagaId(),
+            log.info("Transform document event sent successfully. CorrelationId: {}, Offset: {}",
+                transformDocumentOutbox.getCorrelationId(),
                 result.getRecordMetadata().offset());
             outboxCallback.accept(transformDocumentOutbox, OutboxStatus.SENT);
           });
     } catch (Exception e) {
-      log.error("Error publishing transform document event. SagaId: {}",
-          transformDocumentOutbox.getSagaId(), e);
+      log.error("Error publishing transform document event. CorrelationId: {}",
+          transformDocumentOutbox.getCorrelationId(), e);
       outboxCallback.accept(transformDocumentOutbox, OutboxStatus.FAILED);
     }
   }

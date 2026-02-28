@@ -4,7 +4,6 @@ import com.spartaecommerce.domain.vo.CollectionId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.joohyuk.datahub.application.dto.result.TransformDocumentRequestsResult;
 import me.joohyuk.datahub.application.port.in.service.TransformDocumentUseCase;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentHandler;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentOutboxHandler;
@@ -21,19 +20,17 @@ public class TransformDocumentService implements TransformDocumentUseCase {
   private final TransformDocumentOutboxHandler transformDocumentOutboxHandler;
 
   @Transactional
-  public TransformDocumentRequestsResult transform(CollectionId collectionId) {
+  public void transform(CollectionId collectionId) {
     List<TransformDocumentEvent> events =
         transformDocumentHandler.processTransformRequest(collectionId);
 
     if (events.isEmpty()) {
-      return TransformDocumentRequestsResult.empty();
+      return;
     }
 
     transformDocumentOutboxHandler.saveAll(events);
 
     log.info("Transform request completed - collectionId: {}, total: {}",
         collectionId.getValue(), events.size());
-
-    return TransformDocumentRequestsResult.fromEvents(events);
   }
 }

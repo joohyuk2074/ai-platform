@@ -5,7 +5,6 @@ import com.spartaecommerce.domain.vo.DocumentId;
 import com.spartaecommerce.util.DateTimeHolder;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datarex.application.dto.command.TransformDocumentCommand;
@@ -31,7 +30,6 @@ public class TransformDocumentHandler {
   private final DateTimeHolder dateTimeHolder;
 
   public TransformDocumentCompletedEvent transform(TransformDocumentCommand command) {
-    String eventId = UUID.randomUUID().toString();
     String contentHash = command.contentHash();
     Instant now = dateTimeHolder.now();
 
@@ -51,8 +49,8 @@ public class TransformDocumentHandler {
       List<DocumentContent> documents = documentReader.read(command);
 
       ChunkingConfig chunkingConfig = ChunkingConfig.defaultConfig();
-      List<DocumentContent> splitDocuments = documentTransformer.transform(documents,
-          chunkingConfig);
+      List<DocumentContent> splitDocuments =
+          documentTransformer.transform(documents, chunkingConfig);
 
       log.debug("문서 변환(청킹) 완료 - 원본 문서 수: {}, 분할된 청크 수: {}",
           documents.size(), splitDocuments.size());
@@ -73,8 +71,8 @@ public class TransformDocumentHandler {
 
       // 성공 이벤트 발행
       return TransformDocumentCompletedEvent.success(
-          eventId,
-          command.sagaId(),
+          command.correlationId(),
+          command.trackingId(),
           String.valueOf(command.collectionId()),
           String.valueOf(command.documentId()),
           contentHash,
@@ -87,8 +85,8 @@ public class TransformDocumentHandler {
           command.documentId(), command.collectionId(), e.getErrorCode().code(), e.getMessage()
       );
       return TransformDocumentCompletedEvent.failure(
-          eventId,
-          command.sagaId(),
+          command.correlationId(),
+          command.trackingId(),
           String.valueOf(command.collectionId()),
           String.valueOf(command.documentId()),
           contentHash,
@@ -102,8 +100,8 @@ public class TransformDocumentHandler {
           command.documentId(), command.collectionId(), e
       );
       return TransformDocumentCompletedEvent.failure(
-          eventId,
-          command.sagaId(),
+          command.correlationId(),
+          command.trackingId(),
           String.valueOf(command.collectionId()),
           String.valueOf(command.documentId()),
           contentHash,

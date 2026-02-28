@@ -6,13 +6,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.dto.result.CreateDocumentCollectionResult;
-import me.joohyuk.datahub.application.dto.result.TransformDocumentRequestsResult;
 import me.joohyuk.datahub.application.port.in.service.CreateDocumentCollectionUseCase;
 import me.joohyuk.datahub.application.port.in.service.DeleteDocumentCollectionUseCase;
 import me.joohyuk.datahub.application.port.in.service.TransformDocumentUseCase;
 import me.joohyuk.datahub.application.port.in.service.UpdateDocumentCollectionUseCase;
 import me.joohyuk.datahub.infrastructure.adapter.in.web.dto.CreateDocumentCollectionRequest;
-import me.joohyuk.datahub.infrastructure.adapter.in.web.dto.DocumentTransformRequestResponse;
 import me.joohyuk.datahub.infrastructure.adapter.in.web.dto.UpdateDocumentCollectionRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -79,15 +77,11 @@ public class DocumentCollectionController {
   }
 
   @PostMapping("/{collectionId}/transform")
-  public ResponseEntity<CommonResponse<DocumentTransformRequestResponse>> transformDocuments(
+  public ResponseEntity<CommonResponse<Void>> transformDocuments(
       @PathVariable String collectionId
   ) {
-    TransformDocumentRequestsResult result =
-        transformDocumentUseCase.transform(CollectionId.of(collectionId));
+    transformDocumentUseCase.transform(CollectionId.of(collectionId));
 
-    DocumentTransformRequestResponse response =
-        DocumentTransformRequestResponse.of(result, collectionId);
-
-    return ResponseEntity.ok(CommonResponse.success(response));
+    return ResponseEntity.ok(CommonResponse.success(null));
   }
 }

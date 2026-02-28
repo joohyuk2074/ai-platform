@@ -13,12 +13,10 @@ import com.spartaecommerce.domain.vo.TrackingId;
 import com.spartaecommerce.infrastructure.json.ObjectMapperJsonSerializer;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.IntStream;
-import me.joohyuk.datahub.application.dto.result.TransformDocumentRequestsResult;
-import me.joohyuk.datahub.application.service.handler.UploadDocumentHandler;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentHandler;
 import me.joohyuk.datahub.application.service.handler.TransformDocumentOutboxHandler;
-import me.joohyuk.datahub.application.service.handler.TransformDocumentSagaHandler;
 import me.joohyuk.datahub.domain.entity.Document;
 import me.joohyuk.datahub.domain.entity.DocumentCollection;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
@@ -69,16 +67,6 @@ class TransformDocumentServiceTest {
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.findAndRegisterModules();
 
-    // Given: Wire real collaborators (Classical approach)
-    TransformDocumentSagaHandler transformDocumentSagaHandler = new TransformDocumentSagaHandler();
-
-    UploadDocumentHandler uploadDocumentHandler = new UploadDocumentHandler(
-        documentRepository,
-        documentCollectionRepository,
-        dateTimeHolder,
-        documentIdGenerator
-    );
-
     // Real JsonSerializer
     JsonSerializer jsonSerializer = new ObjectMapperJsonSerializer(objectMapper);
 
@@ -86,15 +74,14 @@ class TransformDocumentServiceTest {
     TransformDocumentHandler transformDocumentHandler = new TransformDocumentHandler(
         documentRepository,
         documentCollectionRepository,
-        dateTimeHolder,
-        documentIdGenerator
+        dateTimeHolder
     );
 
     TransformDocumentOutboxHandler transformDocumentOutboxHandler = new TransformDocumentOutboxHandler(
         transformDocumentOutboxRepository,
-        transformDocumentSagaHandler,
         outboxIdGenerator,
-        jsonSerializer
+        jsonSerializer,
+        dateTimeHolder
     );
 
     // Given: System under test with real collaborators
@@ -106,7 +93,7 @@ class TransformDocumentServiceTest {
 
   @ParameterizedTest
   @ValueSource(ints = {1, 2, 5, 10})
-  @DisplayName("유효한 컬렉션에 문서들이 있을 때 transform 호출 시 TrackingId들을 반환하고 TRANSFORM_REQUESTED 상태로 문서들을 저장한다")
+  @DisplayName("유효한 컬렉션에 문서들이 있을 때 transform 호출 시 TRANSFORM_REQUESTED 상태로 문서들을 저장한다")
   void transform_with_valid_collection_containing_documents(int documentCount) {
     // Given: Valid collection exists
     CollectionId collectionId = CollectionId.of(100L);
@@ -119,16 +106,7 @@ class TransformDocumentServiceTest {
     );
 
     // When: Transform is called
-    TransformDocumentRequestsResult result = transformDocumentService.transform(collectionId);
-
-    // Then: Result contains correct tracking IDs
-    assertThat(result.transformTrackingIds())
-        .hasSize(documentCount)
-        .containsExactlyInAnyOrderElementsOf(
-            uploadedDocuments.stream()
-                .map(Document::getTrackingId)
-                .toList()
-        );
+    transformDocumentService.transform(collectionId);
 
     // Then: Documents were persisted with TRANSFORM_REQUESTED status (state-based verification)
     List<Document> savedDocuments = documentRepository.findByCollectionId(
@@ -138,6 +116,15 @@ class TransformDocumentServiceTest {
     assertThat(savedDocuments).hasSize(documentCount);
     assertAllDocumentsHaveTransformRequestedState(savedDocuments);
 
+    // Then: Saved documents match uploaded documents
+    assertThat(savedDocuments)
+        .extracting(Document::getTrackingId)
+        .containsExactlyInAnyOrderElementsOf(
+            uploadedDocuments.stream()
+                .map(Document::getTrackingId)
+                .toList()
+        );
+
     // Then: Outbox entries were created (state-based verification)
     List<TransformDocumentOutbox> savedOutboxes = transformDocumentOutboxRepository.findAll();
     assertThat(savedOutboxes).hasSize(documentCount);
@@ -145,18 +132,14 @@ class TransformDocumentServiceTest {
   }
 
   @Test
-  @DisplayName("컬렉션에 UPLOADED 상태의 문서가 없을 때 빈 결과를 반환한다")
-  void return_empty_result_when_no_uploaded_documents_exist() {
+  @DisplayName("컬렉션에 UPLOADED 상태의 문서가 없을 때 아무 작업도 수행하지 않는다")
+  void do_nothing_when_no_uploaded_documents_exist() {
     // Given: Valid collection exists but has no UPLOADED documents
     CollectionId collectionId = CollectionId.of(200L);
     createAndSaveCollection(collectionId, "empty-collection");
 
     // When: Transform is called
-    TransformDocumentRequestsResult result = transformDocumentService.transform(collectionId);
-
-    // Then: Empty result is returned
-    assertThat(result).isNotNull();
-    assertThat(result.transformTrackingIds()).isEmpty();
+    transformDocumentService.transform(collectionId);
 
     // Then: No documents were persisted (state-based verification)
     List<Document> savedDocuments = documentRepository.findByCollectionId(collectionId,
@@ -247,10 +230,10 @@ class TransformDocumentServiceTest {
     CollectionId collectionId = CollectionId.of(600L);
     createAndSaveCollection(collectionId, "consistency-test-collection");
 
-    List<Document> documents = createAndSaveUploadedDocuments(collectionId, 2);
+    List<Document> uploadedDocuments = createAndSaveUploadedDocuments(collectionId, 2);
 
     // When: Transform is called
-    TransformDocumentRequestsResult result = transformDocumentService.transform(collectionId);
+    transformDocumentService.transform(collectionId);
 
     // Then: Same number of documents and outbox entries (state-based verification)
     List<Document> savedDocuments = documentRepository.findByCollectionId(collectionId,
@@ -260,13 +243,15 @@ class TransformDocumentServiceTest {
     assertThat(savedDocuments).hasSize(2);
     assertThat(savedOutboxes).hasSize(2);
 
-    // Then: Result tracking IDs match saved documents
-    List<TrackingId> resultTrackingIds = result.transformTrackingIds();
-    List<TrackingId> documentTrackingIds = savedDocuments.stream()
+    // Then: Saved documents match uploaded documents
+    List<TrackingId> uploadedTrackingIds = uploadedDocuments.stream()
+        .map(Document::getTrackingId)
+        .toList();
+    List<TrackingId> savedTrackingIds = savedDocuments.stream()
         .map(Document::getTrackingId)
         .toList();
 
-    assertThat(resultTrackingIds).containsExactlyInAnyOrderElementsOf(documentTrackingIds);
+    assertThat(savedTrackingIds).containsExactlyInAnyOrderElementsOf(uploadedTrackingIds);
   }
 
   // ─── Assertion Helpers ──────────────────────────────────────
@@ -288,7 +273,6 @@ class TransformDocumentServiceTest {
         .allSatisfy(outbox -> {
           assertThat(outbox.getType()).isEqualTo("TransformDocumentSaga");
           assertThat(outbox.getDocumentStatus()).isEqualTo(DocumentStatus.TRANSFORM_REQUESTED);
-          assertThat(outbox.getSagaStatus().name()).isEqualTo("STARTED");
           assertThat(outbox.getOutboxStatus().name()).isEqualTo("PENDING");
           assertThat(outbox.getPayload()).isNotBlank();
         });
@@ -346,9 +330,16 @@ class TransformDocumentServiceTest {
       ContentHash contentHash,
       Metadata metadata
   ) {
-    Document document = Document.create(collectionId, fileKey, contentHash, metadata);
     DocumentId documentId = new DocumentId(documentIdGenerator.generateId());
-    document.upload(documentId, fixedNow);
+    Document document = Document.createForUpload(
+        collectionId,
+        fileKey,
+        contentHash,
+        metadata,
+        documentId,
+        new TrackingId(UUID.randomUUID()),
+        fixedNow
+    );
 
     return documentRepository.save(document);
   }
