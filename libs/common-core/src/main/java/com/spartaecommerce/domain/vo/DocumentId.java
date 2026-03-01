@@ -7,7 +7,7 @@ public final class DocumentId extends BaseId<Long> {
   }
 
   public static DocumentId from(String value) {
-    return new DocumentId(Long.getLong(value));
+    return new DocumentId(Long.parseLong(value));
   }
 
   public static DocumentId from(Long value) {
