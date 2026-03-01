@@ -2,6 +2,7 @@ package me.joohyuk.datahub.infrastructure.adapter.out.persistence;
 
 import com.spartaecommerce.outbox.OutboxStatus;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import me.joohyuk.datahub.application.port.out.persistence.TransformDocumentOutboxRepository;
@@ -60,5 +61,11 @@ public class TransformDocumentOutboxRepositoryImpl implements TransformDocumentO
         .stream()
         .map(TransformDocumentOutboxJpaEntity::toDomain)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public Optional<TransformDocumentOutbox> findByCorrelationId(String correlationId) {
+    return jpaRepository.findByCorrelationId(correlationId)
+        .map(TransformDocumentOutboxJpaEntity::toDomain);
   }
 }

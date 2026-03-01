@@ -1,12 +1,14 @@
 package me.joohyuk.datahub.application.service;
 
+import static me.joohyuk.commonsaga.SagaConstants.DOCUMENT_TRANSFORM_SAGA_NAME;
+
 import com.spartaecommerce.outbox.OutboxScheduler;
 import com.spartaecommerce.outbox.OutboxStatus;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.joohyuk.datahub.application.port.out.message.publisher.TransformDocumentMessagePublisher;
-import me.joohyuk.datahub.application.service.handler.TransformDocumentOutboxHandler;
+import me.joohyuk.datahub.application.port.out.persistence.TransformDocumentOutboxRepository;
 import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TransformDocumentOutboxScheduler implements OutboxScheduler {
 
-  private final TransformDocumentOutboxHandler transformDocumentOutboxHandler;
+  private final TransformDocumentOutboxRepository transformDocumentOutboxRepository;
   private final TransformDocumentMessagePublisher transformDocumentMessagePublisher;
 
   @Override
@@ -28,7 +30,8 @@ public class TransformDocumentOutboxScheduler implements OutboxScheduler {
   )
   public void processOutboxMessage() {
     List<TransformDocumentOutbox> outboxMessages =
-        transformDocumentOutboxHandler.getTransformDocumentOutboxByOutboxStatus(
+        transformDocumentOutboxRepository.findAllByTypeAndOutboxStatus(
+            DOCUMENT_TRANSFORM_SAGA_NAME,
             OutboxStatus.PENDING
         );
 
@@ -50,7 +53,7 @@ public class TransformDocumentOutboxScheduler implements OutboxScheduler {
       OutboxStatus outboxStatus
   ) {
     transformDocumentOutbox.setOutboxStatus(outboxStatus);
-    transformDocumentOutboxHandler.save(transformDocumentOutbox);
+    transformDocumentOutboxRepository.save(transformDocumentOutbox);
     log.info("TransformDocumentOutbox is updated with outbox status: {}", outboxStatus.name());
   }
 }

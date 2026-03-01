@@ -28,7 +28,7 @@ public class TransformDocumentResultOutboxJpaEntity {
   private String type;
 
   @Column(nullable = false)
-  private Long sagaId;
+  private String correlationId;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -47,7 +47,7 @@ public class TransformDocumentResultOutboxJpaEntity {
   ) {
     return TransformDocumentResultOutboxJpaEntity.builder()
         .id(domain.getId())
-        .sagaId(domain.getSagaId())
+        .correlationId(domain.getCorrelationId())
         .type(domain.getType())
         .outboxStatus(domain.getOutboxStatus())
         .payload(domain.getPayload())
@@ -59,7 +59,7 @@ public class TransformDocumentResultOutboxJpaEntity {
   public TransformDocumentResultOutbox toDomain() {
     return new TransformDocumentResultOutbox(
         this.id,
-        this.sagaId,
+        this.correlationId,
         this.type,
         this.outboxStatus,
         this.payload,

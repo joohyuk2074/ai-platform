@@ -14,5 +14,5 @@ public interface TransformDocumentResultOutboxRepository {
       OutboxStatus outboxStatus
   );
 
-  Optional<TransformDocumentResultOutbox> findBySagaId(Long sagaId);
+  Optional<TransformDocumentResultOutbox> findByCorrelationId(String correlationId);
 }

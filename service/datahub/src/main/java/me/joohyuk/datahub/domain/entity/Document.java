@@ -146,14 +146,7 @@ public class Document extends AggregateRoot<DocumentId> {
     this.updatedAt = now;
   }
 
-  /**
-   * {@code TRANSFORM_REQUESTED → TRANSFORMED} 로 전이합니다. datarex에서 Transform 완료 이벤트를 수신하면 호출합니다.
-   *
-   * @param passageCount 생성된 청크 수
-   * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
-   * @throws DatahubDomainException 현재 상태가 TRANSFORM_REQUESTED가 아닌 경우
-   */
-  public void completeTransform(int passageCount, String eventId, Instant now) {
+  public void completeTransform(int passageCount, String correlationId, Instant now) {
     if (status != DocumentStatus.TRANSFORM_REQUESTED) {
       throw new DatahubDomainException(
           "Cannot complete transform. current=" + status + ", expected=TRANSFORM_REQUESTED"
@@ -163,7 +156,7 @@ public class Document extends AggregateRoot<DocumentId> {
     }
     this.status = DocumentStatus.TRANSFORMED;
     this.passageCount = passageCount;
-    this.lastResultEventId = eventId;
+    this.lastResultEventId = correlationId;
     this.updatedAt = now;
   }
 
@@ -173,13 +166,13 @@ public class Document extends AggregateRoot<DocumentId> {
    *
    * @param errorCode    실패 이벤트의 에러 코드
    * @param errorMessage 실패 이벤트의 에러 메시지 (500자 초과 시 절단)
-   * @param eventId      수신한 결과 이벤트의 ID (멱등성 체크용)
+   * @param correlationId      수신한 결과 이벤트의 ID (멱등성 체크용)
    * @throws DatahubDomainException 현재 상태가 TRANSFORM_REQUESTED가 아닌 경우
    */
   public void failTransform(
       String errorCode,
       String errorMessage,
-      String eventId,
+      String correlationId,
       Instant now
   ) {
     if (status != DocumentStatus.TRANSFORM_REQUESTED) {
@@ -193,7 +186,7 @@ public class Document extends AggregateRoot<DocumentId> {
     this.attempt++;
     this.lastErrorCode = errorCode;
     this.lastErrorMessage = truncateErrorMessage(errorMessage);
-    this.lastResultEventId = eventId;
+    this.lastResultEventId = correlationId;
     this.updatedAt = now;
   }
 

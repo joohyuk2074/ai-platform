@@ -53,15 +53,20 @@ public class TransformDocumentHandler {
     return events;
   }
 
-  public void complete(DocumentId documentId, Integer passageCount, String eventId) {
+  public void complete(DocumentId documentId, Integer passageCount, String correlationId) {
     Document document = documentRepository.getById(documentId);
-    document.completeTransform(passageCount, eventId, dateTimeHolder.now());
+    document.completeTransform(passageCount, correlationId, dateTimeHolder.now());
     documentRepository.save(document);
   }
 
-  public void failed(DocumentId documentId, String errorCode, String errorMessage, String eventId) {
+  public void failed(
+      DocumentId documentId,
+      String errorCode,
+      String errorMessage,
+      String correlationId
+  ) {
     Document document = documentRepository.getById(documentId);
-    document.failTransform(errorCode, errorMessage, eventId, dateTimeHolder.now());
+    document.failTransform(errorCode, errorMessage, correlationId, dateTimeHolder.now());
     documentRepository.save(document);
   }
 

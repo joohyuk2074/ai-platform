@@ -3,8 +3,7 @@ package me.joohyuk.datahub.infrastructure.adapter.in.listener.dto;
 import java.time.Instant;
 
 public record TransformDocumentCompletedEvent(
-    String eventId,
-    Long sagaId,
+    String correlationId,
     String collectionId,
     String documentId,
     String contentHash,

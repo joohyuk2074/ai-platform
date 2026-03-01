@@ -14,5 +14,5 @@ public interface TransformDocumentResultOutboxJpaRepository
       OutboxStatus outboxStatus
   );
 
-  Optional<TransformDocumentResultOutboxJpaEntity> findBySagaId(Long sagaId);
+  Optional<TransformDocumentResultOutboxJpaEntity> findByCorrelationId(String correlationId);
 }

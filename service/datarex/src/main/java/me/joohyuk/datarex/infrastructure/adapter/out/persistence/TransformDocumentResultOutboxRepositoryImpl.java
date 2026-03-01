@@ -35,8 +35,8 @@ public class TransformDocumentResultOutboxRepositoryImpl implements
   }
 
   @Override
-  public Optional<TransformDocumentResultOutbox> findBySagaId(Long sagaId) {
-    return jpaRepository.findBySagaId(sagaId)
+  public Optional<TransformDocumentResultOutbox> findByCorrelationId(String correlationId) {
+    return jpaRepository.findByCorrelationId(correlationId)
         .map(TransformDocumentResultOutboxJpaEntity::toDomain);
   }
 }

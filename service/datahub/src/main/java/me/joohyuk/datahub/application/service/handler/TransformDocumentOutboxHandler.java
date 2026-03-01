@@ -27,10 +27,6 @@ public class TransformDocumentOutboxHandler {
   private final JsonSerializer jsonSerializer;
   private final DateTimeHolder dateTimeHolder;
 
-  public void save(TransformDocumentOutbox transformDocumentOutbox) {
-    transformDocumentOutboxRepository.save(transformDocumentOutbox);
-  }
-
   public void saveAll(List<TransformDocumentEvent> events) {
     List<TransformDocumentOutbox> outboxes = events.stream()
         .map(this::createOutbox)
@@ -46,16 +42,6 @@ public class TransformDocumentOutboxHandler {
       OutboxStatus outboxStatus
   ) {
     transformDocumentOutboxRepository.deleteByTypeAndOutboxStatus(
-        DOCUMENT_TRANSFORM_SAGA_NAME,
-        outboxStatus
-    );
-  }
-
-  @Transactional(readOnly = true)
-  public List<TransformDocumentOutbox> getTransformDocumentOutboxByOutboxStatus(
-      OutboxStatus outboxStatus
-  ) {
-    return transformDocumentOutboxRepository.findAllByTypeAndOutboxStatus(
         DOCUMENT_TRANSFORM_SAGA_NAME,
         outboxStatus
     );

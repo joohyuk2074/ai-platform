@@ -35,10 +35,10 @@ public class TransformDocumentResultOutboxHandler {
   }
 
   public void save(TransformDocumentCompletedEvent event) {
-    if (resultOutboxRepository.findBySagaId(event.trackingId()).isPresent()) {
+    if (resultOutboxRepository.findByCorrelationId(event.correlationId()).isPresent()) {
       log.warn(
-          "Outbox already exists for sagaId: {}, skipping duplicate processing",
-          event.sagaId()
+          "Outbox already exists for correlationId: {}, skipping duplicate processing",
+          event.collectionId()
       );
       return;
     }
@@ -65,7 +65,7 @@ public class TransformDocumentResultOutboxHandler {
 
     return new TransformDocumentResultOutbox(
         idGenerator.generateId(),
-        event.sagaId(),
+        event.correlationId(),
         DOCUMENT_TRANSFORM_SAGA_NAME,
         OutboxStatus.PENDING,
         payload,

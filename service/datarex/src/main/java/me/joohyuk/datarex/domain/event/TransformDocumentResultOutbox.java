@@ -13,7 +13,7 @@ import lombok.Setter;
 public class TransformDocumentResultOutbox {
 
   private Long id;
-  private Long sagaId;
+  private String correlationId;
   private String type;
   @Setter
   private OutboxStatus outboxStatus;

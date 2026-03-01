@@ -26,7 +26,7 @@ public class KafkaDocumentTransformResultEventPublisher implements
   ) {
 
     try {
-      String key = String.valueOf(resultOutbox.getSagaId());
+      String key = String.valueOf(resultOutbox.getCorrelationId());
       kafkaTemplate.send(
               DOCUMENT_TRANSFORM_RESULT,
               key,
@@ -36,19 +36,19 @@ public class KafkaDocumentTransformResultEventPublisher implements
             if (ex == null) {
               log.info(
                   "Document transform result outbox published successfully. SagaId: {}, Topic: {}, Offset: {}",
-                  resultOutbox.getSagaId(),
+                  resultOutbox.getCorrelationId(),
                   DOCUMENT_TRANSFORM_RESULT,
                   result.getRecordMetadata().offset());
               outboxCallback.accept(resultOutbox, OutboxStatus.SENT);
             } else {
               log.error("Failed to publish document transform result outbox. SagaId: {}",
-                  resultOutbox.getSagaId(), ex);
+                  resultOutbox.getCorrelationId(), ex);
               outboxCallback.accept(resultOutbox, OutboxStatus.FAILED);
             }
           });
     } catch (Exception e) {
       log.error("Error publishing document transform result outbox. SagaId: {}",
-          resultOutbox.getSagaId(), e);
+          resultOutbox.getCorrelationId(), e);
       outboxCallback.accept(resultOutbox, OutboxStatus.FAILED);
     }
 

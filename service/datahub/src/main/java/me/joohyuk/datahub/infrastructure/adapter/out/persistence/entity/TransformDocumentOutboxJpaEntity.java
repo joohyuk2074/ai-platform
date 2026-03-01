@@ -33,6 +33,7 @@ public class TransformDocumentOutboxJpaEntity {
   private String payload;
 
   private LocalDateTime createdAt;
+  private LocalDateTime processedAt;
 
   @Enumerated(EnumType.STRING)
   private OutboxStatus outboxStatus;
@@ -52,6 +53,7 @@ public class TransformDocumentOutboxJpaEntity {
         .type(transformDocumentOutbox.getType())
         .payload(transformDocumentOutbox.getPayload())
         .createdAt(transformDocumentOutbox.getCreatedAt())
+        .processedAt(transformDocumentOutbox.getProcessedAt())
         .outboxStatus(transformDocumentOutbox.getOutboxStatus())
         .documentStatus(transformDocumentOutbox.getDocumentStatus())
         .version(transformDocumentOutbox.getVersion())
@@ -65,6 +67,7 @@ public class TransformDocumentOutboxJpaEntity {
         .type(this.type)
         .payload(this.payload)
         .createdAt(this.createdAt)
+        .processedAt(this.processedAt)
         .outboxStatus(this.outboxStatus)
         .documentStatus(this.documentStatus)
         .version(this.version)

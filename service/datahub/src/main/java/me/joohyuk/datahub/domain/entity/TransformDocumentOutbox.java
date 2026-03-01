@@ -30,6 +30,7 @@ public class TransformDocumentOutbox {
   private int version;
 
   private LocalDateTime createdAt;
+  private LocalDateTime processedAt;
 
   /**
    * PENDING 상태의 TransformDocumentOutbox를 생성합니다.
@@ -57,5 +58,34 @@ public class TransformDocumentOutbox {
         .version(0)
         .createdAt(createdAt)
         .build();
+  }
+
+  /**
+   * 문서 변환이 성공적으로 완료되었음을 기록합니다.
+   * Outbox 상태는 이미 SENT이므로 변경하지 않고, processedAt만 기록합니다.
+   * (SENT + processedAt != null = 성공적으로 완료된 상태)
+   *
+   * @param processedAt 처리 완료 시각
+   */
+  public void markCompleted(LocalDateTime processedAt) {
+    this.processedAt = processedAt;
+  }
+
+  /**
+   * Outbox를 실패 상태로 마킹합니다. (SENT -> FAILED)
+   *
+   * @param processedAt 처리 시도 시각
+   */
+  public void markFailed(LocalDateTime processedAt) {
+    this.outboxStatus = OutboxStatus.FAILED;
+    this.processedAt = processedAt;
+  }
+
+  /**
+   * 재시도 가능한 오류 발생 시 Outbox를 PENDING 상태로 되돌립니다.
+   * 스케줄러가 다시 이 Outbox를 처리하여 재시도할 수 있도록 합니다.
+   */
+  public void markForRetry() {
+    this.outboxStatus = OutboxStatus.PENDING;
   }
 }
