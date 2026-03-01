@@ -1,20 +1,26 @@
 package me.joohyuk.datarex.application.service;
 
 import com.spartaecommerce.domain.vo.Metadata;
+import com.spartaecommerce.domain.vo.TrackingId;
+import java.util.UUID;
 import me.joohyuk.datarex.application.dto.command.TransformDocumentCommand;
 
 /**
  * Builder for creating TransformDocumentCommand test fixtures.
  * <p>
- * Provides a fluent API for constructing test commands with sensible defaults and specific overrides.
+ * Provides a fluent API for constructing test commands with sensible defaults and specific
+ * overrides.
  */
 public class DocumentTransformRequestBuilder {
 
-  private Long sagaId = 1001L;
+  private TrackingId trackingId = new TrackingId(UUID.randomUUID());
+  // Generate unique correlationId for each builder instance
+  private String correlationId = UUID.randomUUID().toString();
   private Long documentId = 1L;
   private Long collectionId = 100L;
   private String fileKey = "collections/100/documents/1/file.pdf";
-  private String contentHash = "abc123hash";
+  // Valid 64-char SHA-256 hex string
+  private String contentHash = "a".repeat(64);
   private Metadata metadata = Metadata.forUpload(
       "test-document.pdf",
       1024L,
@@ -30,8 +36,13 @@ public class DocumentTransformRequestBuilder {
     return new DocumentTransformRequestBuilder();
   }
 
-  public DocumentTransformRequestBuilder withSagaId(Long sagaId) {
-    this.sagaId = sagaId;
+  public DocumentTransformRequestBuilder withTrackingId(TrackingId trackingId) {
+    this.trackingId = trackingId;
+    return this;
+  }
+
+  public DocumentTransformRequestBuilder withCorrelationId(String correlationId) {
+    this.correlationId = correlationId;
     return this;
   }
 
@@ -76,7 +87,8 @@ public class DocumentTransformRequestBuilder {
 
   public TransformDocumentCommand build() {
     return new TransformDocumentCommand(
-        sagaId,
+        trackingId,
+        correlationId,
         documentId,
         collectionId,
         fileKey,

@@ -33,8 +33,10 @@ public class FakeTransformDocumentResultOutboxRepository implements
   }
 
   @Override
-  public Optional<TransformDocumentResultOutbox> findBySagaId(Long sagaId) {
-    return Optional.empty();
+  public Optional<TransformDocumentResultOutbox> findByCorrelationId(String correlationId) {
+    return store.values().stream()
+        .filter(outbox -> correlationId.equals(outbox.getCorrelationId()))
+        .findFirst();
   }
 
   /**

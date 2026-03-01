@@ -181,8 +181,8 @@ class DocumentTransformServiceTest {
       assertThat(event.passageCount())
           .as("Event should report the number of chunks created")
           .isEqualTo(2);  // Default chunking creates 2 chunks
-      assertThat(event.eventId())
-          .as("Event should have a unique ID")
+      assertThat(event.correlationId())
+          .as("Event should have a unique correlation ID")
           .isNotNull();
       assertThat(event.occurredAt())
           .as("Event should have a timestamp")
@@ -547,11 +547,11 @@ class DocumentTransformServiceTest {
       transformService.transformDocument(request1);
       transformService.transformDocument(request2);
 
-      // Then: Each should have a unique event ID
+      // Then: Each should have a unique correlation ID
       List<TransformDocumentCompletedEvent> events = extractAllEventsFromOutbox();
       assertThat(events)
           .hasSize(2)
-          .extracting(TransformDocumentCompletedEvent::eventId)
+          .extracting(TransformDocumentCompletedEvent::correlationId)
           .doesNotHaveDuplicates();
     }
   }
