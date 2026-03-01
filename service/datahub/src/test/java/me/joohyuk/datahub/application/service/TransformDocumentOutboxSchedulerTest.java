@@ -82,7 +82,7 @@ class TransformDocumentOutboxSchedulerTest {
 
     // Given: System under test
     scheduler = new TransformDocumentOutboxScheduler(
-        outboxHandler,
+        outboxRepository,
         messagePublisher
     );
   }

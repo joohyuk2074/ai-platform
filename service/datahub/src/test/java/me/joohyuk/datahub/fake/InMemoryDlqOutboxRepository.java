@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import me.joohyuk.datahub.application.port.out.persistence.TransformDocumentOutboxRepository;
-import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
+import me.joohyuk.datahub.application.port.out.persistence.DlqOutboxRepository;
+import me.joohyuk.datahub.domain.entity.DlqOutbox;
 
 /**
- * In-Memory TransformDocumentOutboxRepository 구현
+ * In-Memory DlqOutboxRepository 구현
  *
  * <p>Classical School 원칙에 따라 mock이 아닌 fake 구현을 사용합니다:
  * <ul>
@@ -28,71 +28,38 @@ import me.joohyuk.datahub.domain.entity.TransformDocumentOutbox;
  *   <li>명확한 의도: 저장소가 어떻게 동작해야 하는지 명확히 표현</li>
  * </ol>
  */
-public class InMemoryTransformDocumentOutboxRepository implements
-    TransformDocumentOutboxRepository {
+public class InMemoryDlqOutboxRepository implements DlqOutboxRepository {
 
-  private final Map<Long, TransformDocumentOutbox> store = new ConcurrentHashMap<>();
+  private final Map<Long, DlqOutbox> store = new ConcurrentHashMap<>();
 
   @Override
-  public TransformDocumentOutbox save(TransformDocumentOutbox outbox) {
-    Objects.requireNonNull(outbox, "TransformDocumentOutbox cannot be null");
-    Objects.requireNonNull(outbox.getId(), "TransformDocumentOutbox ID cannot be null");
+  public DlqOutbox save(DlqOutbox dlqOutbox) {
+    Objects.requireNonNull(dlqOutbox, "DlqOutbox cannot be null");
+    Objects.requireNonNull(dlqOutbox.getId(), "DlqOutbox ID cannot be null");
 
-    store.put(outbox.getId(), outbox);
-    return outbox;
+    store.put(dlqOutbox.getId(), dlqOutbox);
+    return dlqOutbox;
   }
 
   @Override
-  public List<TransformDocumentOutbox> saveAll(List<TransformDocumentOutbox> outboxes) {
-    Objects.requireNonNull(outboxes, "TransformDocumentOutbox list cannot be null");
-
-    outboxes.forEach(outbox -> {
-      Objects.requireNonNull(outbox, "TransformDocumentOutbox cannot be null");
-      Objects.requireNonNull(outbox.getId(), "TransformDocumentOutbox ID cannot be null");
-      store.put(outbox.getId(), outbox);
-    });
-
-    return outboxes;
-  }
-
-  @Override
-  public List<TransformDocumentOutbox> findAllByTypeAndOutboxStatus(
-      String type,
-      OutboxStatus outboxStatus
-  ) {
-    Objects.requireNonNull(type, "Type cannot be null");
+  public List<DlqOutbox> findAllByOutboxStatus(OutboxStatus outboxStatus) {
     Objects.requireNonNull(outboxStatus, "Outbox status cannot be null");
 
     return store.values().stream()
-        .filter(outbox -> type.equals(outbox.getType()))
         .filter(outbox -> outboxStatus.equals(outbox.getOutboxStatus()))
         .toList();
   }
 
   @Override
-  public void deleteByTypeAndOutboxStatus(
-      String type,
-      OutboxStatus outboxStatus
-  ) {
-    Objects.requireNonNull(type, "Type cannot be null");
+  public void deleteByOutboxStatus(OutboxStatus outboxStatus) {
     Objects.requireNonNull(outboxStatus, "Outbox status cannot be null");
 
     List<Long> idsToDelete = store.values().stream()
-        .filter(outbox -> type.equals(outbox.getType()))
         .filter(outbox -> outboxStatus.equals(outbox.getOutboxStatus()))
-        .map(TransformDocumentOutbox::getId)
+        .map(DlqOutbox::getId)
         .toList();
 
     idsToDelete.forEach(store::remove);
-  }
-
-  @Override
-  public java.util.Optional<TransformDocumentOutbox> findByCorrelationId(String correlationId) {
-    Objects.requireNonNull(correlationId, "Correlation ID cannot be null");
-
-    return store.values().stream()
-        .filter(outbox -> correlationId.equals(outbox.getCorrelationId()))
-        .findFirst();
   }
 
   // ─── 테스트 헬퍼 ──────────────────────────────────────────────
@@ -117,7 +84,7 @@ public class InMemoryTransformDocumentOutboxRepository implements
    * 테스트 헬퍼: 모든 outbox 조회
    * 테스트에서 상태 검증에 사용
    */
-  public List<TransformDocumentOutbox> findAll() {
+  public List<DlqOutbox> findAll() {
     return new ArrayList<>(store.values());
   }
 
@@ -125,7 +92,7 @@ public class InMemoryTransformDocumentOutboxRepository implements
    * 테스트 헬퍼: ID로 outbox 조회
    * 테스트에서 특정 outbox 검증에 사용
    */
-  public TransformDocumentOutbox findById(Long id) {
+  public DlqOutbox findById(Long id) {
     return store.get(id);
   }
 }
