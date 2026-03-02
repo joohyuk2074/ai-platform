@@ -1,0 +1,225 @@
+{
+  "info": {
+    "name": "Datahub API Collection",
+    "description": "Datahub 서비스의 Document 및 Collection API 테스트 컬렉션",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "datahub-api"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "collectionId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Collection APIs",
+      "item": [
+        {
+          "name": "Create Collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 성공 응답 테스트",
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// 응답 구조 테스트",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// collectionId 저장",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.collectionId) {",
+                  "        pm.collectionVariables.set(\"collectionId\", jsonData.data.collectionId);",
+                  "        console.log(\"Collection ID saved: \" + jsonData.data.collectionId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Passport",
+                "value": "{\"userId\":{\"value\":1},\"username\":\"testuser\",\"roles\":[\"USER\"]}",
+                "description": "Netflix Passport pattern - 사용자 인증 정보"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"AI Research Papers\",\n  \"description\": \"인공지능 관련 연구 논문 모음\",\n  \"source\": \"arXiv\",\n  \"author\": \"Various Authors\",\n  \"tags\": [\"AI\", \"Machine Learning\", \"Deep Learning\"],\n  \"createdBy\": {\n    \"value\": 1\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "collections"]
+            },
+            "description": "새로운 문서 컬렉션을 생성합니다."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Collection",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Passport",
+                "value": "{\"userId\":{\"value\":1},\"username\":\"testuser\",\"roles\":[\"USER\"]}",
+                "description": "Netflix Passport pattern - 사용자 인증 정보"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"AI Research Papers (Updated)\",\n  \"description\": \"인공지능 관련 연구 논문 모음 - 2024년 최신 논문 추가\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections/{{collectionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "collections", "{{collectionId}}"]
+            },
+            "description": "기존 컬렉션의 정보를 수정합니다."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Collection",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Passport",
+                "value": "{\"userId\":{\"value\":1},\"username\":\"testuser\",\"roles\":[\"USER\"]}",
+                "description": "Netflix Passport pattern - 사용자 인증 정보"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections/{{collectionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "collections", "{{collectionId}}"]
+            },
+            "description": "컬렉션을 삭제합니다."
+          },
+          "response": []
+        }
+      ],
+      "description": "문서 컬렉션 관리 API"
+    },
+    {
+      "name": "Document APIs",
+      "item": [
+        {
+          "name": "Upload Document",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 성공 응답 테스트",
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// 응답 구조 테스트",
+                  "pm.test(\"Response has documentId\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.data).to.have.property('documentId');",
+                  "    console.log(\"Document ID: \" + jsonData.data.documentId);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Passport",
+                "value": "{\"userId\":{\"value\":1},\"username\":\"testuser\",\"roles\":[\"USER\"]}",
+                "description": "Netflix Passport pattern - 사용자 인증 정보"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "업로드할 문서 파일 (예: .md, .txt, .pdf 등)"
+                },
+                {
+                  "key": "collectionId",
+                  "value": "{{collectionId}}",
+                  "type": "text",
+                  "description": "문서를 저장할 컬렉션 ID"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "documents", "upload"]
+            },
+            "description": "문서 파일을 업로드합니다. multipart/form-data 형식으로 파일과 컬렉션 ID를 함께 전송합니다."
+          },
+          "response": []
+        }
+      ],
+      "description": "문서 관리 API"
+    }
+  ],
+  "auth": {
+    "type": "noauth"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// 모든 요청 전에 실행되는 스크립트",
+          "console.log('Request to: ' + pm.request.url);"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// 모든 응답 후에 실행되는 스크립트",
+          "console.log('Response status: ' + pm.response.code);"
+        ]
+      }
+    }
+  ]
+}
