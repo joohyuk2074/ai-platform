@@ -1,5 +1,6 @@
 package com.spartaecommerce.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Objects;
 
 public abstract class BaseId<T> {
@@ -10,6 +11,7 @@ public abstract class BaseId<T> {
     this.value = value;
   }
 
+  @JsonValue
   public T getValue() {
     return value;
   }

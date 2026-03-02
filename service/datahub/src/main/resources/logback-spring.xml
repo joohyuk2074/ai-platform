@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 콘솔 출력 설정 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--
+                MDC의 traceId와 spanId를 로그에 포함
+                빅테크 기업에서 사용하는 구조화된 로깅 패턴
+
+                형식: [날짜시간] [로그레벨] [traceId] [spanId] [스레드] [클래스] - 메시지
+                예시: [2025-01-15 10:30:45.123] [INFO] [a1b2c3d4-e5f6-7890] [x9y8z7w6] [http-nio-8082-exec-1] [c.s.d.i.a.i.w.DocumentController] - Document created successfully
+            -->
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) %cyan([%X{traceId:--}]) %magenta([%X{spanId:--}]) [%thread] %yellow([%logger{36}]) - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- JSON 형식 로그 출력 (프로덕션 환경용) -->
+    <!--
+        ELK Stack, Splunk, Datadog 등 로그 수집 시스템에 적합한 형식
+        빅테크 기업에서는 JSON 로그를 선호 (파싱이 쉽고 검색 성능이 좋음)
+    -->
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- traceId와 spanId를 JSON 필드로 포함 -->
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+
+            <!-- 추가 메타데이터 -->
+            <customFields>{"service":"datahub","environment":"${ENVIRONMENT:-local}"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- 파일 출력 설정 (로테이션 포함) -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/datahub.log</file>
+
+        <!-- 로그 로테이션 정책: 날짜별 + 크기별 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/datahub-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory> <!-- 30일간 보관 -->
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId:--}] [%X{spanId:--}] [%thread] [%logger{36}] - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- 에러 로그 별도 파일 저장 (중요 에러 추적용) -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/datahub-error.log</file>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/datahub-error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>90</maxHistory> <!-- 에러는 90일간 보관 -->
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId:--}] [%X{spanId:--}] [%thread] [%logger{36}] - %msg%n%ex{full}
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- 로거 레벨 설정 -->
+    <logger name="me.joohyuk.datahub" level="DEBUG"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.hibernate" level="INFO"/>
+    <logger name="org.apache.kafka" level="INFO"/>
+
+    <!-- 프로파일별 설정 -->
+    <springProfile name="local,dev">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="INFO">
+            <!-- 프로덕션에서는 JSON 로그 사용 (로그 수집 시스템 연동) -->
+            <appender-ref ref="JSON"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+    </springProfile>
+
+    <!-- 기본 설정 (프로파일 미지정 시) -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
