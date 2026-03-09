@@ -1,5 +1,6 @@
 name: Claude Code
 
+# Workflow for handling @claude mentions in issues and PRs
 on:
   issue_comment:
     types: [created]
