@@ -41,11 +41,21 @@ jobs:
           additional_permissions: |
             actions: read
 
-          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
-          # prompt: 'Update the pull request description to include a summary of changes.'
+          # Custom prompt to instruct Claude to create a PR after completing the task
+          prompt: |
+            ${{ github.event.comment.body || github.event.issue.body }}
 
-          # Optional: Add claude_args to customize behavior and configuration
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          # claude_args: '--allowed-tools Bash(gh pr:*)'
+            IMPORTANT: After completing the requested task:
+            1. Create a new branch from main (use format: work/issue-${{ github.event.issue.number }}-description)
+            2. Commit your changes with descriptive commit messages
+            3. Push the branch to origin
+            4. Create a Pull Request using 'gh pr create' with:
+               - Title following the PR template convention
+               - Body that includes the PR template sections (작업 내용, 고민이 되었던 부분, 리뷰 요구사항)
+               - Reference to this issue (#${{ github.event.issue.number }})
+
+            Use the repository's CLAUDE.md and PR template for guidance.
+
+          # Allow Claude to use git and gh commands for PR creation
+          claude_args: '--allowed-tools "Bash(git:*),Bash(gh pr:*),Bash(gh issue:*)"'
 
