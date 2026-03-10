@@ -128,12 +128,15 @@ Audit the project with special attention to the following areas:
 - Check outbox usage and transaction/event publication consistency
 - Highlight duplicate consumption and ordering risks
 
-### 14. Redis Usage
+### 14. Redis Usage (Future Consideration)
+<!-- NOTE: Redis is not currently used in this project. This section is reserved for future implementation. -->
+<!-- When Redis is added, review the following:
 - Review key design and naming consistency
 - Check TTL strategy
 - Detect cache stampede / penetration / stale data risks
 - Review distributed lock correctness
 - Check serialization strategy and compatibility risks
+-->
 
 ### 15. Authentication and Authorization
 - Review token validation flow
