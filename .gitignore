@@ -74,6 +74,8 @@ docker-compose.override.yml
 ### file ###
 /storage/
 
-### AI ###
-.claude
-CLAUDE.md
+### Claude Code ###
+# Ignore .claude directory by default (session memory, local settings)
+.claude/*
+# But track slash commands
+!.claude/commands/
