@@ -73,7 +73,3 @@ docker-compose.override.yml
 
 ### file ###
 /storage/
-
-### AI ###
-.claude
-CLAUDE.md

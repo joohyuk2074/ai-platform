@@ -82,6 +82,7 @@ Closes #15
 - **Subject**: 50자 이내, 명령형 현재 시제 (Add, Fix, Update)
 - **Body**: 변경 이유를 명확히 설명
 - **Footer**: 관련 이슈를 `Closes #[이슈번호]` 형식으로 반드시 포함
+- 절대 claude 관련된 커밋 내용을 남기지 말고 author에도 적지마세요.
 
 ## 4. Pull Request (PR) Process
 
